@@ -3,6 +3,7 @@ import { notFound } from 'next/navigation'
 import Image from 'next/image'
 import { createClient } from '@/lib/supabase/server'
 import InquiryForm from '@/components/shop/InquiryForm'
+import ProductOptions from '@/components/shop/ProductOptions'
 import type { ProductDetail } from '@/types'
 
 async function getProduct(slug: string): Promise<ProductDetail | null> {
@@ -53,9 +54,6 @@ export default async function ProductDetailPage({
   const discountRate = hasDiscount
     ? Math.round(((product.price - product.sale_price!) / product.price) * 100)
     : 0
-
-  const colors = [...new Set(product.product_options?.map((o) => o.color).filter(Boolean))]
-  const sizes = [...new Set(product.product_options?.map((o) => o.size).filter(Boolean))]
 
   return (
     <div className="max-w-5xl mx-auto px-4 py-8">
@@ -126,34 +124,6 @@ export default async function ProductDetailPage({
             </div>
           </div>
 
-          {/* 색상 */}
-          {colors.length > 0 && (
-            <div>
-              <p className="text-sm font-semibold text-[#5C4A2A] mb-2">색상</p>
-              <div className="flex flex-wrap gap-2">
-                {colors.map((color) => (
-                  <span key={color!} className="px-3 py-1.5 border border-[#E8DFD0] rounded-full text-sm text-[#5C4A2A]">
-                    {color}
-                  </span>
-                ))}
-              </div>
-            </div>
-          )}
-
-          {/* 사이즈 */}
-          {sizes.length > 0 && (
-            <div>
-              <p className="text-sm font-semibold text-[#5C4A2A] mb-2">사이즈</p>
-              <div className="flex flex-wrap gap-2">
-                {sizes.map((size) => (
-                  <span key={size!} className="px-3 py-1.5 border border-[#E8DFD0] rounded-full text-sm text-[#5C4A2A]">
-                    {size}
-                  </span>
-                ))}
-              </div>
-            </div>
-          )}
-
           {/* 짧은 설명 */}
           {product.short_description && (
             <p className="text-sm text-[#8B6F47] leading-relaxed border-l-2 border-[#E8DFD0] pl-3">
@@ -161,23 +131,19 @@ export default async function ProductDetailPage({
             </p>
           )}
 
-          {/* 문의 버튼 */}
-          <div className="flex flex-col gap-3 mt-2">
-            <a
-              href="https://pf.kakao.com/_your_kakao_id"
-              target="_blank"
-              rel="noopener noreferrer"
-              className="w-full bg-[#FEE500] text-[#3A1D1D] font-bold py-4 rounded-xl text-center text-base hover:opacity-90 transition"
-            >
-              카카오톡으로 문의하기
-            </a>
-            <a
-              href="tel:01000000000"
-              className="w-full bg-[#5C4A2A] text-white font-bold py-4 rounded-xl text-center text-base hover:bg-[#8B6F47] transition"
-            >
-              전화로 문의하기
-            </a>
-          </div>
+          {/* 옵션 선택 + 구매 버튼 */}
+          <ProductOptions
+            product={{
+              id: product.id,
+              name: product.name,
+              slug: product.slug,
+              price: product.price,
+              sale_price: product.sale_price ?? null,
+              status: product.status,
+            }}
+            imageUrl={mainImage?.image_url ?? null}
+            options={product.product_options ?? []}
+          />
 
           {/* 배송 안내 */}
           <div className="bg-[#F3EDE4] rounded-xl p-4 text-sm text-[#8B6F47] flex flex-col gap-1.5">
