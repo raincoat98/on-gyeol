@@ -5,7 +5,9 @@ import { useRouter } from 'next/navigation'
 import Link from 'next/link'
 import Image from 'next/image'
 import { loadTossPayments, ANONYMOUS } from '@tosspayments/tosspayments-sdk'
+import { createClient } from '@/lib/supabase/client'
 import { useCartStore } from '@/lib/store/cart'
+import type { Address } from '@/types'
 
 const DELIVERY_FEE = 3000
 const FREE_DELIVERY_THRESHOLD = 50000
@@ -14,16 +16,43 @@ const CLIENT_KEY = process.env.NEXT_PUBLIC_TOSS_CLIENT_KEY ?? 'test_ck_D5GePWvyJ
 export default function CheckoutPage() {
   const router = useRouter()
   const { items, totalAmount, clearCart } = useCartStore()
+
   const [hydrated, setHydrated] = useState(false)
+  const [userId, setUserId] = useState<string | null>(null)
+  const [addresses, setAddresses] = useState<Address[]>([])
 
   const [name, setName] = useState('')
   const [phone, setPhone] = useState('')
   const [address, setAddress] = useState('')
   const [memo, setMemo] = useState('')
+  const [saveAddress, setSaveAddress] = useState(false)
+
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState('')
 
-  useEffect(() => setHydrated(true), [])
+  useEffect(() => {
+    setHydrated(true)
+    const supabase = createClient()
+    supabase.auth.getUser().then(async ({ data: { user } }) => {
+      if (!user) return
+      setUserId(user.id)
+      const { data: addrs } = await supabase
+        .from('addresses')
+        .select('*')
+        .eq('user_id', user.id)
+        .order('is_default', { ascending: false })
+        .order('created_at', { ascending: true })
+      const list = addrs ?? []
+      setAddresses(list)
+      // 기본 배송지 자동 입력
+      const def = list.find((a) => a.is_default) ?? list[0]
+      if (def) {
+        setName(def.recipient_name)
+        setPhone(def.phone)
+        setAddress(def.address)
+      }
+    })
+  }, [])
 
   if (!hydrated) return null
 
@@ -31,9 +60,7 @@ export default function CheckoutPage() {
     return (
       <div className="max-w-3xl mx-auto px-4 py-20 text-center">
         <p className="text-[#9C9189] mb-4">장바구니가 비어있습니다.</p>
-        <Link href="/products" className="text-[#5C4A2A] underline">
-          쇼핑 계속하기
-        </Link>
+        <Link href="/products" className="text-[#5C4A2A] underline">쇼핑 계속하기</Link>
       </div>
     )
   }
@@ -42,22 +69,39 @@ export default function CheckoutPage() {
   const deliveryFee = subtotal >= FREE_DELIVERY_THRESHOLD ? 0 : DELIVERY_FEE
   const total = subtotal + deliveryFee
 
+  function fillAddress(addr: Address) {
+    setName(addr.recipient_name)
+    setPhone(addr.phone)
+    setAddress(addr.address)
+  }
+
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault()
     setError('')
-
     if (!name.trim() || !phone.trim() || !address.trim()) {
       setError('이름, 연락처, 주소를 모두 입력해주세요.')
       return
     }
-
     setLoading(true)
     try {
-      // 주문 생성 (pending 상태)
+      // 배송지 저장 (로그인 + 체크한 경우)
+      if (userId && saveAddress) {
+        const supabase = createClient()
+        await supabase.from('addresses').insert({
+          user_id: userId,
+          label: '최근 배송지',
+          recipient_name: name,
+          phone,
+          address,
+          is_default: addresses.length === 0,
+        })
+      }
+
       const res = await fetch('/api/orders/create', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
+          userId,
           customerName: name,
           customerPhone: phone,
           customerAddress: address,
@@ -84,7 +128,6 @@ export default function CheckoutPage() {
 
       const { orderId, orderNumber } = await res.json()
 
-      // 토스페이먼츠 결제 요청
       const tossPayments = await loadTossPayments(CLIENT_KEY)
       const payment = tossPayments.payment({ customerKey: ANONYMOUS })
 
@@ -105,7 +148,6 @@ export default function CheckoutPage() {
       clearCart()
     } catch (err) {
       const msg = err instanceof Error ? err.message : '오류가 발생했습니다.'
-      // 사용자가 결제 취소 시 Toss가 에러를 던지지만 페이지는 유지
       if (!msg.includes('PAY_PROCESS_CANCELED')) {
         setError(msg)
       }
@@ -146,50 +188,88 @@ export default function CheckoutPage() {
           </div>
         </section>
 
-        {/* 배송 정보 */}
+        {/* 저장된 배송지 선택 (로그인 시) */}
+        {addresses.length > 0 && (
+          <section>
+            <h2 className="text-base font-semibold text-[#5C4A2A] mb-3">저장된 배송지</h2>
+            <div className="flex flex-col gap-2">
+              {addresses.map((addr) => (
+                <button
+                  key={addr.id}
+                  type="button"
+                  onClick={() => fillAddress(addr)}
+                  className={`text-left border rounded-xl p-3 transition ${
+                    name === addr.recipient_name && phone === addr.phone && address === addr.address
+                      ? 'border-[#5C4A2A] bg-[#FAF8F4]'
+                      : 'border-[#E8DFD0] hover:border-[#8B6F47]'
+                  }`}
+                >
+                  <div className="flex items-center gap-2 mb-0.5">
+                    <span className="text-xs font-semibold text-[#8B6F47] bg-[#F3EDE4] px-2 py-0.5 rounded-full">
+                      {addr.label}
+                    </span>
+                    {addr.is_default && (
+                      <span className="text-xs font-semibold text-white bg-[#5C4A2A] px-2 py-0.5 rounded-full">
+                        기본
+                      </span>
+                    )}
+                  </div>
+                  <p className="text-sm font-medium text-[#2D2416]">{addr.recipient_name} · {addr.phone}</p>
+                  <p className="text-xs text-[#9C9189]">{addr.address}</p>
+                </button>
+              ))}
+            </div>
+          </section>
+        )}
+
+        {/* 배송 정보 입력 */}
         <section>
           <h2 className="text-base font-semibold text-[#5C4A2A] mb-4">배송 정보</h2>
           <div className="flex flex-col gap-3">
-            <div>
-              <label className="text-sm text-[#8B6F47] mb-1 block">받는 분 이름 *</label>
-              <input
-                type="text"
-                value={name}
-                onChange={(e) => setName(e.target.value)}
-                placeholder="홍길동"
-                className="w-full border border-[#E8DFD0] rounded-xl px-4 py-3 text-sm text-[#2D2416] focus:outline-none focus:border-[#8B6F47] bg-white"
-              />
-            </div>
-            <div>
-              <label className="text-sm text-[#8B6F47] mb-1 block">연락처 *</label>
-              <input
-                type="tel"
-                value={phone}
-                onChange={(e) => setPhone(e.target.value)}
-                placeholder="010-0000-0000"
-                className="w-full border border-[#E8DFD0] rounded-xl px-4 py-3 text-sm text-[#2D2416] focus:outline-none focus:border-[#8B6F47] bg-white"
-              />
-            </div>
-            <div>
-              <label className="text-sm text-[#8B6F47] mb-1 block">배송 주소 *</label>
-              <input
-                type="text"
-                value={address}
-                onChange={(e) => setAddress(e.target.value)}
-                placeholder="서울시 강남구 테헤란로 123 (우편번호 포함)"
-                className="w-full border border-[#E8DFD0] rounded-xl px-4 py-3 text-sm text-[#2D2416] focus:outline-none focus:border-[#8B6F47] bg-white"
-              />
-            </div>
-            <div>
-              <label className="text-sm text-[#8B6F47] mb-1 block">배송 메모</label>
-              <input
-                type="text"
-                value={memo}
-                onChange={(e) => setMemo(e.target.value)}
-                placeholder="문 앞에 놓아주세요"
-                className="w-full border border-[#E8DFD0] rounded-xl px-4 py-3 text-sm text-[#2D2416] focus:outline-none focus:border-[#8B6F47] bg-white"
-              />
-            </div>
+            <input
+              type="text"
+              value={name}
+              onChange={(e) => setName(e.target.value)}
+              placeholder="받는 분 이름 *"
+              className="w-full border border-[#E8DFD0] rounded-xl px-4 py-3 text-sm text-[#2D2416] focus:outline-none focus:border-[#8B6F47] bg-white"
+            />
+            <input
+              type="tel"
+              value={phone}
+              onChange={(e) => setPhone(e.target.value)}
+              placeholder="연락처 *"
+              className="w-full border border-[#E8DFD0] rounded-xl px-4 py-3 text-sm text-[#2D2416] focus:outline-none focus:border-[#8B6F47] bg-white"
+            />
+            <input
+              type="text"
+              value={address}
+              onChange={(e) => setAddress(e.target.value)}
+              placeholder="배송 주소 (우편번호 포함) *"
+              className="w-full border border-[#E8DFD0] rounded-xl px-4 py-3 text-sm text-[#2D2416] focus:outline-none focus:border-[#8B6F47] bg-white"
+            />
+            <input
+              type="text"
+              value={memo}
+              onChange={(e) => setMemo(e.target.value)}
+              placeholder="배송 메모 (선택)"
+              className="w-full border border-[#E8DFD0] rounded-xl px-4 py-3 text-sm text-[#2D2416] focus:outline-none focus:border-[#8B6F47] bg-white"
+            />
+            {userId && (
+              <label className="flex items-center gap-2 text-sm text-[#8B6F47] cursor-pointer">
+                <input
+                  type="checkbox"
+                  checked={saveAddress}
+                  onChange={(e) => setSaveAddress(e.target.checked)}
+                  className="rounded"
+                />
+                이 배송지를 저장하기
+              </label>
+            )}
+            {!userId && (
+              <p className="text-xs text-[#9C9189]">
+                <Link href="/auth/login?next=/checkout" className="text-[#5C4A2A] underline">로그인</Link>하면 배송지를 저장할 수 있습니다.
+              </p>
+            )}
           </div>
         </section>
 
@@ -209,9 +289,7 @@ export default function CheckoutPage() {
           </div>
         </section>
 
-        {error && (
-          <p className="text-red-500 text-sm text-center">{error}</p>
-        )}
+        {error && <p className="text-red-500 text-sm text-center">{error}</p>}
 
         <button
           type="submit"

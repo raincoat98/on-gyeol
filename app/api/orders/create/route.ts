@@ -16,7 +16,7 @@ function generateOrderNumber(): string {
 export async function POST(req: NextRequest) {
   try {
     const body = await req.json()
-    const { customerName, customerPhone, customerAddress, customerMemo, totalAmount, deliveryFee, items } = body
+    const { userId, customerName, customerPhone, customerAddress, customerMemo, totalAmount, deliveryFee, items } = body
 
     if (!customerName || !customerPhone || !customerAddress || !items?.length) {
       return NextResponse.json({ error: '필수 정보가 누락되었습니다.' }, { status: 400 })
@@ -28,6 +28,7 @@ export async function POST(req: NextRequest) {
       .from('orders')
       .insert({
         order_number: orderNumber,
+        user_id: userId ?? null,
         customer_name: customerName,
         customer_phone: customerPhone,
         customer_address: customerAddress,

@@ -4,6 +4,7 @@ import Link from 'next/link'
 import { useState } from 'react'
 import { Menu, X, Search, Phone } from 'lucide-react'
 import CartIcon from '@/components/shop/CartIcon'
+import UserMenu from '@/components/shop/UserMenu'
 
 const CATEGORIES = [
   { name: '전체', slug: 'all' },
@@ -44,6 +45,7 @@ export default function Header() {
             <Search size={22} />
           </Link>
           <CartIcon />
+          <UserMenu />
           <a href="tel:01000000000" className="hidden md:block text-[#5C4A2A] hover:text-[#8B6F47]">
             <Phone size={22} />
           </a>

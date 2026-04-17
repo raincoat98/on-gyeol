@@ -1,0 +1,144 @@
+'use client'
+
+import { useState } from 'react'
+import { useRouter } from 'next/navigation'
+import Link from 'next/link'
+import { createClient } from '@/lib/supabase/client'
+
+export default function SignupPage() {
+  const router = useRouter()
+  const [email, setEmail] = useState('')
+  const [password, setPassword] = useState('')
+  const [passwordConfirm, setPasswordConfirm] = useState('')
+  const [name, setName] = useState('')
+  const [phone, setPhone] = useState('')
+  const [loading, setLoading] = useState(false)
+  const [error, setError] = useState('')
+  const [success, setSuccess] = useState(false)
+
+  async function handleSignup(e: React.FormEvent) {
+    e.preventDefault()
+    setError('')
+
+    if (password !== passwordConfirm) {
+      setError('비밀번호가 일치하지 않습니다.')
+      return
+    }
+    if (password.length < 6) {
+      setError('비밀번호는 6자 이상이어야 합니다.')
+      return
+    }
+
+    setLoading(true)
+    const supabase = createClient()
+    const { data, error: authError } = await supabase.auth.signUp({
+      email,
+      password,
+      options: {
+        data: { full_name: name, phone },
+        emailRedirectTo: `${window.location.origin}/auth/callback?next=/`,
+      },
+    })
+    setLoading(false)
+
+    if (authError) {
+      if (authError.message.includes('already registered')) {
+        setError('이미 가입된 이메일입니다.')
+      } else {
+        setError('회원가입에 실패했습니다. 다시 시도해주세요.')
+      }
+      return
+    }
+
+    // 이메일 확인 불필요 설정인 경우 바로 로그인 상태
+    if (data.session) {
+      // 프로필 업데이트
+      await supabase.from('profiles').update({ full_name: name, phone }).eq('id', data.user!.id)
+      router.push('/')
+      router.refresh()
+    } else {
+      setSuccess(true)
+    }
+  }
+
+  if (success) {
+    return (
+      <div className="max-w-sm mx-auto px-4 py-16 text-center">
+        <h2 className="font-brand text-2xl font-bold text-[#5C4A2A] mb-4">이메일을 확인해주세요</h2>
+        <p className="text-[#8B6F47] text-sm leading-relaxed mb-6">
+          {email}로 확인 메일을 발송했습니다.<br />
+          메일의 링크를 클릭하면 가입이 완료됩니다.
+        </p>
+        <Link href="/auth/login" className="text-[#5C4A2A] font-semibold hover:underline text-sm">
+          로그인 페이지로
+        </Link>
+      </div>
+    )
+  }
+
+  return (
+    <div className="max-w-sm mx-auto px-4 py-16">
+      <div className="text-center mb-10">
+        <h1 className="font-brand text-3xl font-bold text-[#5C4A2A] tracking-widest mb-2">온결</h1>
+        <p className="text-sm text-[#9C9189]">회원가입</p>
+      </div>
+
+      <form onSubmit={handleSignup} className="flex flex-col gap-4">
+        <input
+          type="text"
+          placeholder="이름"
+          value={name}
+          onChange={(e) => setName(e.target.value)}
+          className="w-full border border-[#E8DFD0] rounded-xl px-4 py-4 text-base bg-white focus:outline-none focus:border-[#8B6F47]"
+          required
+        />
+        <input
+          type="tel"
+          placeholder="연락처 (010-0000-0000)"
+          value={phone}
+          onChange={(e) => setPhone(e.target.value)}
+          className="w-full border border-[#E8DFD0] rounded-xl px-4 py-4 text-base bg-white focus:outline-none focus:border-[#8B6F47]"
+        />
+        <input
+          type="email"
+          placeholder="이메일"
+          value={email}
+          onChange={(e) => setEmail(e.target.value)}
+          className="w-full border border-[#E8DFD0] rounded-xl px-4 py-4 text-base bg-white focus:outline-none focus:border-[#8B6F47]"
+          required
+        />
+        <input
+          type="password"
+          placeholder="비밀번호 (6자 이상)"
+          value={password}
+          onChange={(e) => setPassword(e.target.value)}
+          className="w-full border border-[#E8DFD0] rounded-xl px-4 py-4 text-base bg-white focus:outline-none focus:border-[#8B6F47]"
+          required
+        />
+        <input
+          type="password"
+          placeholder="비밀번호 확인"
+          value={passwordConfirm}
+          onChange={(e) => setPasswordConfirm(e.target.value)}
+          className="w-full border border-[#E8DFD0] rounded-xl px-4 py-4 text-base bg-white focus:outline-none focus:border-[#8B6F47]"
+          required
+        />
+        {error && <p className="text-red-500 text-sm text-center">{error}</p>}
+        <button
+          type="submit"
+          disabled={loading}
+          className="bg-[#5C4A2A] text-white font-bold py-4 rounded-xl text-base hover:bg-[#8B6F47] transition disabled:opacity-60 mt-2"
+        >
+          {loading ? '가입 중...' : '회원가입'}
+        </button>
+      </form>
+
+      <p className="text-center text-sm text-[#9C9189] mt-6">
+        이미 회원이신가요?{' '}
+        <Link href="/auth/login" className="text-[#5C4A2A] font-semibold hover:underline">
+          로그인
+        </Link>
+      </p>
+    </div>
+  )
+}

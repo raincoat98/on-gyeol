@@ -231,6 +231,128 @@ export interface Database {
         }
         Relationships: []
       }
+      profiles: {
+        Row: {
+          id: string
+          role: 'admin' | 'customer'
+          full_name: string | null
+          phone: string | null
+          created_at: string
+          updated_at: string
+        }
+        Insert: {
+          id: string
+          role?: 'admin' | 'customer'
+          full_name?: string | null
+          phone?: string | null
+          created_at?: string
+          updated_at?: string
+        }
+        Update: {
+          role?: 'admin' | 'customer'
+          full_name?: string | null
+          phone?: string | null
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      addresses: {
+        Row: {
+          id: string
+          user_id: string
+          label: string
+          recipient_name: string
+          phone: string
+          address: string
+          is_default: boolean
+          created_at: string
+        }
+        Insert: {
+          id?: string
+          user_id: string
+          label?: string
+          recipient_name: string
+          phone: string
+          address: string
+          is_default?: boolean
+          created_at?: string
+        }
+        Update: {
+          label?: string
+          recipient_name?: string
+          phone?: string
+          address?: string
+          is_default?: boolean
+        }
+        Relationships: []
+      }
+      orders: {
+        Row: {
+          id: string
+          order_number: string
+          user_id: string | null
+          customer_name: string
+          customer_phone: string
+          customer_address: string
+          customer_memo: string | null
+          total_amount: number
+          delivery_fee: number
+          status: 'pending' | 'paid' | 'shipping' | 'delivered' | 'cancelled'
+          payment_key: string | null
+          payment_method: string | null
+          created_at: string
+          updated_at: string
+        }
+        Insert: {
+          id?: string
+          order_number: string
+          user_id?: string | null
+          customer_name: string
+          customer_phone: string
+          customer_address: string
+          customer_memo?: string | null
+          total_amount: number
+          delivery_fee?: number
+          status?: 'pending' | 'paid' | 'shipping' | 'delivered' | 'cancelled'
+          payment_key?: string | null
+          payment_method?: string | null
+        }
+        Update: {
+          status?: 'pending' | 'paid' | 'shipping' | 'delivered' | 'cancelled'
+          payment_key?: string | null
+          payment_method?: string | null
+        }
+        Relationships: []
+      }
+      order_items: {
+        Row: {
+          id: string
+          order_id: string
+          product_id: string | null
+          product_name: string
+          product_slug: string
+          image_url: string | null
+          option_color: string | null
+          option_size: string | null
+          price: number
+          quantity: number
+          created_at: string
+        }
+        Insert: {
+          id?: string
+          order_id: string
+          product_id?: string | null
+          product_name: string
+          product_slug: string
+          image_url?: string | null
+          option_color?: string | null
+          option_size?: string | null
+          price: number
+          quantity?: number
+        }
+        Update: Record<string, never>
+        Relationships: []
+      }
     }
     Views: Record<string, never>
     Functions: Record<string, never>
