@@ -57,13 +57,23 @@ export default function ReviewForm({ productId, orderItemId, userId }: ReviewFor
         className="w-full border border-line px-4 py-3 text-sm bg-white focus:outline-none focus:border-ink resize-none"
       />
       {error && <p className="text-red-500 text-xs">{error}</p>}
-      <button
-        type="submit"
-        disabled={loading}
-        className="bg-ink text-white text-sm tracking-widest py-4 hover:bg-ink-sub transition disabled:opacity-60"
-      >
-        {loading ? '등록 중...' : '리뷰 등록하기'}
-      </button>
+      <div className="flex gap-2">
+        <button
+          type="button"
+          onClick={() => router.back()}
+          disabled={loading}
+          className="flex-1 border border-line text-ink-muted text-sm tracking-widest py-4 hover:border-ink hover:text-ink transition disabled:opacity-60"
+        >
+          취소
+        </button>
+        <button
+          type="submit"
+          disabled={loading}
+          className="flex-1 bg-ink text-white text-sm tracking-widest py-4 hover:bg-ink-sub transition disabled:opacity-60"
+        >
+          {loading ? '등록 중...' : '리뷰 등록하기'}
+        </button>
+      </div>
     </form>
   )
 }
