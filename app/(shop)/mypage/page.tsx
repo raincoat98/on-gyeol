@@ -113,6 +113,9 @@ export default async function MyPage() {
       <section>
         <div className="flex items-center justify-between mb-4">
           <h2 className="text-sm font-semibold text-ink tracking-wider uppercase">주문 내역</h2>
+          <Link href="/mypage/orders" className="text-xs text-ink-muted hover:text-ink transition">
+            전체 보기 →
+          </Link>
         </div>
 
         {!orders || orders.length === 0 ? (
