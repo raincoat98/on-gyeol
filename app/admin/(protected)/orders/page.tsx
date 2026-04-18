@@ -1,6 +1,7 @@
 import { createClient } from '@/lib/supabase/server'
 import OrderStatusSelect from '@/components/admin/OrderStatusSelect'
 import OrderDeliveryEditor from '@/components/admin/OrderDeliveryEditor'
+import DeleteOrderButton from '@/components/admin/DeleteOrderButton'
 
 const STATUS_LABELS = {
   pending: '결제대기',
@@ -126,6 +127,11 @@ export default async function AdminOrdersPage({
                       month: 'long', day: 'numeric', hour: '2-digit', minute: '2-digit',
                     })}
                   </p>
+                  {order.status !== 'paid' && (
+                    <div className="mt-1">
+                      <DeleteOrderButton orderId={order.id} />
+                    </div>
+                  )}
                 </div>
                 <div className="flex flex-col items-end gap-1.5">
                   <OrderStatusSelect orderId={order.id} currentStatus={order.status} />
