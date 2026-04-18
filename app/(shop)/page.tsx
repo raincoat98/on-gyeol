@@ -49,7 +49,7 @@ export default async function HomePage() {
   return (
     <div>
       {/* 히어로 배너 */}
-      <section className="relative -mt-16 h-[calc(70vh+4rem)] min-h-[480px] flex items-center justify-center overflow-hidden bg-[#E8DFD0]">
+      <section className="relative -mt-16 h-[calc(70vh+4rem)] min-h-[480px] flex items-center justify-center overflow-hidden bg-[#E5E5EA]">
         <Image
           src="/hero.jpg"
           alt="온결 히어로 이미지"
@@ -87,7 +87,7 @@ export default async function HomePage() {
             <Link
               key={cat.slug}
               href={`/category/${cat.slug}`}
-              className="flex flex-col items-center gap-2 bg-white border border-[#E8DFD0] rounded-xl py-5 hover:border-[#8B6F47] hover:bg-[#FAF8F4] transition-colors"
+              className="flex flex-col items-center gap-2 bg-white border border-[#E5E5EA] rounded-xl py-5 hover:border-[#8B6F47] hover:bg-[#F5F5F7] transition-colors"
             >
               <span className="text-2xl">{cat.emoji}</span>
               <span className="text-sm font-medium text-[#5C4A2A]">{cat.name}</span>
@@ -117,7 +117,7 @@ export default async function HomePage() {
 
       {/* 베스트 상품 */}
       {featuredProducts.length > 0 && (
-        <section className="bg-[#F3EDE4] py-12">
+        <section className="bg-[#EFEFEF] py-12">
           <div className="max-w-5xl mx-auto px-4">
             <div className="flex items-center justify-between mb-6">
               <h2 className="font-brand text-2xl font-bold text-[#5C4A2A]">베스트</h2>
@@ -143,7 +143,7 @@ export default async function HomePage() {
         </p>
         <Link
           href="/about"
-          className="inline-block mt-6 border border-[#8B6F47] text-[#8B6F47] px-6 py-3 rounded-full text-sm font-medium hover:bg-[#8B6F47] hover:text-white transition-colors"
+          className="inline-block mt-6 border border-[#8B6F47] text-[#8B6F47] px-6 py-3 rounded-full text-sm font-medium hover:bg-[#3A3A3C] hover:text-white transition-colors"
         >
           브랜드 소개
         </Link>

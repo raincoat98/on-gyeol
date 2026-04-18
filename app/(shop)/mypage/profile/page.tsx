@@ -60,7 +60,7 @@ export default function ProfilePage() {
             type="text"
             value={name}
             onChange={(e) => setName(e.target.value)}
-            className="w-full border border-[#E8DFD0] rounded-xl px-4 py-3 text-base bg-white focus:outline-none focus:border-[#8B6F47]"
+            className="w-full border border-[#E5E5EA] rounded-xl px-4 py-3 text-base bg-white focus:outline-none focus:border-[#1C1C1E]"
           />
         </div>
         <div>
@@ -70,7 +70,7 @@ export default function ProfilePage() {
             value={phone}
             onChange={(e) => setPhone(e.target.value)}
             placeholder="010-0000-0000"
-            className="w-full border border-[#E8DFD0] rounded-xl px-4 py-3 text-base bg-white focus:outline-none focus:border-[#8B6F47]"
+            className="w-full border border-[#E5E5EA] rounded-xl px-4 py-3 text-base bg-white focus:outline-none focus:border-[#1C1C1E]"
           />
         </div>
         {message && (
@@ -81,7 +81,7 @@ export default function ProfilePage() {
         <button
           type="submit"
           disabled={saving}
-          className="bg-[#5C4A2A] text-white font-bold py-3 rounded-xl hover:bg-[#8B6F47] transition disabled:opacity-60"
+          className="bg-[#1C1C1E] text-white font-bold py-3 rounded-xl hover:bg-[#3A3A3C] transition disabled:opacity-60"
         >
           {saving ? '저장 중...' : '저장하기'}
         </button>

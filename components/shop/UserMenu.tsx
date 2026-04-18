@@ -50,25 +50,25 @@ export default function UserMenu({ transparent = false }: { transparent?: boolea
       </button>
 
       {open && (
-        <div className="absolute right-0 top-8 w-40 bg-white border border-[#E8DFD0] rounded-xl shadow-lg py-2 z-50">
+        <div className="absolute right-0 top-8 w-40 bg-white border border-[#E5E5EA] rounded-xl shadow-lg py-2 z-50">
           <Link
             href="/mypage"
             onClick={() => setOpen(false)}
-            className="block px-4 py-2.5 text-sm text-[#2D2416] hover:bg-[#FAF8F4]"
+            className="block px-4 py-2.5 text-sm text-[#2D2416] hover:bg-[#F5F5F7]"
           >
             마이페이지
           </Link>
           <Link
             href="/mypage/addresses"
             onClick={() => setOpen(false)}
-            className="block px-4 py-2.5 text-sm text-[#2D2416] hover:bg-[#FAF8F4]"
+            className="block px-4 py-2.5 text-sm text-[#2D2416] hover:bg-[#F5F5F7]"
           >
             배송지 관리
           </Link>
-          <hr className="border-[#E8DFD0] my-1" />
+          <hr className="border-[#E5E5EA] my-1" />
           <button
             onClick={handleLogout}
-            className="block w-full text-left px-4 py-2.5 text-sm text-[#9C9189] hover:bg-[#FAF8F4]"
+            className="block w-full text-left px-4 py-2.5 text-sm text-[#9C9189] hover:bg-[#F5F5F7]"
           >
             로그아웃
           </button>

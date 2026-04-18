@@ -51,13 +51,13 @@ export default async function ProductsPage({
       <div className="flex items-center justify-between mb-6">
         <h1 className="font-brand text-2xl font-bold text-[#5C4A2A]">전체 상품</h1>
         <div className="flex gap-2 text-sm">
-          <a href="?sort=newest" className={`px-3 py-1 rounded-full border ${!params.sort || params.sort === 'newest' ? 'bg-[#5C4A2A] text-white border-[#5C4A2A]' : 'border-[#E8DFD0] text-[#9C9189]'}`}>
+          <a href="?sort=newest" className={`px-3 py-1 rounded-full border ${!params.sort || params.sort === 'newest' ? 'bg-[#1C1C1E] text-white border-[#5C4A2A]' : 'border-[#E5E5EA] text-[#9C9189]'}`}>
             최신순
           </a>
-          <a href="?sort=price_asc" className={`px-3 py-1 rounded-full border ${params.sort === 'price_asc' ? 'bg-[#5C4A2A] text-white border-[#5C4A2A]' : 'border-[#E8DFD0] text-[#9C9189]'}`}>
+          <a href="?sort=price_asc" className={`px-3 py-1 rounded-full border ${params.sort === 'price_asc' ? 'bg-[#1C1C1E] text-white border-[#5C4A2A]' : 'border-[#E5E5EA] text-[#9C9189]'}`}>
             낮은가격
           </a>
-          <a href="?sort=price_desc" className={`px-3 py-1 rounded-full border ${params.sort === 'price_desc' ? 'bg-[#5C4A2A] text-white border-[#5C4A2A]' : 'border-[#E8DFD0] text-[#9C9189]'}`}>
+          <a href="?sort=price_desc" className={`px-3 py-1 rounded-full border ${params.sort === 'price_desc' ? 'bg-[#1C1C1E] text-white border-[#5C4A2A]' : 'border-[#E5E5EA] text-[#9C9189]'}`}>
             높은가격
           </a>
         </div>

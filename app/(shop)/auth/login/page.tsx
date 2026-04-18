@@ -44,7 +44,7 @@ function LoginForm() {
           placeholder="이메일"
           value={email}
           onChange={(e) => setEmail(e.target.value)}
-          className="w-full border border-[#E8DFD0] rounded-xl px-4 py-4 text-base bg-white focus:outline-none focus:border-[#8B6F47]"
+          className="w-full border border-[#E5E5EA] rounded-xl px-4 py-4 text-base bg-white focus:outline-none focus:border-[#1C1C1E]"
           required
         />
         <input
@@ -52,14 +52,14 @@ function LoginForm() {
           placeholder="비밀번호"
           value={password}
           onChange={(e) => setPassword(e.target.value)}
-          className="w-full border border-[#E8DFD0] rounded-xl px-4 py-4 text-base bg-white focus:outline-none focus:border-[#8B6F47]"
+          className="w-full border border-[#E5E5EA] rounded-xl px-4 py-4 text-base bg-white focus:outline-none focus:border-[#1C1C1E]"
           required
         />
         {error && <p className="text-red-500 text-sm text-center">{error}</p>}
         <button
           type="submit"
           disabled={loading}
-          className="bg-[#5C4A2A] text-white font-bold py-4 rounded-xl text-base hover:bg-[#8B6F47] transition disabled:opacity-60 mt-2"
+          className="bg-[#1C1C1E] text-white font-bold py-4 rounded-xl text-base hover:bg-[#3A3A3C] transition disabled:opacity-60 mt-2"
         >
           {loading ? '로그인 중...' : '로그인'}
         </button>

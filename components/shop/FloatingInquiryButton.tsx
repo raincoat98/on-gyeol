@@ -19,7 +19,7 @@ export default function FloatingInquiryButton() {
       {/* 전화 문의 */}
       <a
         href="tel:01000000000"
-        className="flex items-center gap-2 bg-[#5C4A2A] text-white font-semibold px-4 py-3 rounded-full shadow-lg text-sm whitespace-nowrap"
+        className="flex items-center gap-2 bg-[#1C1C1E] text-white font-semibold px-4 py-3 rounded-full shadow-lg text-sm whitespace-nowrap"
         aria-label="전화 문의"
       >
         <Phone size={20} />

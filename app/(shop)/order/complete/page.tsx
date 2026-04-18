@@ -65,7 +65,7 @@ function CompleteContent() {
         <p className="text-[#9C9189] mb-8">{errorMsg}</p>
         <Link
           href="/cart"
-          className="inline-block bg-[#5C4A2A] text-white font-semibold px-8 py-3 rounded-full hover:bg-[#8B6F47] transition"
+          className="inline-block bg-[#1C1C1E] text-white font-semibold px-8 py-3 rounded-full hover:bg-[#3A3A3C] transition"
         >
           장바구니로 돌아가기
         </Link>
@@ -86,7 +86,7 @@ function CompleteContent() {
       </p>
       <Link
         href="/products"
-        className="inline-block bg-[#5C4A2A] text-white font-semibold px-8 py-3 rounded-full hover:bg-[#8B6F47] transition"
+        className="inline-block bg-[#1C1C1E] text-white font-semibold px-8 py-3 rounded-full hover:bg-[#3A3A3C] transition"
       >
         쇼핑 계속하기
       </Link>

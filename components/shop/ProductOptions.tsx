@@ -78,8 +78,8 @@ export default function ProductOptions({ product, imageUrl, options }: Props) {
                 onClick={() => setSelectedColor(color)}
                 className={`px-3 py-1.5 border rounded-full text-sm transition-colors ${
                   selectedColor === color
-                    ? 'border-[#5C4A2A] bg-[#5C4A2A] text-white'
-                    : 'border-[#E8DFD0] text-[#5C4A2A] hover:border-[#8B6F47]'
+                    ? 'border-[#5C4A2A] bg-[#1C1C1E] text-white'
+                    : 'border-[#E5E5EA] text-[#5C4A2A] hover:border-[#8B6F47]'
                 }`}
               >
                 {color}
@@ -106,10 +106,10 @@ export default function ProductOptions({ product, imageUrl, options }: Props) {
                   disabled={soldOut}
                   className={`px-3 py-1.5 border rounded-full text-sm transition-colors ${
                     soldOut
-                      ? 'border-[#E8DFD0] text-[#C5BDB5] line-through cursor-not-allowed'
+                      ? 'border-[#E5E5EA] text-[#C5BDB5] line-through cursor-not-allowed'
                       : selectedSize === size
-                      ? 'border-[#5C4A2A] bg-[#5C4A2A] text-white'
-                      : 'border-[#E8DFD0] text-[#5C4A2A] hover:border-[#8B6F47]'
+                      ? 'border-[#5C4A2A] bg-[#1C1C1E] text-white'
+                      : 'border-[#E5E5EA] text-[#5C4A2A] hover:border-[#8B6F47]'
                   }`}
                 >
                   {size}
@@ -123,7 +123,7 @@ export default function ProductOptions({ product, imageUrl, options }: Props) {
       {/* 구매 버튼 */}
       <div className="flex flex-col gap-3 mt-2">
         {isSoldOut ? (
-          <div className="w-full bg-[#E8DFD0] text-[#9C9189] font-bold py-4 rounded-xl text-center text-base">
+          <div className="w-full bg-[#E5E5EA] text-[#9C9189] font-bold py-4 rounded-xl text-center text-base">
             품절된 상품입니다
           </div>
         ) : (
@@ -131,7 +131,7 @@ export default function ProductOptions({ product, imageUrl, options }: Props) {
             <button
               onClick={handleBuyNow}
               disabled={disabled}
-              className="w-full bg-[#5C4A2A] text-white font-bold py-4 rounded-xl text-base hover:bg-[#8B6F47] transition disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
+              className="w-full bg-[#1C1C1E] text-white font-bold py-4 rounded-xl text-base hover:bg-[#3A3A3C] transition disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
             >
               <CreditCard size={18} />
               바로 구매하기
@@ -139,7 +139,7 @@ export default function ProductOptions({ product, imageUrl, options }: Props) {
             <button
               onClick={handleAddToCart}
               disabled={disabled}
-              className="w-full bg-white border-2 border-[#5C4A2A] text-[#5C4A2A] font-bold py-4 rounded-xl text-base hover:bg-[#FAF8F4] transition disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
+              className="w-full bg-white border-2 border-[#5C4A2A] text-[#5C4A2A] font-bold py-4 rounded-xl text-base hover:bg-[#F5F5F7] transition disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
             >
               <ShoppingBag size={18} />
               {added ? '담겼습니다!' : '장바구니 담기'}

@@ -28,7 +28,7 @@ export default function CartPage() {
         <p className="text-[#9C9189] text-lg mb-6">장바구니가 비어있습니다.</p>
         <Link
           href="/products"
-          className="inline-block bg-[#5C4A2A] text-white font-semibold px-8 py-3 rounded-full hover:bg-[#8B6F47] transition"
+          className="inline-block bg-[#1C1C1E] text-white font-semibold px-8 py-3 rounded-full hover:bg-[#3A3A3C] transition"
         >
           쇼핑 계속하기
         </Link>
@@ -44,10 +44,10 @@ export default function CartPage() {
         {items.map((item) => {
           const key = `${item.productId}-${item.color}-${item.size}`
           return (
-            <div key={key} className="flex gap-4 bg-white border border-[#E8DFD0] rounded-xl p-4">
+            <div key={key} className="flex gap-4 bg-white border border-[#E5E5EA] rounded-xl p-4">
               {/* 이미지 */}
               <Link href={`/products/${item.productSlug}`} className="flex-shrink-0">
-                <div className="relative w-20 h-24 rounded-lg overflow-hidden bg-[#E8DFD0]">
+                <div className="relative w-20 h-24 rounded-lg overflow-hidden bg-[#E5E5EA]">
                   {item.imageUrl ? (
                     <Image src={item.imageUrl} alt={item.productName} fill className="object-cover" sizes="80px" />
                   ) : (
@@ -69,7 +69,7 @@ export default function CartPage() {
 
                 <div className="flex items-center justify-between">
                   {/* 수량 */}
-                  <div className="flex items-center gap-2 border border-[#E8DFD0] rounded-full px-2 py-1">
+                  <div className="flex items-center gap-2 border border-[#E5E5EA] rounded-full px-2 py-1">
                     <button
                       onClick={() => updateQuantity(item.productId, item.color, item.size, item.quantity - 1)}
                       className="text-[#5C4A2A] hover:text-[#8B6F47]"
@@ -104,7 +104,7 @@ export default function CartPage() {
       </div>
 
       {/* 금액 요약 */}
-      <div className="bg-[#F3EDE4] rounded-xl p-5 mb-6 flex flex-col gap-2 text-sm text-[#8B6F47]">
+      <div className="bg-[#EFEFEF] rounded-xl p-5 mb-6 flex flex-col gap-2 text-sm text-[#8B6F47]">
         <div className="flex justify-between">
           <span>상품 금액</span>
           <span>{subtotal.toLocaleString()}원</span>
@@ -118,7 +118,7 @@ export default function CartPage() {
             {(FREE_DELIVERY_THRESHOLD - subtotal).toLocaleString()}원 더 담으면 무료배송
           </p>
         )}
-        <div className="border-t border-[#E8DFD0] pt-2 mt-1 flex justify-between font-bold text-base text-[#2D2416]">
+        <div className="border-t border-[#E5E5EA] pt-2 mt-1 flex justify-between font-bold text-base text-[#2D2416]">
           <span>총 결제금액</span>
           <span>{total.toLocaleString()}원</span>
         </div>
@@ -126,7 +126,7 @@ export default function CartPage() {
 
       <Link
         href="/checkout"
-        className="block w-full bg-[#5C4A2A] text-white font-bold py-4 rounded-xl text-center text-base hover:bg-[#8B6F47] transition"
+        className="block w-full bg-[#1C1C1E] text-white font-bold py-4 rounded-xl text-center text-base hover:bg-[#3A3A3C] transition"
       >
         주문하기
       </Link>

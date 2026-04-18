@@ -34,12 +34,12 @@ export default async function SearchPage({
             name="q"
             defaultValue={q}
             placeholder="상품명을 검색하세요"
-            className="flex-1 border border-[#E8DFD0] rounded-xl px-4 py-3 text-base bg-white focus:outline-none focus:border-[#8B6F47]"
+            className="flex-1 border border-[#E5E5EA] rounded-xl px-4 py-3 text-base bg-white focus:outline-none focus:border-[#1C1C1E]"
             autoFocus
           />
           <button
             type="submit"
-            className="bg-[#5C4A2A] text-white font-semibold px-6 py-3 rounded-xl hover:bg-[#8B6F47] transition"
+            className="bg-[#1C1C1E] text-white font-semibold px-6 py-3 rounded-xl hover:bg-[#3A3A3C] transition"
           >
             검색
           </button>

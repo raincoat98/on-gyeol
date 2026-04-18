@@ -9,9 +9,9 @@ export const metadata: Metadata = {
 
 export default function AboutPage() {
   return (
-    <div className="bg-[#FAF8F4]">
+    <div className="bg-[#F5F5F7]">
       {/* 히어로 */}
-      <section className="relative -mt-16 h-[50vh] min-h-[360px] flex items-end justify-center overflow-hidden bg-[#E8DFD0]">
+      <section className="relative -mt-16 h-[50vh] min-h-[360px] flex items-end justify-center overflow-hidden bg-[#E5E5EA]">
         <Image
           src="/hero.jpg"
           alt="온결"
@@ -43,7 +43,7 @@ export default function AboutPage() {
 
       {/* 구분선 */}
       <div className="max-w-2xl mx-auto px-6">
-        <div className="border-t border-[#E8DFD0]" />
+        <div className="border-t border-[#E5E5EA]" />
       </div>
 
       {/* 가치 3가지 */}
@@ -75,7 +75,7 @@ export default function AboutPage() {
 
       {/* 구분선 */}
       <div className="max-w-2xl mx-auto px-6">
-        <div className="border-t border-[#E8DFD0]" />
+        <div className="border-t border-[#E5E5EA]" />
       </div>
 
       {/* 브랜드명 의미 */}
@@ -92,12 +92,12 @@ export default function AboutPage() {
       </section>
 
       {/* CTA */}
-      <section className="bg-[#E8DFD0] py-16 text-center">
+      <section className="bg-[#E5E5EA] py-16 text-center">
         <h2 className="font-brand text-2xl font-bold text-[#5C4A2A] mb-3">온결의 옷을 만나보세요</h2>
         <p className="text-sm text-[#8B6F47] mb-8">정성껏 고른 데일리룩이 기다리고 있습니다.</p>
         <Link
           href="/products"
-          className="inline-block border border-[#5C4A2A] text-[#5C4A2A] text-sm font-medium tracking-widest px-10 py-3.5 hover:bg-[#5C4A2A] hover:text-white transition-colors duration-300"
+          className="inline-block border border-[#5C4A2A] text-[#5C4A2A] text-sm font-medium tracking-widest px-10 py-3.5 hover:bg-[#1C1C1E] hover:text-white transition-colors duration-300"
         >
           SHOP NOW
         </Link>

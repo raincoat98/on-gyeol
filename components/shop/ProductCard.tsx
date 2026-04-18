@@ -16,7 +16,7 @@ export default function ProductCard({ product }: ProductCardProps) {
 
   return (
     <Link href={`/products/${product.slug}`} className="group block">
-      <div className="relative aspect-[3/4] bg-[#E8DFD0] rounded-lg overflow-hidden mb-3">
+      <div className="relative aspect-[3/4] bg-[#E5E5EA] rounded-lg overflow-hidden mb-3">
         {mainImage ? (
           <Image
             src={mainImage.image_url}
@@ -39,7 +39,7 @@ export default function ProductCard({ product }: ProductCardProps) {
             </span>
           )}
           {product.is_featured && !isSoldOut && (
-            <span className="bg-[#5C4A2A] text-white text-xs font-semibold px-2 py-1 rounded">
+            <span className="bg-[#1C1C1E] text-white text-xs font-semibold px-2 py-1 rounded">
               신상품
             </span>
           )}

@@ -12,7 +12,7 @@ export default function ContactPage() {
       <h1 className="font-brand text-2xl font-bold text-[#5C4A2A] mb-2">문의하기</h1>
       <p className="text-sm text-[#9C9189] mb-8">궁금하신 점을 남겨주시면 빠르게 연락드립니다.</p>
 
-      <div className="flex flex-col gap-4 bg-[#F3EDE4] rounded-xl p-5 mb-8 text-sm">
+      <div className="flex flex-col gap-4 bg-[#EFEFEF] rounded-xl p-5 mb-8 text-sm">
         <div className="flex items-center gap-3">
           <span className="text-lg">📞</span>
           <div>

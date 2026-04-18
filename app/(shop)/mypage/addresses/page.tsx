@@ -110,7 +110,7 @@ export default function AddressesPage() {
         <h1 className="font-brand text-2xl font-bold text-[#5C4A2A]">배송지 관리</h1>
         <button
           onClick={() => { setShowForm(true); setForm(EMPTY_FORM) }}
-          className="flex items-center gap-1.5 text-sm text-white bg-[#5C4A2A] px-4 py-2 rounded-full hover:bg-[#8B6F47] transition"
+          className="flex items-center gap-1.5 text-sm text-white bg-[#1C1C1E] px-4 py-2 rounded-full hover:bg-[#3A3A3C] transition"
         >
           <Plus size={14} />
           배송지 추가
@@ -119,7 +119,7 @@ export default function AddressesPage() {
 
       {/* 주소 목록 */}
       {addresses.length === 0 && !showForm && (
-        <div className="text-center py-12 text-[#9C9189] bg-[#F3EDE4] rounded-xl">
+        <div className="text-center py-12 text-[#9C9189] bg-[#EFEFEF] rounded-xl">
           <p className="mb-2">저장된 배송지가 없습니다.</p>
           <button
             onClick={() => setShowForm(true)}
@@ -132,15 +132,15 @@ export default function AddressesPage() {
 
       <div className="flex flex-col gap-3 mb-6">
         {addresses.map((addr) => (
-          <div key={addr.id} className={`bg-white border rounded-xl p-4 ${addr.is_default ? 'border-[#8B6F47]' : 'border-[#E8DFD0]'}`}>
+          <div key={addr.id} className={`bg-white border rounded-xl p-4 ${addr.is_default ? 'border-[#8B6F47]' : 'border-[#E5E5EA]'}`}>
             <div className="flex items-start justify-between">
               <div className="flex-1">
                 <div className="flex items-center gap-2 mb-1">
-                  <span className="text-xs font-semibold text-[#8B6F47] bg-[#F3EDE4] px-2 py-0.5 rounded-full">
+                  <span className="text-xs font-semibold text-[#8B6F47] bg-[#EFEFEF] px-2 py-0.5 rounded-full">
                     {addr.label}
                   </span>
                   {addr.is_default && (
-                    <span className="text-xs font-semibold text-white bg-[#5C4A2A] px-2 py-0.5 rounded-full">
+                    <span className="text-xs font-semibold text-white bg-[#1C1C1E] px-2 py-0.5 rounded-full">
                       기본
                     </span>
                   )}
@@ -173,7 +173,7 @@ export default function AddressesPage() {
 
       {/* 추가 폼 */}
       {showForm && (
-        <form onSubmit={handleSave} className="bg-[#F3EDE4] rounded-xl p-5 flex flex-col gap-3">
+        <form onSubmit={handleSave} className="bg-[#EFEFEF] rounded-xl p-5 flex flex-col gap-3">
           <h2 className="font-semibold text-[#5C4A2A] mb-1">새 배송지</h2>
 
           {/* 라벨 */}
@@ -185,8 +185,8 @@ export default function AddressesPage() {
                 onClick={() => setForm((f) => ({ ...f, label: l }))}
                 className={`px-3 py-1.5 rounded-full text-sm border transition ${
                   form.label === l
-                    ? 'border-[#5C4A2A] bg-[#5C4A2A] text-white'
-                    : 'border-[#E8DFD0] bg-white text-[#5C4A2A]'
+                    ? 'border-[#5C4A2A] bg-[#1C1C1E] text-white'
+                    : 'border-[#E5E5EA] bg-white text-[#5C4A2A]'
                 }`}
               >
                 {l}
@@ -199,7 +199,7 @@ export default function AddressesPage() {
             placeholder="받는 분 이름 *"
             value={form.recipient_name}
             onChange={(e) => setForm((f) => ({ ...f, recipient_name: e.target.value }))}
-            className="w-full border border-[#E8DFD0] rounded-xl px-4 py-3 text-sm bg-white focus:outline-none focus:border-[#8B6F47]"
+            className="w-full border border-[#E5E5EA] rounded-xl px-4 py-3 text-sm bg-white focus:outline-none focus:border-[#1C1C1E]"
             required
           />
           <input
@@ -207,7 +207,7 @@ export default function AddressesPage() {
             placeholder="연락처 *"
             value={form.phone}
             onChange={(e) => setForm((f) => ({ ...f, phone: e.target.value }))}
-            className="w-full border border-[#E8DFD0] rounded-xl px-4 py-3 text-sm bg-white focus:outline-none focus:border-[#8B6F47]"
+            className="w-full border border-[#E5E5EA] rounded-xl px-4 py-3 text-sm bg-white focus:outline-none focus:border-[#1C1C1E]"
             required
           />
           <input
@@ -215,7 +215,7 @@ export default function AddressesPage() {
             placeholder="주소 (우편번호 포함) *"
             value={form.address}
             onChange={(e) => setForm((f) => ({ ...f, address: e.target.value }))}
-            className="w-full border border-[#E8DFD0] rounded-xl px-4 py-3 text-sm bg-white focus:outline-none focus:border-[#8B6F47]"
+            className="w-full border border-[#E5E5EA] rounded-xl px-4 py-3 text-sm bg-white focus:outline-none focus:border-[#1C1C1E]"
             required
           />
           <label className="flex items-center gap-2 text-sm text-[#8B6F47] cursor-pointer">
@@ -234,14 +234,14 @@ export default function AddressesPage() {
             <button
               type="button"
               onClick={() => { setShowForm(false); setError('') }}
-              className="flex-1 border border-[#E8DFD0] bg-white text-[#8B6F47] font-medium py-3 rounded-xl text-sm hover:bg-[#FAF8F4] transition"
+              className="flex-1 border border-[#E5E5EA] bg-white text-[#8B6F47] font-medium py-3 rounded-xl text-sm hover:bg-[#F5F5F7] transition"
             >
               취소
             </button>
             <button
               type="submit"
               disabled={saving}
-              className="flex-1 bg-[#5C4A2A] text-white font-bold py-3 rounded-xl text-sm hover:bg-[#8B6F47] transition disabled:opacity-60"
+              className="flex-1 bg-[#1C1C1E] text-white font-bold py-3 rounded-xl text-sm hover:bg-[#3A3A3C] transition disabled:opacity-60"
             >
               {saving ? '저장 중...' : '저장'}
             </button>

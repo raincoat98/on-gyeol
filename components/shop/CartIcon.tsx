@@ -17,7 +17,7 @@ export default function CartIcon({ transparent = false }: { transparent?: boolea
     <Link href="/cart" className={`relative flex items-center transition-colors duration-300 hover:opacity-70 ${transparent ? 'text-white' : 'text-[#5C4A2A]'}`}>
       <ShoppingBag size={22} />
       {count > 0 && (
-        <span className="absolute -top-1.5 -right-1.5 bg-[#5C4A2A] text-white text-[10px] font-bold w-4 h-4 rounded-full flex items-center justify-center leading-none">
+        <span className="absolute -top-1.5 -right-1.5 bg-[#1C1C1E] text-white text-[10px] font-bold w-4 h-4 rounded-full flex items-center justify-center leading-none">
           {count > 9 ? '9+' : count}
         </span>
       )}

@@ -89,7 +89,7 @@ export default function SignupPage() {
           placeholder="이름"
           value={name}
           onChange={(e) => setName(e.target.value)}
-          className="w-full border border-[#E8DFD0] rounded-xl px-4 py-4 text-base bg-white focus:outline-none focus:border-[#8B6F47]"
+          className="w-full border border-[#E5E5EA] rounded-xl px-4 py-4 text-base bg-white focus:outline-none focus:border-[#1C1C1E]"
           required
         />
         <input
@@ -97,14 +97,14 @@ export default function SignupPage() {
           placeholder="연락처 (010-0000-0000)"
           value={phone}
           onChange={(e) => setPhone(e.target.value)}
-          className="w-full border border-[#E8DFD0] rounded-xl px-4 py-4 text-base bg-white focus:outline-none focus:border-[#8B6F47]"
+          className="w-full border border-[#E5E5EA] rounded-xl px-4 py-4 text-base bg-white focus:outline-none focus:border-[#1C1C1E]"
         />
         <input
           type="email"
           placeholder="이메일"
           value={email}
           onChange={(e) => setEmail(e.target.value)}
-          className="w-full border border-[#E8DFD0] rounded-xl px-4 py-4 text-base bg-white focus:outline-none focus:border-[#8B6F47]"
+          className="w-full border border-[#E5E5EA] rounded-xl px-4 py-4 text-base bg-white focus:outline-none focus:border-[#1C1C1E]"
           required
         />
         <input
@@ -112,7 +112,7 @@ export default function SignupPage() {
           placeholder="비밀번호 (6자 이상)"
           value={password}
           onChange={(e) => setPassword(e.target.value)}
-          className="w-full border border-[#E8DFD0] rounded-xl px-4 py-4 text-base bg-white focus:outline-none focus:border-[#8B6F47]"
+          className="w-full border border-[#E5E5EA] rounded-xl px-4 py-4 text-base bg-white focus:outline-none focus:border-[#1C1C1E]"
           required
         />
         <input
@@ -120,14 +120,14 @@ export default function SignupPage() {
           placeholder="비밀번호 확인"
           value={passwordConfirm}
           onChange={(e) => setPasswordConfirm(e.target.value)}
-          className="w-full border border-[#E8DFD0] rounded-xl px-4 py-4 text-base bg-white focus:outline-none focus:border-[#8B6F47]"
+          className="w-full border border-[#E5E5EA] rounded-xl px-4 py-4 text-base bg-white focus:outline-none focus:border-[#1C1C1E]"
           required
         />
         {error && <p className="text-red-500 text-sm text-center">{error}</p>}
         <button
           type="submit"
           disabled={loading}
-          className="bg-[#5C4A2A] text-white font-bold py-4 rounded-xl text-base hover:bg-[#8B6F47] transition disabled:opacity-60 mt-2"
+          className="bg-[#1C1C1E] text-white font-bold py-4 rounded-xl text-base hover:bg-[#3A3A3C] transition disabled:opacity-60 mt-2"
         >
           {loading ? '가입 중...' : '회원가입'}
         </button>

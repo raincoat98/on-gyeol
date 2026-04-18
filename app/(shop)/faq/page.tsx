@@ -40,13 +40,13 @@ export default function FaqPage() {
         {FAQ.map((item, i) => (
           <details
             key={i}
-            className="bg-white border border-[#E8DFD0] rounded-xl overflow-hidden group"
+            className="bg-white border border-[#E5E5EA] rounded-xl overflow-hidden group"
           >
             <summary className="px-5 py-4 font-medium text-[#2D2416] cursor-pointer list-none flex justify-between items-center">
               <span>Q. {item.q}</span>
               <span className="text-[#9C9189] group-open:rotate-180 transition-transform">▼</span>
             </summary>
-            <div className="px-5 pb-5 text-sm text-[#8B6F47] leading-relaxed border-t border-[#E8DFD0] pt-4">
+            <div className="px-5 pb-5 text-sm text-[#8B6F47] leading-relaxed border-t border-[#E5E5EA] pt-4">
               {item.a}
             </div>
           </details>
