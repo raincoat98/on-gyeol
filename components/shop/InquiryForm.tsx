@@ -42,9 +42,9 @@ export default function InquiryForm({ productId, productName }: InquiryFormProps
 
   if (done) {
     return (
-      <div className="bg-[#EFEFEF] rounded-xl p-8 text-center">
-        <p className="text-lg font-semibold text-[#5C4A2A] mb-2">문의가 접수되었습니다</p>
-        <p className="text-sm text-[#9C9189]">빠른 시일 내에 연락드리겠습니다.</p>
+      <div className="bg-surface-muted rounded-xl p-8 text-center">
+        <p className="text-lg font-semibold text-ink mb-2">문의가 접수되었습니다</p>
+        <p className="text-sm text-ink-muted">빠른 시일 내에 연락드리겠습니다.</p>
       </div>
     )
   }
@@ -56,27 +56,27 @@ export default function InquiryForm({ productId, productName }: InquiryFormProps
         placeholder="이름"
         value={form.name}
         onChange={(e) => setForm({ ...form, name: e.target.value })}
-        className="w-full border border-[#E5E5EA] rounded-xl px-4 py-3 text-base bg-white focus:outline-none focus:border-[#1C1C1E]"
+        className="w-full border border-line rounded-xl px-4 py-3 text-base bg-white focus:outline-none focus:border-ink"
       />
       <input
         type="tel"
         placeholder="연락처 (010-0000-0000)"
         value={form.phone}
         onChange={(e) => setForm({ ...form, phone: e.target.value })}
-        className="w-full border border-[#E5E5EA] rounded-xl px-4 py-3 text-base bg-white focus:outline-none focus:border-[#1C1C1E]"
+        className="w-full border border-line rounded-xl px-4 py-3 text-base bg-white focus:outline-none focus:border-ink"
       />
       <textarea
         placeholder={`[${productName}] 에 대해 문의할 내용을 적어주세요.`}
         value={form.message}
         onChange={(e) => setForm({ ...form, message: e.target.value })}
         rows={4}
-        className="w-full border border-[#E5E5EA] rounded-xl px-4 py-3 text-base bg-white focus:outline-none focus:border-[#1C1C1E] resize-none"
+        className="w-full border border-line rounded-xl px-4 py-3 text-base bg-white focus:outline-none focus:border-ink resize-none"
       />
       {error && <p className="text-red-500 text-sm">{error}</p>}
       <button
         type="submit"
         disabled={loading}
-        className="bg-[#1C1C1E] text-white font-bold py-4 rounded-xl text-base hover:bg-[#3A3A3C] transition disabled:opacity-60"
+        className="bg-surface-dark text-white font-bold py-4 rounded-xl text-base hover:bg-surface-hover transition disabled:opacity-60"
       >
         {loading ? '접수 중...' : '문의 접수하기'}
       </button>

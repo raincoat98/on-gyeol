@@ -58,14 +58,14 @@ export default async function ProductDetailPage({
   return (
     <div className="max-w-5xl mx-auto px-4 py-8">
       {/* 빵부스러기 */}
-      <nav className="text-sm text-[#9C9189] mb-6">
-        <span>홈</span> &rsaquo; <span>{product.categories?.name}</span> &rsaquo; <span className="text-[#5C4A2A]">{product.name}</span>
+      <nav className="text-sm text-ink-muted mb-6">
+        <span>홈</span> &rsaquo; <span>{product.categories?.name}</span> &rsaquo; <span className="text-ink">{product.name}</span>
       </nav>
 
       <div className="grid grid-cols-1 md:grid-cols-2 gap-10">
         {/* 이미지 */}
         <div className="flex flex-col gap-3">
-          <div className="relative aspect-[3/4] bg-[#E5E5EA] rounded-xl overflow-hidden">
+          <div className="relative aspect-[3/4] bg-line rounded-xl overflow-hidden">
             {mainImage ? (
               <Image
                 src={mainImage.image_url}
@@ -76,7 +76,7 @@ export default async function ProductDetailPage({
                 priority
               />
             ) : (
-              <div className="w-full h-full flex items-center justify-center text-[#9C9189]">
+              <div className="w-full h-full flex items-center justify-center text-ink-muted">
                 이미지 없음
               </div>
             )}
@@ -90,7 +90,7 @@ export default async function ProductDetailPage({
           {images.length > 1 && (
             <div className="flex gap-2 overflow-x-auto pb-1">
               {images.map((img) => (
-                <div key={img.id} className="relative w-20 h-24 flex-shrink-0 rounded-lg overflow-hidden bg-[#E5E5EA]">
+                <div key={img.id} className="relative w-20 h-24 flex-shrink-0 rounded-lg overflow-hidden bg-line">
                   <Image src={img.image_url} alt="" fill className="object-cover" sizes="80px" />
                 </div>
               ))}
@@ -101,15 +101,15 @@ export default async function ProductDetailPage({
         {/* 상품 정보 */}
         <div className="flex flex-col gap-5">
           <div>
-            <p className="text-sm text-[#9C9189] mb-1">{product.categories?.name}</p>
-            <h1 className="text-2xl font-bold text-[#2D2416] leading-snug mb-3">{product.name}</h1>
+            <p className="text-sm text-ink-muted mb-1">{product.categories?.name}</p>
+            <h1 className="text-2xl font-bold text-ink leading-snug mb-3">{product.name}</h1>
             <div className="flex items-center gap-3">
               {hasDiscount ? (
                 <>
-                  <span className="text-2xl font-bold text-[#5C4A2A]">
+                  <span className="text-2xl font-bold text-ink">
                     {product.sale_price!.toLocaleString()}원
                   </span>
-                  <span className="text-base text-[#9C9189] line-through">
+                  <span className="text-base text-ink-muted line-through">
                     {product.price.toLocaleString()}원
                   </span>
                   <span className="text-sm bg-red-500 text-white px-2 py-0.5 rounded">
@@ -117,7 +117,7 @@ export default async function ProductDetailPage({
                   </span>
                 </>
               ) : (
-                <span className="text-2xl font-bold text-[#2D2416]">
+                <span className="text-2xl font-bold text-ink">
                   {product.price.toLocaleString()}원
                 </span>
               )}
@@ -126,7 +126,7 @@ export default async function ProductDetailPage({
 
           {/* 짧은 설명 */}
           {product.short_description && (
-            <p className="text-sm text-[#8B6F47] leading-relaxed border-l-2 border-[#E5E5EA] pl-3">
+            <p className="text-sm text-ink-sub leading-relaxed border-l-2 border-line pl-3">
               {product.short_description}
             </p>
           )}
@@ -146,8 +146,8 @@ export default async function ProductDetailPage({
           />
 
           {/* 배송 안내 */}
-          <div className="bg-[#EFEFEF] rounded-xl p-4 text-sm text-[#8B6F47] flex flex-col gap-1.5">
-            <p className="font-semibold text-[#5C4A2A] mb-1">배송 안내</p>
+          <div className="bg-white border border-line rounded-xl p-4 text-sm text-ink-sub flex flex-col gap-1.5">
+            <p className="font-semibold text-ink mb-1">배송 안내</p>
             <p>주문 확인 후 1~3 영업일 이내 발송</p>
             <p>배송비 3,000원 (5만원 이상 무료)</p>
           </div>
@@ -157,11 +157,11 @@ export default async function ProductDetailPage({
       {/* 상세 설명 */}
       {product.description && (
         <div className="mt-14">
-          <h2 className="font-brand text-xl font-bold text-[#5C4A2A] mb-6 pb-3 border-b border-[#E5E5EA]">
+          <h2 className="font-brand text-xl font-bold text-ink mb-6 pb-3 border-b border-line">
             상품 상세
           </h2>
           <div
-            className="prose max-w-none text-[#2D2416] leading-relaxed"
+            className="prose max-w-none text-ink leading-relaxed"
             dangerouslySetInnerHTML={{ __html: product.description }}
           />
         </div>
@@ -169,15 +169,15 @@ export default async function ProductDetailPage({
 
       {/* 문의 폼 */}
       <div className="mt-14">
-        <h2 className="font-brand text-xl font-bold text-[#5C4A2A] mb-6 pb-3 border-b border-[#E5E5EA]">
+        <h2 className="font-brand text-xl font-bold text-ink mb-6 pb-3 border-b border-line">
           상품 문의
         </h2>
         <InquiryForm productId={product.id} productName={product.name} />
       </div>
 
       {/* 교환/환불 안내 */}
-      <div className="mt-14 bg-[#EFEFEF] rounded-xl p-6 text-sm text-[#8B6F47]">
-        <p className="font-semibold text-[#5C4A2A] text-base mb-3">교환 / 환불 안내</p>
+      <div className="mt-14 bg-white border border-line rounded-xl p-6 text-sm text-ink-sub">
+        <p className="font-semibold text-ink text-base mb-3">교환 / 환불 안내</p>
         <ul className="flex flex-col gap-1.5 list-disc list-inside">
           <li>수령 후 7일 이내 교환/환불 가능</li>
           <li>착용/세탁 후 교환/환불 불가</li>

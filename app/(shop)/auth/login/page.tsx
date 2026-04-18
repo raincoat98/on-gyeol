@@ -34,8 +34,8 @@ function LoginForm() {
   return (
     <div className="max-w-sm mx-auto px-4 py-16">
       <div className="text-center mb-10">
-        <h1 className="font-brand text-3xl font-bold text-[#5C4A2A] tracking-widest mb-2">온결</h1>
-        <p className="text-sm text-[#9C9189]">로그인</p>
+        <h1 className="font-brand text-3xl font-bold text-ink tracking-widest mb-2">온결</h1>
+        <p className="text-sm text-ink-muted">로그인</p>
       </div>
 
       <form onSubmit={handleLogin} className="flex flex-col gap-4">
@@ -44,7 +44,7 @@ function LoginForm() {
           placeholder="이메일"
           value={email}
           onChange={(e) => setEmail(e.target.value)}
-          className="w-full border border-[#E5E5EA] rounded-xl px-4 py-4 text-base bg-white focus:outline-none focus:border-[#1C1C1E]"
+          className="w-full border border-line rounded-xl px-4 py-4 text-base bg-white focus:outline-none focus:border-ink"
           required
         />
         <input
@@ -52,22 +52,22 @@ function LoginForm() {
           placeholder="비밀번호"
           value={password}
           onChange={(e) => setPassword(e.target.value)}
-          className="w-full border border-[#E5E5EA] rounded-xl px-4 py-4 text-base bg-white focus:outline-none focus:border-[#1C1C1E]"
+          className="w-full border border-line rounded-xl px-4 py-4 text-base bg-white focus:outline-none focus:border-ink"
           required
         />
         {error && <p className="text-red-500 text-sm text-center">{error}</p>}
         <button
           type="submit"
           disabled={loading}
-          className="bg-[#1C1C1E] text-white font-bold py-4 rounded-xl text-base hover:bg-[#3A3A3C] transition disabled:opacity-60 mt-2"
+          className="bg-surface-dark text-white font-bold py-4 rounded-xl text-base hover:bg-surface-hover transition disabled:opacity-60 mt-2"
         >
           {loading ? '로그인 중...' : '로그인'}
         </button>
       </form>
 
-      <p className="text-center text-sm text-[#9C9189] mt-6">
+      <p className="text-center text-sm text-ink-muted mt-6">
         아직 회원이 아니신가요?{' '}
-        <Link href="/auth/signup" className="text-[#5C4A2A] font-semibold hover:underline">
+        <Link href="/auth/signup" className="text-ink font-semibold hover:underline">
           회원가입
         </Link>
       </p>

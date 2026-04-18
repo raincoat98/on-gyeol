@@ -16,7 +16,7 @@ export default function ProductCard({ product }: ProductCardProps) {
 
   return (
     <Link href={`/products/${product.slug}`} className="group block">
-      <div className="relative aspect-[3/4] bg-[#E5E5EA] rounded-lg overflow-hidden mb-3">
+      <div className="relative aspect-[3/4] bg-line rounded-lg overflow-hidden mb-3">
         {mainImage ? (
           <Image
             src={mainImage.image_url}
@@ -26,7 +26,7 @@ export default function ProductCard({ product }: ProductCardProps) {
             sizes="(max-width: 768px) 50vw, 25vw"
           />
         ) : (
-          <div className="w-full h-full flex items-center justify-center text-[#9C9189] text-sm">
+          <div className="w-full h-full flex items-center justify-center text-ink-muted text-sm">
             이미지 없음
           </div>
         )}
@@ -34,12 +34,12 @@ export default function ProductCard({ product }: ProductCardProps) {
         {/* 뱃지 */}
         <div className="absolute top-2 left-2 flex flex-col gap-1">
           {isSoldOut && (
-            <span className="bg-[#9C9189] text-white text-xs font-semibold px-2 py-1 rounded">
+            <span className="bg-ink-muted text-white text-xs font-semibold px-2 py-1 rounded">
               품절
             </span>
           )}
           {product.is_featured && !isSoldOut && (
-            <span className="bg-[#1C1C1E] text-white text-xs font-semibold px-2 py-1 rounded">
+            <span className="bg-surface-dark text-white text-xs font-semibold px-2 py-1 rounded">
               신상품
             </span>
           )}
@@ -52,20 +52,20 @@ export default function ProductCard({ product }: ProductCardProps) {
       </div>
 
       <div className="px-1">
-        <p className="text-sm text-[#9C9189] mb-1">{product.categories?.name}</p>
-        <p className="font-medium text-[#2D2416] leading-snug mb-1 line-clamp-2">{product.name}</p>
+        <p className="text-sm text-ink-muted mb-1">{product.categories?.name}</p>
+        <p className="font-medium text-ink leading-snug mb-1 line-clamp-2">{product.name}</p>
         <div className="flex items-center gap-2">
           {hasDiscount ? (
             <>
-              <span className="font-bold text-[#5C4A2A]">
+              <span className="font-bold text-ink">
                 {product.sale_price!.toLocaleString()}원
               </span>
-              <span className="text-sm text-[#9C9189] line-through">
+              <span className="text-sm text-ink-muted line-through">
                 {product.price.toLocaleString()}원
               </span>
             </>
           ) : (
-            <span className="font-bold text-[#2D2416]">
+            <span className="font-bold text-ink">
               {product.price.toLocaleString()}원
             </span>
           )}

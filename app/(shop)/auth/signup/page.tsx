@@ -64,12 +64,12 @@ export default function SignupPage() {
   if (success) {
     return (
       <div className="max-w-sm mx-auto px-4 py-16 text-center">
-        <h2 className="font-brand text-2xl font-bold text-[#5C4A2A] mb-4">이메일을 확인해주세요</h2>
-        <p className="text-[#8B6F47] text-sm leading-relaxed mb-6">
+        <h2 className="font-brand text-2xl font-bold text-ink mb-4">이메일을 확인해주세요</h2>
+        <p className="text-ink-sub text-sm leading-relaxed mb-6">
           {email}로 확인 메일을 발송했습니다.<br />
           메일의 링크를 클릭하면 가입이 완료됩니다.
         </p>
-        <Link href="/auth/login" className="text-[#5C4A2A] font-semibold hover:underline text-sm">
+        <Link href="/auth/login" className="text-ink font-semibold hover:underline text-sm">
           로그인 페이지로
         </Link>
       </div>
@@ -79,8 +79,8 @@ export default function SignupPage() {
   return (
     <div className="max-w-sm mx-auto px-4 py-16">
       <div className="text-center mb-10">
-        <h1 className="font-brand text-3xl font-bold text-[#5C4A2A] tracking-widest mb-2">온결</h1>
-        <p className="text-sm text-[#9C9189]">회원가입</p>
+        <h1 className="font-brand text-3xl font-bold text-ink tracking-widest mb-2">온결</h1>
+        <p className="text-sm text-ink-muted">회원가입</p>
       </div>
 
       <form onSubmit={handleSignup} className="flex flex-col gap-4">
@@ -89,7 +89,7 @@ export default function SignupPage() {
           placeholder="이름"
           value={name}
           onChange={(e) => setName(e.target.value)}
-          className="w-full border border-[#E5E5EA] rounded-xl px-4 py-4 text-base bg-white focus:outline-none focus:border-[#1C1C1E]"
+          className="w-full border border-line rounded-xl px-4 py-4 text-base bg-white focus:outline-none focus:border-ink"
           required
         />
         <input
@@ -97,14 +97,14 @@ export default function SignupPage() {
           placeholder="연락처 (010-0000-0000)"
           value={phone}
           onChange={(e) => setPhone(e.target.value)}
-          className="w-full border border-[#E5E5EA] rounded-xl px-4 py-4 text-base bg-white focus:outline-none focus:border-[#1C1C1E]"
+          className="w-full border border-line rounded-xl px-4 py-4 text-base bg-white focus:outline-none focus:border-ink"
         />
         <input
           type="email"
           placeholder="이메일"
           value={email}
           onChange={(e) => setEmail(e.target.value)}
-          className="w-full border border-[#E5E5EA] rounded-xl px-4 py-4 text-base bg-white focus:outline-none focus:border-[#1C1C1E]"
+          className="w-full border border-line rounded-xl px-4 py-4 text-base bg-white focus:outline-none focus:border-ink"
           required
         />
         <input
@@ -112,7 +112,7 @@ export default function SignupPage() {
           placeholder="비밀번호 (6자 이상)"
           value={password}
           onChange={(e) => setPassword(e.target.value)}
-          className="w-full border border-[#E5E5EA] rounded-xl px-4 py-4 text-base bg-white focus:outline-none focus:border-[#1C1C1E]"
+          className="w-full border border-line rounded-xl px-4 py-4 text-base bg-white focus:outline-none focus:border-ink"
           required
         />
         <input
@@ -120,22 +120,22 @@ export default function SignupPage() {
           placeholder="비밀번호 확인"
           value={passwordConfirm}
           onChange={(e) => setPasswordConfirm(e.target.value)}
-          className="w-full border border-[#E5E5EA] rounded-xl px-4 py-4 text-base bg-white focus:outline-none focus:border-[#1C1C1E]"
+          className="w-full border border-line rounded-xl px-4 py-4 text-base bg-white focus:outline-none focus:border-ink"
           required
         />
         {error && <p className="text-red-500 text-sm text-center">{error}</p>}
         <button
           type="submit"
           disabled={loading}
-          className="bg-[#1C1C1E] text-white font-bold py-4 rounded-xl text-base hover:bg-[#3A3A3C] transition disabled:opacity-60 mt-2"
+          className="bg-surface-dark text-white font-bold py-4 rounded-xl text-base hover:bg-surface-hover transition disabled:opacity-60 mt-2"
         >
           {loading ? '가입 중...' : '회원가입'}
         </button>
       </form>
 
-      <p className="text-center text-sm text-[#9C9189] mt-6">
+      <p className="text-center text-sm text-ink-muted mt-6">
         이미 회원이신가요?{' '}
-        <Link href="/auth/login" className="text-[#5C4A2A] font-semibold hover:underline">
+        <Link href="/auth/login" className="text-ink font-semibold hover:underline">
           로그인
         </Link>
       </p>

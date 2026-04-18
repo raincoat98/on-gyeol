@@ -70,8 +70,8 @@ function CheckoutContent() {
   if (items.length === 0) {
     return (
       <div className="max-w-3xl mx-auto px-4 py-20 text-center">
-        <p className="text-[#9C9189] mb-4">장바구니가 비어있습니다.</p>
-        <Link href="/products" className="text-[#5C4A2A] underline">쇼핑 계속하기</Link>
+        <p className="text-ink-muted mb-4">장바구니가 비어있습니다.</p>
+        <Link href="/products" className="text-ink underline">쇼핑 계속하기</Link>
       </div>
     )
   }
@@ -169,30 +169,30 @@ function CheckoutContent() {
 
   return (
     <div className="max-w-3xl mx-auto px-4 py-8">
-      <h1 className="font-brand text-2xl font-bold text-[#5C4A2A] mb-8">주문 / 결제</h1>
+      <h1 className="font-brand text-2xl font-bold text-ink mb-8">주문 / 결제</h1>
 
       <form onSubmit={handleSubmit} className="flex flex-col gap-8">
         {/* 주문 상품 */}
         <section>
-          <h2 className="text-base font-semibold text-[#5C4A2A] mb-4">주문 상품</h2>
+          <h2 className="text-base font-semibold text-ink mb-4">주문 상품</h2>
           <div className="flex flex-col gap-3">
             {items.map((item) => (
               <div
                 key={`${item.productId}-${item.color}-${item.size}`}
-                className="flex gap-3 items-center bg-[#EFEFEF] rounded-xl p-3"
+                className="flex gap-3 items-center bg-white border border-line rounded-xl p-3"
               >
-                <div className="relative w-14 h-16 rounded-lg overflow-hidden bg-[#E5E5EA] flex-shrink-0">
+                <div className="relative w-14 h-16 rounded-lg overflow-hidden bg-line flex-shrink-0">
                   {item.imageUrl && (
                     <Image src={item.imageUrl} alt={item.productName} fill className="object-cover" sizes="56px" />
                   )}
                 </div>
                 <div className="flex-1 min-w-0">
-                  <p className="text-sm font-medium text-[#2D2416] truncate">{item.productName}</p>
-                  <p className="text-xs text-[#9C9189]">
+                  <p className="text-sm font-medium text-ink truncate">{item.productName}</p>
+                  <p className="text-xs text-ink-muted">
                     {[item.color, item.size].filter(Boolean).join(' / ')} · {item.quantity}개
                   </p>
                 </div>
-                <span className="text-sm font-bold text-[#5C4A2A] flex-shrink-0">
+                <span className="text-sm font-bold text-ink flex-shrink-0">
                   {(item.price * item.quantity).toLocaleString()}원
                 </span>
               </div>
@@ -203,7 +203,7 @@ function CheckoutContent() {
         {/* 저장된 배송지 선택 (로그인 시) */}
         {addresses.length > 0 && (
           <section>
-            <h2 className="text-base font-semibold text-[#5C4A2A] mb-3">저장된 배송지</h2>
+            <h2 className="text-base font-semibold text-ink mb-3">저장된 배송지</h2>
             <div className="flex flex-col gap-2">
               {addresses.map((addr) => (
                 <button
@@ -212,22 +212,22 @@ function CheckoutContent() {
                   onClick={() => fillAddress(addr)}
                   className={`text-left border rounded-xl p-3 transition ${
                     name === addr.recipient_name && phone === addr.phone && address === addr.address
-                      ? 'border-[#5C4A2A] bg-[#F5F5F7]'
-                      : 'border-[#E5E5EA] hover:border-[#8B6F47]'
+                      ? 'border-ink bg-surface'
+                      : 'border-line hover:border-ink-sub'
                   }`}
                 >
                   <div className="flex items-center gap-2 mb-0.5">
-                    <span className="text-xs font-semibold text-[#8B6F47] bg-[#EFEFEF] px-2 py-0.5 rounded-full">
+                    <span className="text-xs font-semibold text-ink-sub bg-surface-muted px-2 py-0.5 rounded-full">
                       {addr.label}
                     </span>
                     {addr.is_default && (
-                      <span className="text-xs font-semibold text-white bg-[#1C1C1E] px-2 py-0.5 rounded-full">
+                      <span className="text-xs font-semibold text-white bg-surface-dark px-2 py-0.5 rounded-full">
                         기본
                       </span>
                     )}
                   </div>
-                  <p className="text-sm font-medium text-[#2D2416]">{addr.recipient_name} · {addr.phone}</p>
-                  <p className="text-xs text-[#9C9189]">{addr.address}</p>
+                  <p className="text-sm font-medium text-ink">{addr.recipient_name} · {addr.phone}</p>
+                  <p className="text-xs text-ink-muted">{addr.address}</p>
                 </button>
               ))}
             </div>
@@ -236,38 +236,38 @@ function CheckoutContent() {
 
         {/* 배송 정보 입력 */}
         <section>
-          <h2 className="text-base font-semibold text-[#5C4A2A] mb-4">배송 정보</h2>
+          <h2 className="text-base font-semibold text-ink mb-4">배송 정보</h2>
           <div className="flex flex-col gap-3">
             <input
               type="text"
               value={name}
               onChange={(e) => setName(e.target.value)}
               placeholder="받는 분 이름 *"
-              className="w-full border border-[#E5E5EA] rounded-xl px-4 py-3 text-sm text-[#2D2416] focus:outline-none focus:border-[#1C1C1E] bg-white"
+              className="w-full border border-line rounded-xl px-4 py-3 text-sm text-ink focus:outline-none focus:border-ink bg-white"
             />
             <input
               type="tel"
               value={phone}
               onChange={(e) => setPhone(e.target.value)}
               placeholder="연락처 *"
-              className="w-full border border-[#E5E5EA] rounded-xl px-4 py-3 text-sm text-[#2D2416] focus:outline-none focus:border-[#1C1C1E] bg-white"
+              className="w-full border border-line rounded-xl px-4 py-3 text-sm text-ink focus:outline-none focus:border-ink bg-white"
             />
             <input
               type="text"
               value={address}
               onChange={(e) => setAddress(e.target.value)}
               placeholder="배송 주소 (우편번호 포함) *"
-              className="w-full border border-[#E5E5EA] rounded-xl px-4 py-3 text-sm text-[#2D2416] focus:outline-none focus:border-[#1C1C1E] bg-white"
+              className="w-full border border-line rounded-xl px-4 py-3 text-sm text-ink focus:outline-none focus:border-ink bg-white"
             />
             <input
               type="text"
               value={memo}
               onChange={(e) => setMemo(e.target.value)}
               placeholder="배송 메모 (선택)"
-              className="w-full border border-[#E5E5EA] rounded-xl px-4 py-3 text-sm text-[#2D2416] focus:outline-none focus:border-[#1C1C1E] bg-white"
+              className="w-full border border-line rounded-xl px-4 py-3 text-sm text-ink focus:outline-none focus:border-ink bg-white"
             />
             {userId && (
-              <label className="flex items-center gap-2 text-sm text-[#8B6F47] cursor-pointer">
+              <label className="flex items-center gap-2 text-sm text-ink-sub cursor-pointer">
                 <input
                   type="checkbox"
                   checked={saveAddress}
@@ -278,15 +278,15 @@ function CheckoutContent() {
               </label>
             )}
             {!userId && (
-              <p className="text-xs text-[#9C9189]">
-                <Link href="/auth/login?next=/checkout" className="text-[#5C4A2A] underline">로그인</Link>하면 배송지를 저장할 수 있습니다.
+              <p className="text-xs text-ink-muted">
+                <Link href="/auth/login?next=/checkout" className="text-ink underline">로그인</Link>하면 배송지를 저장할 수 있습니다.
               </p>
             )}
           </div>
         </section>
 
         {/* 결제 금액 */}
-        <section className="bg-[#EFEFEF] rounded-xl p-5 flex flex-col gap-2 text-sm text-[#8B6F47]">
+        <section className="bg-white border border-line rounded-xl p-5 flex flex-col gap-2 text-sm text-ink-sub">
           <div className="flex justify-between">
             <span>상품 금액</span>
             <span>{subtotal.toLocaleString()}원</span>
@@ -295,7 +295,7 @@ function CheckoutContent() {
             <span>배송비</span>
             <span>{deliveryFee === 0 ? '무료' : `${deliveryFee.toLocaleString()}원`}</span>
           </div>
-          <div className="border-t border-[#E5E5EA] pt-2 mt-1 flex justify-between font-bold text-base text-[#2D2416]">
+          <div className="border-t border-line pt-2 mt-1 flex justify-between font-bold text-base text-ink">
             <span>총 결제금액</span>
             <span>{total.toLocaleString()}원</span>
           </div>
@@ -306,7 +306,7 @@ function CheckoutContent() {
         <button
           type="submit"
           disabled={loading}
-          className="w-full bg-[#1C1C1E] text-white font-bold py-4 rounded-xl text-base hover:bg-[#3A3A3C] transition disabled:opacity-60 disabled:cursor-not-allowed"
+          className="w-full bg-surface-dark text-white font-bold py-4 rounded-xl text-base hover:bg-surface-hover transition disabled:opacity-60 disabled:cursor-not-allowed"
         >
           {loading ? '처리 중...' : `${total.toLocaleString()}원 결제하기`}
         </button>

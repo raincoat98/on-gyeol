@@ -196,9 +196,9 @@ export default function ProductForm({ categories, initialData, initialImages = [
     <form onSubmit={handleSubmit} className="flex flex-col gap-6">
       {/* 이미지 업로드 */}
       <div>
-        <label className="block font-semibold text-[#1C1C1E] mb-3">상품 사진</label>
+        <label className="block font-semibold text-ink mb-3">상품 사진</label>
         <div
-          className="border-2 border-dashed border-[#E8DFD0] rounded-xl p-8 text-center cursor-pointer hover:border-[#1C1C1E] transition"
+          className="border-2 border-dashed border-line rounded-xl p-8 text-center cursor-pointer hover:border-ink transition"
           onClick={() => fileInputRef.current?.click()}
         >
           {(existingImages.length > 0 || previewUrls.length > 0) ? (
@@ -207,7 +207,7 @@ export default function ProductForm({ categories, initialData, initialImages = [
                 <div key={img.id} className="relative w-24 h-28 rounded-lg overflow-hidden group">
                   <Image src={img.image_url} alt="" fill className="object-cover" sizes="96px" />
                   {img.is_main && (
-                    <span className="absolute bottom-0 left-0 right-0 bg-[#1C1C1E] text-white text-xs text-center py-0.5">
+                    <span className="absolute bottom-0 left-0 right-0 bg-surface-dark text-white text-xs text-center py-0.5">
                       대표
                     </span>
                   )}
@@ -228,18 +228,18 @@ export default function ProductForm({ categories, initialData, initialImages = [
               {previewUrls.map((url, i) => (
                 <div key={`new-${i}`} className="relative w-24 h-28 rounded-lg overflow-hidden">
                   <Image src={url} alt="" fill className="object-cover" sizes="96px" />
-                  <span className="absolute bottom-0 left-0 right-0 bg-[#6B6B6B] text-white text-xs text-center py-0.5">NEW</span>
+                  <span className="absolute bottom-0 left-0 right-0 bg-ink-muted text-white text-xs text-center py-0.5">NEW</span>
                 </div>
               ))}
-              <div className="w-24 h-28 border-2 border-dashed border-[#E8DFD0] rounded-lg flex items-center justify-center text-[#9C9189] text-sm">
+              <div className="w-24 h-28 border-2 border-dashed border-line rounded-lg flex items-center justify-center text-ink-muted text-sm">
                 + 추가
               </div>
             </div>
           ) : (
             <>
               <p className="text-3xl mb-2">📷</p>
-              <p className="text-[#9C9189] text-sm">사진을 선택하세요</p>
-              <p className="text-[#9C9189] text-xs mt-1">첫 번째 사진이 대표 이미지가 됩니다</p>
+              <p className="text-ink-muted text-sm">사진을 선택하세요</p>
+              <p className="text-ink-muted text-xs mt-1">첫 번째 사진이 대표 이미지가 됩니다</p>
             </>
           )}
         </div>
@@ -254,27 +254,27 @@ export default function ProductForm({ categories, initialData, initialImages = [
       </div>
 
       {/* 기본 정보 */}
-      <div className="bg-white border border-[#E8DFD0] rounded-xl p-6 flex flex-col gap-4">
-        <h2 className="font-semibold text-[#1C1C1E]">기본 정보</h2>
+      <div className="bg-white border border-line rounded-xl p-6 flex flex-col gap-4">
+        <h2 className="font-semibold text-ink">기본 정보</h2>
 
         <div>
-          <label className="block text-sm text-[#6B6B6B] mb-1.5">상품명 *</label>
+          <label className="block text-sm text-ink-muted mb-1.5">상품명 *</label>
           <input
             type="text"
             value={name}
             onChange={(e) => setName(e.target.value)}
             placeholder="예: 봄 데일리 블라우스"
-            className="w-full border border-[#E8DFD0] rounded-xl px-4 py-3 text-base focus:outline-none focus:border-[#1C1C1E]"
+            className="w-full border border-line rounded-xl px-4 py-3 text-base focus:outline-none focus:border-ink"
             required
           />
         </div>
 
         <div>
-          <label className="block text-sm text-[#6B6B6B] mb-1.5">카테고리</label>
+          <label className="block text-sm text-ink-muted mb-1.5">카테고리</label>
           <select
             value={categoryId}
             onChange={(e) => setCategoryId(e.target.value)}
-            className="w-full border border-[#E8DFD0] rounded-xl px-4 py-3 text-base focus:outline-none focus:border-[#1C1C1E] bg-white"
+            className="w-full border border-line rounded-xl px-4 py-3 text-base focus:outline-none focus:border-ink bg-white"
           >
             <option value="">카테고리 선택</option>
             {categories.map((cat) => (
@@ -285,45 +285,45 @@ export default function ProductForm({ categories, initialData, initialImages = [
 
         <div className="grid grid-cols-2 gap-4">
           <div>
-            <label className="block text-sm text-[#6B6B6B] mb-1.5">판매가 *</label>
+            <label className="block text-sm text-ink-muted mb-1.5">판매가 *</label>
             <input
               type="number"
               value={price}
               onChange={(e) => setPrice(e.target.value)}
               placeholder="0"
               min="0"
-              className="w-full border border-[#E8DFD0] rounded-xl px-4 py-3 text-base focus:outline-none focus:border-[#1C1C1E]"
+              className="w-full border border-line rounded-xl px-4 py-3 text-base focus:outline-none focus:border-ink"
               required
             />
           </div>
           <div>
-            <label className="block text-sm text-[#6B6B6B] mb-1.5">할인가 (없으면 비워두기)</label>
+            <label className="block text-sm text-ink-muted mb-1.5">할인가 (없으면 비워두기)</label>
             <input
               type="number"
               value={salePrice}
               onChange={(e) => setSalePrice(e.target.value)}
               placeholder="0"
               min="0"
-              className="w-full border border-[#E8DFD0] rounded-xl px-4 py-3 text-base focus:outline-none focus:border-[#1C1C1E]"
+              className="w-full border border-line rounded-xl px-4 py-3 text-base focus:outline-none focus:border-ink"
             />
           </div>
         </div>
 
         <div>
-          <label className="block text-sm text-[#6B6B6B] mb-1.5">한 줄 설명</label>
+          <label className="block text-sm text-ink-muted mb-1.5">한 줄 설명</label>
           <input
             type="text"
             value={shortDesc}
             onChange={(e) => setShortDesc(e.target.value)}
             placeholder="예: 편안한 소재로 일상에 따뜻함을 더하는 봄 블라우스"
-            className="w-full border border-[#E8DFD0] rounded-xl px-4 py-3 text-base focus:outline-none focus:border-[#1C1C1E]"
+            className="w-full border border-line rounded-xl px-4 py-3 text-base focus:outline-none focus:border-ink"
           />
         </div>
       </div>
 
       {/* 옵션 (색상/사이즈) */}
-      <div className="bg-white border border-[#E8DFD0] rounded-xl p-6 flex flex-col gap-4">
-        <h2 className="font-semibold text-[#1C1C1E]">색상 / 사이즈</h2>
+      <div className="bg-white border border-line rounded-xl p-6 flex flex-col gap-4">
+        <h2 className="font-semibold text-ink">색상 / 사이즈</h2>
         {options.map((opt, i) => (
           <div key={i} className="flex gap-3 items-center">
             <input
@@ -331,12 +331,12 @@ export default function ProductForm({ categories, initialData, initialImages = [
               value={opt.color}
               onChange={(e) => { const next = [...options]; next[i].color = e.target.value; setOptions(next) }}
               placeholder="색상 (예: 아이보리)"
-              className="flex-1 border border-[#E8DFD0] rounded-xl px-4 py-3 text-sm focus:outline-none focus:border-[#1C1C1E]"
+              className="flex-1 border border-line rounded-xl px-4 py-3 text-sm focus:outline-none focus:border-ink"
             />
             <select
               value={opt.size}
               onChange={(e) => { const next = [...options]; next[i].size = e.target.value; setOptions(next) }}
-              className="flex-1 border border-[#E8DFD0] rounded-xl px-4 py-3 text-sm focus:outline-none focus:border-[#1C1C1E] bg-white"
+              className="flex-1 border border-line rounded-xl px-4 py-3 text-sm focus:outline-none focus:border-ink bg-white"
             >
               <option value="">사이즈</option>
               {SIZES.map((s) => <option key={s} value={s}>{s}</option>)}
@@ -347,25 +347,25 @@ export default function ProductForm({ categories, initialData, initialImages = [
               onChange={(e) => { const next = [...options]; next[i].stock_qty = e.target.value; setOptions(next) }}
               placeholder="재고"
               min="0"
-              className="w-20 border border-[#E8DFD0] rounded-xl px-3 py-3 text-sm focus:outline-none focus:border-[#1C1C1E]"
+              className="w-20 border border-line rounded-xl px-3 py-3 text-sm focus:outline-none focus:border-ink"
             />
             {options.length > 1 && (
-              <button type="button" onClick={() => removeOption(i)} className="text-[#9C9189] hover:text-red-500 text-xl font-bold px-2">×</button>
+              <button type="button" onClick={() => removeOption(i)} className="text-ink-muted hover:text-red-500 text-xl font-bold px-2">×</button>
             )}
           </div>
         ))}
         <button
           type="button"
           onClick={addOption}
-          className="text-sm text-[#6B6B6B] hover:text-[#1C1C1E] text-left"
+          className="text-sm text-ink-muted hover:text-ink text-left"
         >
           + 옵션 추가
         </button>
       </div>
 
       {/* 상태 */}
-      <div className="bg-white border border-[#E8DFD0] rounded-xl p-6 flex flex-col gap-4">
-        <h2 className="font-semibold text-[#1C1C1E]">판매 상태</h2>
+      <div className="bg-white border border-line rounded-xl p-6 flex flex-col gap-4">
+        <h2 className="font-semibold text-ink">판매 상태</h2>
         <div className="flex gap-4">
           {[
             { value: 'active', label: '판매중' },
@@ -379,7 +379,7 @@ export default function ProductForm({ categories, initialData, initialImages = [
                 value={s.value}
                 checked={status === s.value}
                 onChange={(e) => setStatus(e.target.value)}
-                className="w-5 h-5 accent-[#1C1C1E]"
+                className="w-5 h-5 accent-ink"
               />
               <span className="text-base">{s.label}</span>
             </label>
@@ -390,21 +390,21 @@ export default function ProductForm({ categories, initialData, initialImages = [
             type="checkbox"
             checked={isFeatured}
             onChange={(e) => setIsFeatured(e.target.checked)}
-            className="w-5 h-5 accent-[#1C1C1E]"
+            className="w-5 h-5 accent-ink"
           />
           <span className="text-base">베스트/신상품 강조 표시</span>
         </label>
       </div>
 
       {/* 상세 설명 */}
-      <div className="bg-white border border-[#E8DFD0] rounded-xl p-6">
-        <h2 className="font-semibold text-[#1C1C1E] mb-3">상세 설명 (선택)</h2>
+      <div className="bg-white border border-line rounded-xl p-6">
+        <h2 className="font-semibold text-ink mb-3">상세 설명 (선택)</h2>
         <textarea
           value={description}
           onChange={(e) => setDescription(e.target.value)}
           rows={6}
           placeholder="상품에 대한 자세한 설명을 입력하세요."
-          className="w-full border border-[#E8DFD0] rounded-xl px-4 py-3 text-base focus:outline-none focus:border-[#1C1C1E] resize-none"
+          className="w-full border border-line rounded-xl px-4 py-3 text-base focus:outline-none focus:border-ink resize-none"
         />
       </div>
 
@@ -421,7 +421,7 @@ export default function ProductForm({ categories, initialData, initialImages = [
       <button
         type="submit"
         disabled={loading}
-        className="bg-[#1C1C1E] text-white font-bold py-5 rounded-xl text-lg hover:bg-[#3A3A3C] transition disabled:opacity-60"
+        className="bg-surface-dark text-white font-bold py-5 rounded-xl text-lg hover:bg-surface-hover transition disabled:opacity-60"
       >
         {loading ? (isEdit ? '저장 중...' : '등록 중...') : (isEdit ? '저장하기' : '상품 등록하기')}
       </button>

@@ -34,12 +34,12 @@ export default async function SearchPage({
             name="q"
             defaultValue={q}
             placeholder="상품명을 검색하세요"
-            className="flex-1 border border-[#E5E5EA] rounded-xl px-4 py-3 text-base bg-white focus:outline-none focus:border-[#1C1C1E]"
+            className="flex-1 border border-line rounded-xl px-4 py-3 text-base bg-white focus:outline-none focus:border-ink"
             autoFocus
           />
           <button
             type="submit"
-            className="bg-[#1C1C1E] text-white font-semibold px-6 py-3 rounded-xl hover:bg-[#3A3A3C] transition"
+            className="bg-surface-dark text-white font-semibold px-6 py-3 rounded-xl hover:bg-surface-hover transition"
           >
             검색
           </button>
@@ -48,7 +48,7 @@ export default async function SearchPage({
 
       {q ? (
         <>
-          <p className="text-sm text-[#9C9189] mb-6">
+          <p className="text-sm text-ink-muted mb-6">
             &ldquo;{q}&rdquo; 검색 결과 {products.length}건
           </p>
           {products.length > 0 ? (
@@ -56,11 +56,11 @@ export default async function SearchPage({
               {products.map((p) => <ProductCard key={p.id} product={p} />)}
             </div>
           ) : (
-            <p className="text-center text-[#9C9189] py-16">검색 결과가 없습니다.</p>
+            <p className="text-center text-ink-muted py-16">검색 결과가 없습니다.</p>
           )}
         </>
       ) : (
-        <p className="text-center text-[#9C9189] py-16">찾고 싶은 상품을 검색해 보세요.</p>
+        <p className="text-center text-ink-muted py-16">찾고 싶은 상품을 검색해 보세요.</p>
       )}
     </div>
   )

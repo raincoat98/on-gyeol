@@ -27,10 +27,10 @@ export default async function AdminProductsPage({
   return (
     <div className="p-8">
       <div className="flex items-center justify-between mb-8">
-        <h1 className="text-xl font-semibold text-[#1C1C1E] tracking-tight">상품 관리</h1>
+        <h1 className="text-xl font-semibold text-ink tracking-tight">상품 관리</h1>
         <Link
           href="/admin/products/new"
-          className="bg-[#1C1C1E] text-white font-medium px-5 py-2.5 rounded-xl hover:bg-[#3A3A3C] transition text-sm"
+          className="bg-surface-dark text-white font-medium px-5 py-2.5 rounded-xl hover:bg-surface-hover transition text-sm"
         >
           + 새 상품 등록
         </Link>
@@ -48,8 +48,8 @@ export default async function AdminProductsPage({
             href={f.value ? `?filter=${f.value}` : '/admin/products'}
             className={`px-4 py-2 rounded-full text-sm font-medium border transition ${
               (params.filter ?? '') === f.value
-                ? 'bg-[#1C1C1E] text-white border-[#1C1C1E]'
-                : 'border-[#E8DFD0] text-[#9C9189] hover:border-[#5C4A2A] hover:text-[#5C4A2A]'
+                ? 'bg-surface-dark text-white border-ink'
+                : 'border-line text-ink-muted hover:border-ink hover:text-ink'
             }`}
           >
             {f.label}
@@ -62,24 +62,24 @@ export default async function AdminProductsPage({
           {(products as ProductWithImages[]).map((product) => {
             const mainImage = product.product_images?.find((img) => img.is_main) ?? product.product_images?.[0]
             return (
-              <div key={product.id} className="bg-white border border-[#E8DFD0] rounded-2xl p-4 flex items-center gap-4 hover:shadow-sm transition-shadow">
-                <div className="w-14 h-16 bg-[#F3EDE4] rounded-xl overflow-hidden shrink-0 relative">
+              <div key={product.id} className="bg-white border border-line rounded-2xl p-4 flex items-center gap-4 hover:shadow-sm transition-shadow">
+                <div className="w-14 h-16 bg-surface-muted rounded-xl overflow-hidden shrink-0 relative">
                   {mainImage ? (
                     <img src={mainImage.image_url} alt={product.name} className="w-full h-full object-cover" />
                   ) : (
-                    <div className="w-full h-full flex items-center justify-center text-xs text-[#9C9189]">없음</div>
+                    <div className="w-full h-full flex items-center justify-center text-xs text-ink-muted">없음</div>
                   )}
                 </div>
                 <div className="flex-1 min-w-0">
-                  <p className="font-medium text-[#1C1C1E] truncate text-sm">{product.name}</p>
-                  <p className="text-xs text-[#9C9189] mt-0.5">
+                  <p className="font-medium text-ink truncate text-sm">{product.name}</p>
+                  <p className="text-xs text-ink-muted mt-0.5">
                     {product.categories?.name} · {product.price.toLocaleString()}원
                   </p>
                 </div>
                 <ProductStatusToggle productId={product.id} currentStatus={product.status} />
                 <Link
                   href={`/admin/products/${product.id}/edit`}
-                  className="text-sm text-[#5C4A2A] font-medium px-3 py-1.5 border border-[#E8DFD0] rounded-lg hover:border-[#5C4A2A] transition whitespace-nowrap"
+                  className="text-sm text-ink font-medium px-3 py-1.5 border border-line rounded-lg hover:border-ink transition whitespace-nowrap"
                 >
                   수정
                 </Link>
@@ -88,11 +88,11 @@ export default async function AdminProductsPage({
           })}
         </div>
       ) : (
-        <div className="text-center py-24 text-[#9C9189]">
+        <div className="text-center py-24 text-ink-muted">
           <p className="mb-4">등록된 상품이 없습니다</p>
           <Link
             href="/admin/products/new"
-            className="bg-[#1C1C1E] text-white font-medium px-6 py-3 rounded-xl hover:bg-[#3A3A3C] transition text-sm"
+            className="bg-surface-dark text-white font-medium px-6 py-3 rounded-xl hover:bg-surface-hover transition text-sm"
           >
             첫 상품 등록하기
           </Link>

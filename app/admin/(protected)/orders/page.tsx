@@ -88,14 +88,14 @@ export default async function AdminOrdersPage({
 
   return (
     <div className="p-8">
-      <h1 className="text-xl font-semibold text-[#1C1C1E] mb-8 tracking-tight">주문 관리</h1>
+      <h1 className="text-xl font-semibold text-ink mb-8 tracking-tight">주문 관리</h1>
 
       {/* 필터 탭 */}
       <div className="flex gap-2 mb-6 flex-wrap">
         <a
           href="/admin/orders"
           className={`px-4 py-2 rounded-full text-sm font-medium border transition ${
-            !params.status ? 'bg-[#1C1C1E] text-white border-[#1C1C1E]' : 'border-[#E8DFD0] text-[#9C9189] hover:border-[#5C4A2A] hover:text-[#5C4A2A]'
+            !params.status ? 'bg-surface-dark text-white border-ink' : 'border-line text-ink-muted hover:border-ink hover:text-ink'
           }`}
         >
           전체 ({counts?.length ?? 0})
@@ -105,7 +105,7 @@ export default async function AdminOrdersPage({
             key={v}
             href={`?status=${v}`}
             className={`px-4 py-2 rounded-full text-sm font-medium border transition ${
-              params.status === v ? 'bg-[#1C1C1E] text-white border-[#1C1C1E]' : 'border-[#E8DFD0] text-[#9C9189] hover:border-[#5C4A2A] hover:text-[#5C4A2A]'
+              params.status === v ? 'bg-surface-dark text-white border-ink' : 'border-line text-ink-muted hover:border-ink hover:text-ink'
             }`}
           >
             {label} ({countMap[v] ?? 0})
@@ -116,12 +116,12 @@ export default async function AdminOrdersPage({
       {orders && orders.length > 0 ? (
         <div className="flex flex-col gap-4">
           {orders.map((order) => (
-            <div key={order.id} className="bg-white border border-[#E8DFD0] rounded-2xl p-5 hover:shadow-sm transition-shadow">
+            <div key={order.id} className="bg-white border border-line rounded-2xl p-5 hover:shadow-sm transition-shadow">
               {/* 주문 헤더 */}
               <div className="flex items-start justify-between gap-4 mb-3">
                 <div>
-                  <p className="font-semibold text-[#1C1C1E] text-sm">#{order.order_number}</p>
-                  <p className="text-xs text-[#9C9189] mt-0.5">
+                  <p className="font-semibold text-ink text-sm">#{order.order_number}</p>
+                  <p className="text-xs text-ink-muted mt-0.5">
                     {new Date(order.created_at).toLocaleDateString('ko-KR', {
                       month: 'long', day: 'numeric', hour: '2-digit', minute: '2-digit',
                     })}
@@ -129,28 +129,28 @@ export default async function AdminOrdersPage({
                 </div>
                 <div className="flex flex-col items-end gap-1.5">
                   <OrderStatusSelect orderId={order.id} currentStatus={order.status} />
-                  <p className="text-sm font-bold text-[#1C1C1E]">
+                  <p className="text-sm font-bold text-ink">
                     {order.total_amount.toLocaleString()}원
                   </p>
                   {order.delivery_fee > 0 && (
-                    <p className="text-xs text-[#9C9189]">배송비 {order.delivery_fee.toLocaleString()}원 포함</p>
+                    <p className="text-xs text-ink-muted">배송비 {order.delivery_fee.toLocaleString()}원 포함</p>
                   )}
                 </div>
               </div>
 
               {/* 주문 상품 */}
-              <div className="border-t border-[#F5F5F7] pt-3 flex flex-col gap-1.5 mb-1">
+              <div className="border-t border-surface pt-3 flex flex-col gap-1.5 mb-1">
                 {order.order_items?.map((item) => (
                   <div key={item.id} className="flex items-center justify-between text-sm">
-                    <span className="text-[#1C1C1E]">
+                    <span className="text-ink">
                       {item.product_name}
                       {(item.option_color || item.option_size) && (
-                        <span className="text-[#9C9189] ml-1.5 text-xs">
+                        <span className="text-ink-muted ml-1.5 text-xs">
                           {[item.option_color, item.option_size].filter(Boolean).join(' / ')}
                         </span>
                       )}
                     </span>
-                    <span className="text-[#6B6B6B] whitespace-nowrap ml-4 text-xs">
+                    <span className="text-ink-muted whitespace-nowrap ml-4 text-xs">
                       {item.quantity}개 · {(item.price * item.quantity).toLocaleString()}원
                     </span>
                   </div>
@@ -171,7 +171,7 @@ export default async function AdminOrdersPage({
           ))}
         </div>
       ) : (
-        <p className="text-center text-[#9C9189] py-24 text-sm">주문이 없습니다.</p>
+        <p className="text-center text-ink-muted py-24 text-sm">주문이 없습니다.</p>
       )}
     </div>
   )

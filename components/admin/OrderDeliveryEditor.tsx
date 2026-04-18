@@ -69,17 +69,17 @@ export default function OrderDeliveryEditor({
   }
 
   return (
-    <div className="mt-3 border-t border-[#F3EDE4] pt-3">
+    <div className="mt-3 border-t border-line pt-3">
       {!editing ? (
         <div className="flex items-start justify-between gap-2">
-          <div className="text-xs text-[#6B6B6B] space-y-0.5">
-            <p><span className="text-[#9C9189]">수령인</span> {name} · {phone}</p>
-            <p><span className="text-[#9C9189]">주소</span> {address}</p>
-            {memo && <p><span className="text-[#9C9189]">메모</span> {memo}</p>}
+          <div className="text-xs text-ink-muted space-y-0.5">
+            <p><span className="text-ink-muted">수령인</span> {name} · {phone}</p>
+            <p><span className="text-ink-muted">주소</span> {address}</p>
+            {memo && <p><span className="text-ink-muted">메모</span> {memo}</p>}
           </div>
           <button
             onClick={() => setEditing(true)}
-            className="flex items-center gap-1 text-xs text-[#9C9189] hover:text-[#1C1C1E] transition shrink-0"
+            className="flex items-center gap-1 text-xs text-ink-muted hover:text-ink transition shrink-0"
           >
             <Pencil size={12} /> 수정
           </button>
@@ -91,38 +91,38 @@ export default function OrderDeliveryEditor({
               value={form.name}
               onChange={(e) => setForm((f) => ({ ...f, name: e.target.value }))}
               placeholder="수령인"
-              className="border border-[#E8DFD0] rounded-lg px-3 py-2 text-sm focus:outline-none focus:border-[#1C1C1E]"
+              className="border border-line rounded-lg px-3 py-2 text-sm focus:outline-none focus:border-ink"
             />
             <input
               value={form.phone}
               onChange={(e) => setForm((f) => ({ ...f, phone: e.target.value }))}
               placeholder="연락처"
-              className="border border-[#E8DFD0] rounded-lg px-3 py-2 text-sm focus:outline-none focus:border-[#1C1C1E]"
+              className="border border-line rounded-lg px-3 py-2 text-sm focus:outline-none focus:border-ink"
             />
           </div>
           <input
             value={form.address}
             onChange={(e) => setForm((f) => ({ ...f, address: e.target.value }))}
             placeholder="주소"
-            className="border border-[#E8DFD0] rounded-lg px-3 py-2 text-sm focus:outline-none focus:border-[#1C1C1E]"
+            className="border border-line rounded-lg px-3 py-2 text-sm focus:outline-none focus:border-ink"
           />
           <input
             value={form.memo}
             onChange={(e) => setForm((f) => ({ ...f, memo: e.target.value }))}
             placeholder="메모 (선택)"
-            className="border border-[#E8DFD0] rounded-lg px-3 py-2 text-sm focus:outline-none focus:border-[#1C1C1E]"
+            className="border border-line rounded-lg px-3 py-2 text-sm focus:outline-none focus:border-ink"
           />
           <div className="flex gap-2 justify-end">
             <button
               onClick={() => { setEditing(false); setForm({ name, phone, address, memo: memo ?? '' }) }}
-              className="flex items-center gap-1 text-xs text-[#9C9189] hover:text-[#1C1C1E] px-3 py-1.5 border border-[#E8DFD0] rounded-lg transition"
+              className="flex items-center gap-1 text-xs text-ink-muted hover:text-ink px-3 py-1.5 border border-line rounded-lg transition"
             >
               <X size={12} /> 취소
             </button>
             <button
               onClick={handleSave}
               disabled={saving}
-              className="flex items-center gap-1 text-xs text-white bg-[#1C1C1E] hover:bg-[#3A3A3C] px-3 py-1.5 rounded-lg transition disabled:opacity-50"
+              className="flex items-center gap-1 text-xs text-white bg-surface-dark hover:bg-surface-hover px-3 py-1.5 rounded-lg transition disabled:opacity-50"
             >
               <Check size={12} /> {saving ? '저장 중...' : '저장'}
             </button>
@@ -135,23 +135,23 @@ export default function OrderDeliveryEditor({
         <div className="mt-2">
           <button
             onClick={() => setShowLogs((v) => !v)}
-            className="flex items-center gap-1 text-xs text-[#9C9189] hover:text-[#1C1C1E] transition"
+            className="flex items-center gap-1 text-xs text-ink-muted hover:text-ink transition"
           >
             <Clock size={11} />
             변경 이력 {logs.length}건
             {showLogs ? <ChevronUp size={11} /> : <ChevronDown size={11} />}
           </button>
           {showLogs && (
-            <div className="mt-2 flex flex-col gap-1.5 pl-3 border-l-2 border-[#F3EDE4]">
+            <div className="mt-2 flex flex-col gap-1.5 pl-3 border-l-2 border-line">
               {logs.map((log) => (
                 <div key={log.id}>
-                  <p className="text-xs text-[#9C9189]">
+                  <p className="text-xs text-ink-muted">
                     {new Date(log.created_at).toLocaleDateString('ko-KR', {
                       month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit',
                     })} · {log.action}
                   </p>
                   {log.detail && (
-                    <p className="text-xs text-[#6B6B6B] whitespace-pre-line mt-0.5">{log.detail}</p>
+                    <p className="text-xs text-ink-muted whitespace-pre-line mt-0.5">{log.detail}</p>
                   )}
                 </div>
               ))}

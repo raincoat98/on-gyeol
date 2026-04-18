@@ -104,13 +104,13 @@ export default function AddressesPage() {
   return (
     <div className="max-w-3xl mx-auto px-4 py-8">
       <div className="flex items-center gap-3 mb-8">
-        <Link href="/mypage" className="text-[#9C9189] hover:text-[#5C4A2A] text-sm">← 마이페이지</Link>
+        <Link href="/mypage" className="text-ink-muted hover:text-ink text-sm">← 마이페이지</Link>
       </div>
       <div className="flex items-center justify-between mb-6">
-        <h1 className="font-brand text-2xl font-bold text-[#5C4A2A]">배송지 관리</h1>
+        <h1 className="font-brand text-2xl font-bold text-ink">배송지 관리</h1>
         <button
           onClick={() => { setShowForm(true); setForm(EMPTY_FORM) }}
-          className="flex items-center gap-1.5 text-sm text-white bg-[#1C1C1E] px-4 py-2 rounded-full hover:bg-[#3A3A3C] transition"
+          className="flex items-center gap-1.5 text-sm text-white bg-surface-dark px-4 py-2 rounded-full hover:bg-surface-hover transition"
         >
           <Plus size={14} />
           배송지 추가
@@ -119,11 +119,11 @@ export default function AddressesPage() {
 
       {/* 주소 목록 */}
       {addresses.length === 0 && !showForm && (
-        <div className="text-center py-12 text-[#9C9189] bg-[#EFEFEF] rounded-xl">
+        <div className="text-center py-12 text-ink-muted bg-surface-muted rounded-xl">
           <p className="mb-2">저장된 배송지가 없습니다.</p>
           <button
             onClick={() => setShowForm(true)}
-            className="text-sm text-[#5C4A2A] underline"
+            className="text-sm text-ink underline"
           >
             배송지 추가하기
           </button>
@@ -132,36 +132,36 @@ export default function AddressesPage() {
 
       <div className="flex flex-col gap-3 mb-6">
         {addresses.map((addr) => (
-          <div key={addr.id} className={`bg-white border rounded-xl p-4 ${addr.is_default ? 'border-[#8B6F47]' : 'border-[#E5E5EA]'}`}>
+          <div key={addr.id} className={`bg-white border rounded-xl p-4 ${addr.is_default ? 'border-ink-sub' : 'border-line'}`}>
             <div className="flex items-start justify-between">
               <div className="flex-1">
                 <div className="flex items-center gap-2 mb-1">
-                  <span className="text-xs font-semibold text-[#8B6F47] bg-[#EFEFEF] px-2 py-0.5 rounded-full">
+                  <span className="text-xs font-semibold text-ink-sub bg-surface-muted px-2 py-0.5 rounded-full">
                     {addr.label}
                   </span>
                   {addr.is_default && (
-                    <span className="text-xs font-semibold text-white bg-[#1C1C1E] px-2 py-0.5 rounded-full">
+                    <span className="text-xs font-semibold text-white bg-surface-dark px-2 py-0.5 rounded-full">
                       기본
                     </span>
                   )}
                 </div>
-                <p className="font-medium text-[#2D2416] text-sm">{addr.recipient_name}</p>
-                <p className="text-sm text-[#8B6F47]">{addr.phone}</p>
-                <p className="text-sm text-[#8B6F47]">{addr.address}</p>
+                <p className="font-medium text-ink text-sm">{addr.recipient_name}</p>
+                <p className="text-sm text-ink-sub">{addr.phone}</p>
+                <p className="text-sm text-ink-sub">{addr.address}</p>
               </div>
               <div className="flex items-center gap-2 ml-3">
                 {!addr.is_default && (
                   <button
                     onClick={() => handleSetDefault(addr.id)}
                     title="기본 배송지로 설정"
-                    className="text-[#C5BDB5] hover:text-[#5C4A2A] transition"
+                    className="text-ink-faint hover:text-ink transition"
                   >
                     <Star size={16} />
                   </button>
                 )}
                 <button
                   onClick={() => handleDelete(addr.id)}
-                  className="text-[#C5BDB5] hover:text-red-400 transition"
+                  className="text-ink-faint hover:text-red-400 transition"
                 >
                   <Trash2 size={16} />
                 </button>
@@ -173,8 +173,8 @@ export default function AddressesPage() {
 
       {/* 추가 폼 */}
       {showForm && (
-        <form onSubmit={handleSave} className="bg-[#EFEFEF] rounded-xl p-5 flex flex-col gap-3">
-          <h2 className="font-semibold text-[#5C4A2A] mb-1">새 배송지</h2>
+        <form onSubmit={handleSave} className="bg-surface-muted rounded-xl p-5 flex flex-col gap-3">
+          <h2 className="font-semibold text-ink mb-1">새 배송지</h2>
 
           {/* 라벨 */}
           <div className="flex gap-2">
@@ -185,8 +185,8 @@ export default function AddressesPage() {
                 onClick={() => setForm((f) => ({ ...f, label: l }))}
                 className={`px-3 py-1.5 rounded-full text-sm border transition ${
                   form.label === l
-                    ? 'border-[#5C4A2A] bg-[#1C1C1E] text-white'
-                    : 'border-[#E5E5EA] bg-white text-[#5C4A2A]'
+                    ? 'border-ink bg-surface-dark text-white'
+                    : 'border-line bg-white text-ink'
                 }`}
               >
                 {l}
@@ -199,7 +199,7 @@ export default function AddressesPage() {
             placeholder="받는 분 이름 *"
             value={form.recipient_name}
             onChange={(e) => setForm((f) => ({ ...f, recipient_name: e.target.value }))}
-            className="w-full border border-[#E5E5EA] rounded-xl px-4 py-3 text-sm bg-white focus:outline-none focus:border-[#1C1C1E]"
+            className="w-full border border-line rounded-xl px-4 py-3 text-sm bg-white focus:outline-none focus:border-ink"
             required
           />
           <input
@@ -207,7 +207,7 @@ export default function AddressesPage() {
             placeholder="연락처 *"
             value={form.phone}
             onChange={(e) => setForm((f) => ({ ...f, phone: e.target.value }))}
-            className="w-full border border-[#E5E5EA] rounded-xl px-4 py-3 text-sm bg-white focus:outline-none focus:border-[#1C1C1E]"
+            className="w-full border border-line rounded-xl px-4 py-3 text-sm bg-white focus:outline-none focus:border-ink"
             required
           />
           <input
@@ -215,10 +215,10 @@ export default function AddressesPage() {
             placeholder="주소 (우편번호 포함) *"
             value={form.address}
             onChange={(e) => setForm((f) => ({ ...f, address: e.target.value }))}
-            className="w-full border border-[#E5E5EA] rounded-xl px-4 py-3 text-sm bg-white focus:outline-none focus:border-[#1C1C1E]"
+            className="w-full border border-line rounded-xl px-4 py-3 text-sm bg-white focus:outline-none focus:border-ink"
             required
           />
-          <label className="flex items-center gap-2 text-sm text-[#8B6F47] cursor-pointer">
+          <label className="flex items-center gap-2 text-sm text-ink-sub cursor-pointer">
             <input
               type="checkbox"
               checked={form.is_default}
@@ -234,14 +234,14 @@ export default function AddressesPage() {
             <button
               type="button"
               onClick={() => { setShowForm(false); setError('') }}
-              className="flex-1 border border-[#E5E5EA] bg-white text-[#8B6F47] font-medium py-3 rounded-xl text-sm hover:bg-[#F5F5F7] transition"
+              className="flex-1 border border-line bg-white text-ink-sub font-medium py-3 rounded-xl text-sm hover:bg-surface transition"
             >
               취소
             </button>
             <button
               type="submit"
               disabled={saving}
-              className="flex-1 bg-[#1C1C1E] text-white font-bold py-3 rounded-xl text-sm hover:bg-[#3A3A3C] transition disabled:opacity-60"
+              className="flex-1 bg-surface-dark text-white font-bold py-3 rounded-xl text-sm hover:bg-surface-hover transition disabled:opacity-60"
             >
               {saving ? '저장 중...' : '저장'}
             </button>

@@ -29,13 +29,13 @@ export default function Header() {
   }, [])
 
   const transparent = isHome && !scrolled && !menuOpen
-  const textColor = transparent ? 'text-white' : 'text-[#5C4A2A]'
+  const textColor = transparent ? 'text-white' : 'text-ink'
 
   return (
     <header className={`sticky top-0 z-40 transition-all duration-300 ${
       transparent
         ? 'bg-transparent border-b border-transparent'
-        : 'bg-white/80 backdrop-blur-md border-b border-[#E5E5EA]/60'
+        : 'bg-white/80 backdrop-blur-md border-b border-line/60'
     }`}>
       <div className="max-w-5xl mx-auto px-4 h-16 flex items-center justify-between">
         {/* 로고 */}
@@ -76,12 +76,12 @@ export default function Header() {
 
       {/* 모바일 드롭다운 메뉴 */}
       {menuOpen && (
-        <div className="md:hidden bg-white/90 backdrop-blur-md border-t border-[#E5E5EA] px-4 py-4 flex flex-col gap-4">
+        <div className="md:hidden bg-white/90 backdrop-blur-md border-t border-line px-4 py-4 flex flex-col gap-4">
           {CATEGORIES.map((cat) => (
             <Link
               key={cat.slug}
               href={`/category/${cat.slug}`}
-              className="text-lg font-medium text-[#5C4A2A] py-1"
+              className="text-lg font-medium text-ink py-1"
               onClick={() => setMenuOpen(false)}
             >
               {cat.name}

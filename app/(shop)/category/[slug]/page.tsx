@@ -40,7 +40,7 @@ export default async function CategoryPage({
 
     return (
       <div className="max-w-5xl mx-auto px-4 py-8">
-        <h1 className="font-brand text-2xl font-bold text-[#5C4A2A] mb-6">전체</h1>
+        <h1 className="font-brand text-2xl font-bold text-ink mb-6">전체</h1>
         <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
           {(products as ProductWithImages[] ?? []).map((p) => (
             <ProductCard key={p.id} product={p} />
@@ -68,9 +68,9 @@ export default async function CategoryPage({
 
   return (
     <div className="max-w-5xl mx-auto px-4 py-8">
-      <h1 className="font-brand text-2xl font-bold text-[#5C4A2A] mb-2">{category.name}</h1>
+      <h1 className="font-brand text-2xl font-bold text-ink mb-2">{category.name}</h1>
       {category.description && (
-        <p className="text-sm text-[#9C9189] mb-6">{category.description}</p>
+        <p className="text-sm text-ink-muted mb-6">{category.description}</p>
       )}
       {(products as ProductWithImages[] ?? []).length > 0 ? (
         <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
@@ -79,7 +79,7 @@ export default async function CategoryPage({
           ))}
         </div>
       ) : (
-        <p className="text-center text-[#9C9189] py-24">해당 카테고리의 상품을 준비 중입니다.</p>
+        <p className="text-center text-ink-muted py-24">해당 카테고리의 상품을 준비 중입니다.</p>
       )}
     </div>
   )

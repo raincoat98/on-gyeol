@@ -26,11 +26,11 @@ export default function AdminLoginPage() {
   }
 
   return (
-    <div className="min-h-screen bg-[#FAF8F4] flex items-center justify-center px-4">
+    <div className="min-h-screen bg-surface flex items-center justify-center px-4">
       <div className="w-full max-w-sm">
         <div className="text-center mb-10">
-          <h1 className="font-brand text-3xl font-bold text-[#5C4A2A] tracking-widest mb-2">온결</h1>
-          <p className="text-sm text-[#9C9189]">관리자 로그인</p>
+          <h1 className="font-brand text-3xl font-bold text-ink tracking-widest mb-2">온결</h1>
+          <p className="text-sm text-ink-muted">관리자 로그인</p>
         </div>
 
         <form onSubmit={handleLogin} className="flex flex-col gap-4">
@@ -39,7 +39,7 @@ export default function AdminLoginPage() {
             placeholder="이메일"
             value={email}
             onChange={(e) => setEmail(e.target.value)}
-            className="w-full border border-[#E8DFD0] rounded-xl px-4 py-4 text-base bg-white focus:outline-none focus:border-[#8B6F47]"
+            className="w-full border border-line rounded-xl px-4 py-4 text-base bg-white focus:outline-none focus:border-ink-sub"
             required
           />
           <input
@@ -47,7 +47,7 @@ export default function AdminLoginPage() {
             placeholder="비밀번호"
             value={password}
             onChange={(e) => setPassword(e.target.value)}
-            className="w-full border border-[#E8DFD0] rounded-xl px-4 py-4 text-base bg-white focus:outline-none focus:border-[#8B6F47]"
+            className="w-full border border-line rounded-xl px-4 py-4 text-base bg-white focus:outline-none focus:border-ink-sub"
             required
           />
           {error && (
@@ -56,7 +56,7 @@ export default function AdminLoginPage() {
           <button
             type="submit"
             disabled={loading}
-            className="bg-[#5C4A2A] text-white font-bold py-4 rounded-xl text-base hover:bg-[#8B6F47] transition disabled:opacity-60 mt-2"
+            className="bg-surface-dark text-white font-bold py-4 rounded-xl text-base hover:bg-ink-sub transition disabled:opacity-60 mt-2"
           >
             {loading ? '로그인 중...' : '로그인'}
           </button>

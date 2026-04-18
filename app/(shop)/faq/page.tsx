@@ -35,18 +35,18 @@ const FAQ = [
 export default function FaqPage() {
   return (
     <div className="max-w-2xl mx-auto px-4 py-12">
-      <h1 className="font-brand text-2xl font-bold text-[#5C4A2A] mb-8">자주 묻는 질문</h1>
+      <h1 className="font-brand text-2xl font-bold text-ink mb-8">자주 묻는 질문</h1>
       <div className="flex flex-col gap-4">
         {FAQ.map((item, i) => (
           <details
             key={i}
-            className="bg-white border border-[#E5E5EA] rounded-xl overflow-hidden group"
+            className="bg-white border border-line rounded-xl overflow-hidden group"
           >
-            <summary className="px-5 py-4 font-medium text-[#2D2416] cursor-pointer list-none flex justify-between items-center">
+            <summary className="px-5 py-4 font-medium text-ink cursor-pointer list-none flex justify-between items-center">
               <span>Q. {item.q}</span>
-              <span className="text-[#9C9189] group-open:rotate-180 transition-transform">▼</span>
+              <span className="text-ink-muted group-open:rotate-180 transition-transform">▼</span>
             </summary>
-            <div className="px-5 pb-5 text-sm text-[#8B6F47] leading-relaxed border-t border-[#E5E5EA] pt-4">
+            <div className="px-5 pb-5 text-sm text-ink-sub leading-relaxed border-t border-line pt-4">
               {item.a}
             </div>
           </details>

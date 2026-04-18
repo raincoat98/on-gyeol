@@ -24,7 +24,7 @@ export default function AdminSidebar() {
   }
 
   return (
-    <aside className="w-56 bg-[#1C1C1E] text-white flex flex-col min-h-screen">
+    <aside className="w-56 bg-surface-dark text-white flex flex-col min-h-screen">
       <div className="px-6 py-6 border-b border-white/10">
         <p className="font-brand text-2xl font-bold tracking-widest">온결</p>
         <p className="text-xs text-white/40 mt-1 tracking-widest uppercase">Admin</p>

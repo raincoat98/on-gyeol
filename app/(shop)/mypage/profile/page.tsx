@@ -10,6 +10,7 @@ export default function ProfilePage() {
   const router = useRouter()
   const userId = useAuthStore((s) => s.userId)
   const hydrated = useAuthStore((s) => s.hydrated)
+  const setFullName = useAuthStore((s) => s.setFullName)
 
   const [name, setName] = useState('')
   const [phone, setPhone] = useState('')
@@ -21,7 +22,7 @@ export default function ProfilePage() {
     if (!hydrated) return
     if (!userId) { router.push('/auth/login?next=/mypage/profile'); return }
     const supabase = createClient()
-    supabase.from('profiles').select('full_name, phone').eq('id', userId).single().then(({ data }) => {
+    supabase.from('profiles').select('full_name, phone').eq('id', userId).maybeSingle().then(({ data }) => {
       if (data) {
         setName(data.full_name ?? '')
         setPhone(data.phone ?? '')
@@ -38,9 +39,10 @@ export default function ProfilePage() {
     const supabase = createClient()
     const { error } = await supabase
       .from('profiles')
-      .update({ full_name: name, phone })
-      .eq('id', userId)
+      .upsert({ id: userId, full_name: name, phone })
     setSaving(false)
+    if (error) console.error('profile upsert error:', error)
+    if (!error) setFullName(name)
     setMessage(error ? '저장에 실패했습니다.' : '저장되었습니다.')
   }
 
@@ -49,28 +51,28 @@ export default function ProfilePage() {
   return (
     <div className="max-w-sm mx-auto px-4 py-8">
       <div className="flex items-center gap-3 mb-8">
-        <Link href="/mypage" className="text-[#9C9189] hover:text-[#5C4A2A] text-sm">← 마이페이지</Link>
+        <Link href="/mypage" className="text-ink-muted hover:text-ink text-sm">← 마이페이지</Link>
       </div>
-      <h1 className="font-brand text-2xl font-bold text-[#5C4A2A] mb-6">프로필 수정</h1>
+      <h1 className="font-brand text-2xl font-bold text-ink mb-6">프로필 수정</h1>
 
       <form onSubmit={handleSave} className="flex flex-col gap-4">
         <div>
-          <label className="text-sm text-[#8B6F47] mb-1 block">이름</label>
+          <label className="text-sm text-ink-sub mb-1 block">이름</label>
           <input
             type="text"
             value={name}
             onChange={(e) => setName(e.target.value)}
-            className="w-full border border-[#E5E5EA] rounded-xl px-4 py-3 text-base bg-white focus:outline-none focus:border-[#1C1C1E]"
+            className="w-full border border-line rounded-xl px-4 py-3 text-base bg-white focus:outline-none focus:border-ink"
           />
         </div>
         <div>
-          <label className="text-sm text-[#8B6F47] mb-1 block">연락처</label>
+          <label className="text-sm text-ink-sub mb-1 block">연락처</label>
           <input
             type="tel"
             value={phone}
             onChange={(e) => setPhone(e.target.value)}
             placeholder="010-0000-0000"
-            className="w-full border border-[#E5E5EA] rounded-xl px-4 py-3 text-base bg-white focus:outline-none focus:border-[#1C1C1E]"
+            className="w-full border border-line rounded-xl px-4 py-3 text-base bg-white focus:outline-none focus:border-ink"
           />
         </div>
         {message && (
@@ -81,7 +83,7 @@ export default function ProfilePage() {
         <button
           type="submit"
           disabled={saving}
-          className="bg-[#1C1C1E] text-white font-bold py-3 rounded-xl hover:bg-[#3A3A3C] transition disabled:opacity-60"
+          className="bg-surface-dark text-white font-bold py-3 rounded-xl hover:bg-surface-hover transition disabled:opacity-60"
         >
           {saving ? '저장 중...' : '저장하기'}
         </button>

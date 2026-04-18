@@ -11,7 +11,7 @@ export default async function AdminProtectedLayout({ children }: { children: Rea
   return (
     <div className="flex min-h-screen">
       <AdminSidebar />
-      <main className="flex-1 bg-[#F5F5F7] overflow-auto">
+      <main className="flex-1 bg-surface overflow-auto">
         {children}
       </main>
     </div>

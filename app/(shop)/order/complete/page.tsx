@@ -52,7 +52,7 @@ function CompleteContent() {
   if (status === 'loading') {
     return (
       <div className="max-w-md mx-auto px-4 py-20 text-center">
-        <p className="text-[#9C9189]">결제를 확인하고 있습니다...</p>
+        <p className="text-ink-muted">결제를 확인하고 있습니다...</p>
       </div>
     )
   }
@@ -61,11 +61,11 @@ function CompleteContent() {
     return (
       <div className="max-w-md mx-auto px-4 py-20 text-center">
         <XCircle size={56} className="mx-auto text-red-400 mb-4" />
-        <h1 className="font-brand text-2xl font-bold text-[#5C4A2A] mb-2">결제 실패</h1>
-        <p className="text-[#9C9189] mb-8">{errorMsg}</p>
+        <h1 className="font-brand text-2xl font-bold text-ink mb-2">결제 실패</h1>
+        <p className="text-ink-muted mb-8">{errorMsg}</p>
         <Link
           href="/cart"
-          className="inline-block bg-[#1C1C1E] text-white font-semibold px-8 py-3 rounded-full hover:bg-[#3A3A3C] transition"
+          className="inline-block bg-surface-dark text-white font-semibold px-8 py-3 rounded-full hover:bg-surface-hover transition"
         >
           장바구니로 돌아가기
         </Link>
@@ -76,17 +76,17 @@ function CompleteContent() {
   return (
     <div className="max-w-md mx-auto px-4 py-20 text-center">
       <CheckCircle size={56} className="mx-auto text-green-500 mb-4" />
-      <h1 className="font-brand text-2xl font-bold text-[#5C4A2A] mb-2">주문이 완료되었습니다</h1>
+      <h1 className="font-brand text-2xl font-bold text-ink mb-2">주문이 완료되었습니다</h1>
       {orderNumber && (
-        <p className="text-[#8B6F47] text-sm mb-2">주문번호: <span className="font-semibold">{orderNumber}</span></p>
+        <p className="text-ink-sub text-sm mb-2">주문번호: <span className="font-semibold">{orderNumber}</span></p>
       )}
-      <p className="text-[#9C9189] text-sm mb-8">
+      <p className="text-ink-muted text-sm mb-8">
         주문 확인 후 1~3 영업일 이내 발송됩니다.<br />
         문의사항은 카카오톡 또는 전화로 연락주세요.
       </p>
       <Link
         href="/products"
-        className="inline-block bg-[#1C1C1E] text-white font-semibold px-8 py-3 rounded-full hover:bg-[#3A3A3C] transition"
+        className="inline-block bg-surface-dark text-white font-semibold px-8 py-3 rounded-full hover:bg-surface-hover transition"
       >
         쇼핑 계속하기
       </Link>

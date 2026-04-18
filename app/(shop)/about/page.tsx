@@ -9,9 +9,9 @@ export const metadata: Metadata = {
 
 export default function AboutPage() {
   return (
-    <div className="bg-[#F5F5F7]">
+    <div className="bg-surface">
       {/* 히어로 */}
-      <section className="relative -mt-16 h-[50vh] min-h-[360px] flex items-end justify-center overflow-hidden bg-[#E5E5EA]">
+      <section className="relative -mt-16 h-[50vh] min-h-[360px] flex items-end justify-center overflow-hidden bg-line">
         <Image
           src="/hero.jpg"
           alt="온결"
@@ -31,10 +31,10 @@ export default function AboutPage() {
 
       {/* 브랜드 철학 */}
       <section className="max-w-2xl mx-auto px-6 py-20 text-center">
-        <p className="text-xs tracking-[0.3em] text-[#9C9189] mb-4 uppercase">Philosophy</p>
-        <h2 className="font-brand text-3xl font-bold text-[#5C4A2A] mb-6">마음의 결을 담은 옷</h2>
-        <div className="w-8 h-px bg-[#C5BDB5] mx-auto mb-8" />
-        <p className="text-[#8B6F47] leading-loose text-base">
+        <p className="text-xs tracking-[0.3em] text-ink-muted mb-4 uppercase">Philosophy</p>
+        <h2 className="font-brand text-3xl font-bold text-ink mb-6">마음의 결을 담은 옷</h2>
+        <div className="w-8 h-px bg-ink-faint mx-auto mb-8" />
+        <p className="text-ink-sub leading-loose text-base">
           온결은 부부가 함께 만든 작은 쇼핑몰입니다.<br />
           좋은 옷을 고르는 눈, 따뜻한 마음을 담아<br />
           일상을 더 편안하고 아름답게 만들어 드리고 싶습니다.
@@ -43,12 +43,12 @@ export default function AboutPage() {
 
       {/* 구분선 */}
       <div className="max-w-2xl mx-auto px-6">
-        <div className="border-t border-[#E5E5EA]" />
+        <div className="border-t border-line" />
       </div>
 
       {/* 가치 3가지 */}
       <section className="max-w-4xl mx-auto px-6 py-20">
-        <p className="text-xs tracking-[0.3em] text-[#9C9189] mb-12 uppercase text-center">Our Values</p>
+        <p className="text-xs tracking-[0.3em] text-ink-muted mb-12 uppercase text-center">Our Values</p>
         <div className="grid md:grid-cols-3 gap-12 text-center">
           {[
             {
@@ -65,9 +65,9 @@ export default function AboutPage() {
             },
           ].map((v) => (
             <div key={v.title}>
-              <div className="w-10 h-px bg-[#C5BDB5] mx-auto mb-6" />
-              <h3 className="font-brand text-xl font-bold text-[#5C4A2A] mb-4">{v.title}</h3>
-              <p className="text-sm text-[#8B6F47] leading-loose whitespace-pre-line">{v.desc}</p>
+              <div className="w-10 h-px bg-ink-faint mx-auto mb-6" />
+              <h3 className="font-brand text-xl font-bold text-ink mb-4">{v.title}</h3>
+              <p className="text-sm text-ink-sub leading-loose whitespace-pre-line">{v.desc}</p>
             </div>
           ))}
         </div>
@@ -75,29 +75,29 @@ export default function AboutPage() {
 
       {/* 구분선 */}
       <div className="max-w-2xl mx-auto px-6">
-        <div className="border-t border-[#E5E5EA]" />
+        <div className="border-t border-line" />
       </div>
 
       {/* 브랜드명 의미 */}
       <section className="max-w-2xl mx-auto px-6 py-20 text-center">
-        <p className="text-xs tracking-[0.3em] text-[#9C9189] mb-4 uppercase">Brand Name</p>
-        <h2 className="font-brand text-3xl font-bold text-[#5C4A2A] mb-6">온결이란?</h2>
-        <div className="w-8 h-px bg-[#C5BDB5] mx-auto mb-8" />
-        <p className="text-[#8B6F47] leading-loose text-base">
-          <span className="font-semibold text-[#5C4A2A]">온</span>은 따뜻함을,{' '}
-          <span className="font-semibold text-[#5C4A2A]">결</span>은 마음의 결을 뜻합니다.<br />
+        <p className="text-xs tracking-[0.3em] text-ink-muted mb-4 uppercase">Brand Name</p>
+        <h2 className="font-brand text-3xl font-bold text-ink mb-6">온결이란?</h2>
+        <div className="w-8 h-px bg-ink-faint mx-auto mb-8" />
+        <p className="text-ink-sub leading-loose text-base">
+          <span className="font-semibold text-ink">온</span>은 따뜻함을,{' '}
+          <span className="font-semibold text-ink">결</span>은 마음의 결을 뜻합니다.<br />
           따뜻한 마음의 결이 담긴 옷—<br />
           그것이 온결이 추구하는 가치입니다.
         </p>
       </section>
 
       {/* CTA */}
-      <section className="bg-[#E5E5EA] py-16 text-center">
-        <h2 className="font-brand text-2xl font-bold text-[#5C4A2A] mb-3">온결의 옷을 만나보세요</h2>
-        <p className="text-sm text-[#8B6F47] mb-8">정성껏 고른 데일리룩이 기다리고 있습니다.</p>
+      <section className="bg-line py-16 text-center">
+        <h2 className="font-brand text-2xl font-bold text-ink mb-3">온결의 옷을 만나보세요</h2>
+        <p className="text-sm text-ink-sub mb-8">정성껏 고른 데일리룩이 기다리고 있습니다.</p>
         <Link
           href="/products"
-          className="inline-block border border-[#5C4A2A] text-[#5C4A2A] text-sm font-medium tracking-widest px-10 py-3.5 hover:bg-[#1C1C1E] hover:text-white transition-colors duration-300"
+          className="inline-block border border-ink text-ink text-sm font-medium tracking-widest px-10 py-3.5 hover:bg-surface-dark hover:text-white transition-colors duration-300"
         >
           SHOP NOW
         </Link>
