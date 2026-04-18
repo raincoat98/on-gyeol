@@ -26,7 +26,7 @@ export default async function EditProductPage({
 
   return (
     <div className="p-8 max-w-3xl">
-      <h1 className="font-brand text-2xl font-bold text-[#5C4A2A] mb-8">상품 수정</h1>
+      <h1 className="text-xl font-semibold text-[#1C1C1E] mb-8 tracking-tight">상품 수정</h1>
       <ProductForm
         categories={categories ?? []}
         initialData={product}

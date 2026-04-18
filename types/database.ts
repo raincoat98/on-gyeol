@@ -321,7 +321,29 @@ export interface Database {
           status?: 'pending' | 'paid' | 'shipping' | 'delivered' | 'cancelled'
           payment_key?: string | null
           payment_method?: string | null
+          customer_name?: string
+          customer_phone?: string
+          customer_address?: string
+          customer_memo?: string | null
         }
+        Relationships: []
+      }
+      order_logs: {
+        Row: {
+          id: string
+          order_id: string
+          action: string
+          detail: string | null
+          created_at: string
+        }
+        Insert: {
+          id?: string
+          order_id: string
+          action: string
+          detail?: string | null
+          created_at?: string
+        }
+        Update: Record<string, never>
         Relationships: []
       }
       order_items: {

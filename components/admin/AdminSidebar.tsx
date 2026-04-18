@@ -24,23 +24,25 @@ export default function AdminSidebar() {
   }
 
   return (
-    <aside className="w-56 bg-[#5C4A2A] text-white flex flex-col min-h-screen">
-      <div className="px-6 py-6 border-b border-[#8B6F47]">
+    <aside className="w-56 bg-[#1C1C1E] text-white flex flex-col min-h-screen">
+      <div className="px-6 py-6 border-b border-white/10">
         <p className="font-brand text-2xl font-bold tracking-widest">온결</p>
-        <p className="text-xs text-[#D4C9B8] mt-1">관리자</p>
+        <p className="text-xs text-white/40 mt-1 tracking-widest uppercase">Admin</p>
       </div>
-      <nav className="flex-1 py-4">
+      <nav className="flex-1 py-3">
         {NAV.map(({ href, label, icon: Icon }) => {
           const active = pathname === href || (href !== '/admin/dashboard' && pathname.startsWith(href))
           return (
             <Link
               key={href}
               href={href}
-              className={`flex items-center gap-3 px-6 py-3.5 text-sm font-medium transition-colors ${
-                active ? 'bg-[#8B6F47] text-white' : 'text-[#D4C9B8] hover:bg-[#8B6F47] hover:text-white'
+              className={`flex items-center gap-3 px-6 py-3 text-sm font-medium transition-colors ${
+                active
+                  ? 'bg-white/10 text-white'
+                  : 'text-white/50 hover:bg-white/5 hover:text-white/80'
               }`}
             >
-              <Icon size={18} />
+              <Icon size={16} />
               {label}
             </Link>
           )
@@ -48,9 +50,9 @@ export default function AdminSidebar() {
       </nav>
       <button
         onClick={handleLogout}
-        className="flex items-center gap-3 px-6 py-4 text-sm text-[#D4C9B8] hover:text-white hover:bg-[#8B6F47] transition-colors"
+        className="flex items-center gap-3 px-6 py-4 text-sm text-white/40 hover:text-white/70 hover:bg-white/5 transition-colors border-t border-white/10"
       >
-        <LogOut size={18} />
+        <LogOut size={16} />
         로그아웃
       </button>
     </aside>
