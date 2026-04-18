@@ -130,6 +130,7 @@ function CheckoutContent() {
       return
     }
     setLoading(true)
+    let createdOrderId: string | null = null
     try {
       if (userId && saveCustom && !shipping.savedAddressId) {
         const supabase = createClient()
@@ -178,6 +179,7 @@ function CheckoutContent() {
       }
 
       const { orderId, orderNumber } = await res.json()
+      createdOrderId = orderId
 
       const tossPayments = await loadTossPayments(CLIENT_KEY)
       const payment = tossPayments.payment({ customerKey: ANONYMOUS })
@@ -199,6 +201,13 @@ function CheckoutContent() {
       if (isBuyNow) clearBuyNow()
       else clearCart()
     } catch (err) {
+      if (createdOrderId) {
+        fetch('/api/orders/delete-pending', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ orderId: createdOrderId }),
+        })
+      }
       const code = (err as { code?: string })?.code ?? ''
       const msg = err instanceof Error ? err.message : '오류가 발생했습니다.'
       const isCanceled = code === 'PAY_PROCESS_CANCELED' || msg.includes('PAY_PROCESS_CANCELED')
