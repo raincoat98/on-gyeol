@@ -44,6 +44,7 @@ export default function OrdersPage() {
   const [from, setFrom] = useState(threeMonthsAgo)
   const [to, setTo] = useState(today)
   const [keyword, setKeyword] = useState('')
+  const [showCancelled, setShowCancelled] = useState(false)
   const [orders, setOrders] = useState<OrderWithItems[]>([])
   const [loading, setLoading] = useState(false)
 
@@ -76,13 +77,14 @@ export default function OrdersPage() {
   }
 
   const filtered = useMemo(() => {
+    let result = showCancelled ? orders : orders.filter((o) => o.status !== 'cancelled')
     const q = keyword.trim().toLowerCase()
-    if (!q) return orders
-    return orders.filter((order) =>
+    if (!q) return result
+    return result.filter((order) =>
       order.order_number.toLowerCase().includes(q) ||
       order.order_items?.some((item) => item.product_name.toLowerCase().includes(q))
     )
-  }, [orders, keyword])
+  }, [orders, keyword, showCancelled])
 
   return (
     <div className="max-w-2xl mx-auto px-4 py-12">
@@ -141,11 +143,17 @@ export default function OrdersPage() {
         </div>
       </div>
 
-      {/* 결과 카운트 */}
+      {/* 결과 카운트 + 취소 주문 토글 */}
       {!loading && (
-        <p className="text-xs text-ink-muted mb-4">
-          {filtered.length}건
-        </p>
+        <div className="flex items-center justify-between mb-4">
+          <p className="text-xs text-ink-muted">{filtered.length}건</p>
+          <button
+            onClick={() => setShowCancelled((v) => !v)}
+            className={`text-xs px-3 py-1.5 border transition ${showCancelled ? 'border-ink text-ink' : 'border-line text-ink-muted hover:border-ink hover:text-ink'}`}
+          >
+            {showCancelled ? '취소 주문 숨기기' : '취소 주문 포함'}
+          </button>
+        </div>
       )}
 
       {/* 결과 */}

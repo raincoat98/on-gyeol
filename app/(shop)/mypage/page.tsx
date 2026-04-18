@@ -34,6 +34,7 @@ export default async function MyPage() {
       .from('orders')
       .select('*, order_items(*)')
       .eq('user_id', user.id)
+      .neq('status', 'cancelled')
       .order('created_at', { ascending: false })
       .limit(10),
     supabase
