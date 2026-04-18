@@ -25,8 +25,7 @@ export default function CancelOrderButton({ orderId }: { orderId: string }) {
       setError(data.error ?? '취소에 실패했습니다.')
       return
     }
-    setOpen(false)
-    router.refresh()
+    router.push('/mypage/orders')
   }
 
   return (
