@@ -95,17 +95,22 @@ function CheckoutContent() {
     }
     setLoading(true)
     try {
-      // 배송지 저장 (로그인 + 체크한 경우)
+      // 배송지 저장 (로그인 + 체크한 경우, 동일 주소 미존재 시)
       if (userId && saveAddress) {
         const supabase = createClient()
-        await supabase.from('addresses').insert({
-          user_id: userId,
-          label: '최근 배송지',
-          recipient_name: name,
-          phone,
-          address,
-          is_default: addresses.length === 0,
-        })
+        const duplicate = addresses.some(
+          (a) => a.recipient_name === name && a.phone === phone && a.address === address
+        )
+        if (!duplicate) {
+          await supabase.from('addresses').insert({
+            user_id: userId,
+            label: '최근 배송지',
+            recipient_name: name,
+            phone,
+            address,
+            is_default: addresses.length === 0,
+          })
+        }
       }
 
       const res = await fetch('/api/orders/create', {
