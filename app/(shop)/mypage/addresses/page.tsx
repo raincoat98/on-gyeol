@@ -82,7 +82,7 @@ export default function AddressesPage() {
     setError('')
   }
 
-  async function handleSave(e: React.FormEvent) {
+  async function handleSave(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault()
     if (!userId) return
     setError('')
