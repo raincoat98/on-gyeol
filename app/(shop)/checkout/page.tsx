@@ -246,7 +246,7 @@ function CheckoutContent() {
                     {[item.color, item.size].filter(Boolean).join(' / ')} · {item.quantity}개
                   </p>
                 </div>
-                <span className="text-sm font-semibold text-ink shrink-0 shrink-0">
+                <span className="text-sm font-semibold text-ink shrink-0">
                   {(item.price * item.quantity).toLocaleString()}원
                 </span>
               </div>
