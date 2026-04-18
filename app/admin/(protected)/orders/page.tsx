@@ -3,6 +3,8 @@ import OrderStatusSelect from '@/components/admin/OrderStatusSelect'
 import OrderDeliveryEditor from '@/components/admin/OrderDeliveryEditor'
 import DeleteOrderButton from '@/components/admin/DeleteOrderButton'
 
+export const dynamic = 'force-dynamic'
+
 const STATUS_LABELS = {
   pending: '결제대기',
   paid: '결제완료',
