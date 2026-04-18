@@ -3,7 +3,7 @@
 import { useState, useEffect, useCallback } from 'react'
 import { useRouter } from 'next/navigation'
 import Link from 'next/link'
-import { Plus, Trash2, Star } from 'lucide-react'
+import { Plus, Trash2, Star, Pencil } from 'lucide-react'
 import { createClient } from '@/lib/supabase/client'
 import { useAuthStore } from '@/lib/store/auth'
 import type { Address } from '@/types'
@@ -35,6 +35,7 @@ export default function AddressesPage() {
   const [addresses, setAddresses] = useState<Address[]>([])
   const [loading, setLoading] = useState(true)
   const [showForm, setShowForm] = useState(false)
+  const [editingId, setEditingId] = useState<string | null>(null)
   const [form, setForm] = useState<FormState>(EMPTY_FORM)
   const [saving, setSaving] = useState(false)
   const [error, setError] = useState('')
@@ -55,34 +56,66 @@ export default function AddressesPage() {
     loadAddresses(userId).then(() => setLoading(false))
   }, [hydrated, userId, router, loadAddresses])
 
+  function openAdd() {
+    setEditingId(null)
+    setForm(EMPTY_FORM)
+    setError('')
+    setShowForm(true)
+  }
+
+  function openEdit(addr: Address) {
+    setEditingId(addr.id)
+    setForm({
+      label: addr.label,
+      recipient_name: addr.recipient_name,
+      phone: addr.phone,
+      address: addr.address,
+      is_default: addr.is_default,
+    })
+    setError('')
+    setShowForm(true)
+  }
+
+  function closeForm() {
+    setShowForm(false)
+    setEditingId(null)
+    setError('')
+  }
+
   async function handleSave(e: React.FormEvent) {
     e.preventDefault()
     if (!userId) return
     setError('')
     setSaving(true)
 
-    // 기본 배송지로 설정 시 기존 기본 해제
     if (form.is_default) {
       await supabase.from('addresses').update({ is_default: false }).eq('user_id', userId)
     }
 
-    const { error: insertError } = await supabase.from('addresses').insert({
-      user_id: userId,
-      label: form.label,
-      recipient_name: form.recipient_name,
-      phone: form.phone,
-      address: form.address,
-      is_default: form.is_default,
-    })
-
-    setSaving(false)
-    if (insertError) {
-      setError('저장에 실패했습니다.')
-      return
+    if (editingId) {
+      const { error: updateError } = await supabase.from('addresses').update({
+        label: form.label,
+        recipient_name: form.recipient_name,
+        phone: form.phone,
+        address: form.address,
+        is_default: form.is_default,
+      }).eq('id', editingId)
+      setSaving(false)
+      if (updateError) { setError('수정에 실패했습니다.'); return }
+    } else {
+      const { error: insertError } = await supabase.from('addresses').insert({
+        user_id: userId,
+        label: form.label,
+        recipient_name: form.recipient_name,
+        phone: form.phone,
+        address: form.address,
+        is_default: form.is_default,
+      })
+      setSaving(false)
+      if (insertError) { setError('저장에 실패했습니다.'); return }
     }
 
-    setForm(EMPTY_FORM)
-    setShowForm(false)
+    closeForm()
     await loadAddresses(userId)
   }
 
@@ -115,7 +148,7 @@ export default function AddressesPage() {
       <div className="flex items-center justify-between mb-6">
         <h1 className="font-brand text-2xl font-bold text-ink">배송지 관리</h1>
         <button
-          onClick={() => { setShowForm(true); setForm(EMPTY_FORM) }}
+          onClick={openAdd}
           className="flex items-center gap-1.5 text-sm text-white bg-surface-dark px-4 py-2 rounded-full hover:bg-surface-hover transition"
         >
           <Plus size={14} />
@@ -123,14 +156,10 @@ export default function AddressesPage() {
         </button>
       </div>
 
-      {/* 주소 목록 */}
       {addresses.length === 0 && !showForm && (
         <div className="text-center py-12 text-ink-muted border border-line rounded-xl">
           <p className="mb-2">저장된 배송지가 없습니다.</p>
-          <button
-            onClick={() => setShowForm(true)}
-            className="text-sm text-ink underline"
-          >
+          <button onClick={openAdd} className="text-sm text-ink underline">
             배송지 추가하기
           </button>
         </div>
@@ -157,6 +186,13 @@ export default function AddressesPage() {
               </div>
               <div className="flex items-center gap-2 ml-3">
                 <button
+                  onClick={() => openEdit(addr)}
+                  title="수정"
+                  className="text-ink-faint hover:text-ink transition"
+                >
+                  <Pencil size={15} />
+                </button>
+                <button
                   onClick={() => addr.is_default ? handleUnsetDefault(addr.id) : handleSetDefault(addr.id)}
                   title={addr.is_default ? '기본 배송지 해제' : '기본 배송지로 설정'}
                   className={`transition ${addr.is_default ? 'text-ink hover:text-ink-muted' : 'text-ink-faint hover:text-ink'}`}
@@ -175,12 +211,10 @@ export default function AddressesPage() {
         ))}
       </div>
 
-      {/* 추가 폼 */}
       {showForm && (
         <form onSubmit={handleSave} className="bg-white border border-line rounded-xl p-5 flex flex-col gap-3">
-          <h2 className="font-semibold text-ink mb-1">새 배송지</h2>
+          <h2 className="font-semibold text-ink mb-1">{editingId ? '배송지 수정' : '새 배송지'}</h2>
 
-          {/* 라벨 */}
           <div className="flex gap-2">
             {LABELS.map((l) => (
               <button
@@ -237,7 +271,7 @@ export default function AddressesPage() {
           <div className="flex gap-3 mt-1">
             <button
               type="button"
-              onClick={() => { setShowForm(false); setError('') }}
+              onClick={closeForm}
               className="flex-1 border border-line bg-white text-ink-sub font-medium py-3 rounded-xl text-sm hover:bg-surface transition"
             >
               취소
@@ -247,7 +281,7 @@ export default function AddressesPage() {
               disabled={saving}
               className="flex-1 bg-surface-dark text-white font-bold py-3 rounded-xl text-sm hover:bg-surface-hover transition disabled:opacity-60"
             >
-              {saving ? '저장 중...' : '저장'}
+              {saving ? '저장 중...' : editingId ? '수정 완료' : '저장'}
             </button>
           </div>
         </form>
