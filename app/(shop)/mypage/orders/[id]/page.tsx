@@ -3,6 +3,7 @@ import Link from 'next/link'
 import Image from 'next/image'
 import { createClient } from '@/lib/supabase/server'
 import type { OrderWithItems } from '@/types'
+import CancelOrderButton from '@/components/shop/CancelOrderButton'
 
 const STATUS_LABEL: Record<string, string> = {
   pending: '결제 대기',
@@ -163,6 +164,11 @@ export default async function OrderDetailPage({
           <p className="text-xs tracking-widest text-ink-muted uppercase mb-3">결제 방법</p>
           <p className="text-sm text-ink-sub border-t border-b border-line py-4">{o.payment_method}</p>
         </section>
+      )}
+
+      {/* 주문 취소 */}
+      {(o.status === 'pending' || o.status === 'paid') && (
+        <CancelOrderButton orderId={o.id} />
       )}
     </div>
   )
