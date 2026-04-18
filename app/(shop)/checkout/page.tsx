@@ -164,11 +164,14 @@ function CheckoutContent() {
       if (isBuyNow) clearBuyNow()
       else clearCart()
     } catch (err) {
+      const code = (err as { code?: string })?.code ?? ''
       const msg = err instanceof Error ? err.message : '오류가 발생했습니다.'
-      if (msg.includes('PAY_PROCESS_CANCELED')) {
-        setName('')
-        setPhone('')
-        setAddress('')
+      const isCanceled = code === 'PAY_PROCESS_CANCELED' || msg.includes('PAY_PROCESS_CANCELED')
+      if (isCanceled) {
+        const def = addresses.find((a) => a.is_default) ?? addresses[0]
+        setName(def?.recipient_name ?? '')
+        setPhone(def?.phone ?? '')
+        setAddress(def?.address ?? '')
         setMemo('')
         setSaveAddress(false)
       } else {
