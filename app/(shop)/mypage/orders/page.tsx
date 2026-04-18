@@ -1,7 +1,8 @@
 'use client'
 
-import { useState, useEffect, useCallback } from 'react'
+import { useState, useEffect, useCallback, useMemo } from 'react'
 import Link from 'next/link'
+import { Search } from 'lucide-react'
 import { createClient } from '@/lib/supabase/client'
 import { useAuthStore } from '@/lib/store/auth'
 import { useRouter } from 'next/navigation'
@@ -42,6 +43,7 @@ export default function OrdersPage() {
 
   const [from, setFrom] = useState(threeMonthsAgo)
   const [to, setTo] = useState(today)
+  const [keyword, setKeyword] = useState('')
   const [orders, setOrders] = useState<OrderWithItems[]>([])
   const [loading, setLoading] = useState(false)
 
@@ -73,6 +75,15 @@ export default function OrdersPage() {
     setTo(today)
   }
 
+  const filtered = useMemo(() => {
+    const q = keyword.trim().toLowerCase()
+    if (!q) return orders
+    return orders.filter((order) =>
+      order.order_number.toLowerCase().includes(q) ||
+      order.order_items?.some((item) => item.product_name.toLowerCase().includes(q))
+    )
+  }, [orders, keyword])
+
   return (
     <div className="max-w-2xl mx-auto px-4 py-12">
       <Link href="/mypage" className="text-xs text-ink-muted hover:text-ink mb-8 inline-block tracking-widest uppercase">
@@ -84,9 +95,22 @@ export default function OrdersPage() {
         <h1 className="text-xl font-semibold text-ink">주문 내역</h1>
       </div>
 
-      {/* 날짜 검색 */}
-      <div className="border-t border-b border-line py-4 mb-6">
-        <div className="flex items-center gap-2 mb-3">
+      {/* 검색 필터 */}
+      <div className="border-t border-b border-line py-4 mb-6 flex flex-col gap-3">
+        {/* 키워드 */}
+        <div className="relative">
+          <Search size={15} className="absolute left-3 top-1/2 -translate-y-1/2 text-ink-muted" />
+          <input
+            type="text"
+            value={keyword}
+            onChange={(e) => setKeyword(e.target.value)}
+            placeholder="주문번호 또는 상품명 검색"
+            className="w-full border border-line pl-9 pr-4 py-2.5 text-sm text-ink bg-white focus:outline-none focus:border-ink"
+          />
+        </div>
+
+        {/* 날짜 */}
+        <div className="flex items-center gap-2 flex-wrap">
           {QUICK_RANGES.map(({ label, months }) => (
             <button
               key={label}
@@ -96,35 +120,42 @@ export default function OrdersPage() {
               {label}
             </button>
           ))}
-        </div>
-        <div className="flex items-center gap-2">
-          <input
-            type="date"
-            value={from}
-            max={to}
-            onChange={(e) => setFrom(e.target.value)}
-            className="border border-line px-3 py-2 text-sm text-ink bg-white focus:outline-none focus:border-ink"
-          />
-          <span className="text-ink-muted text-sm">–</span>
-          <input
-            type="date"
-            value={to}
-            min={from}
-            max={today}
-            onChange={(e) => setTo(e.target.value)}
-            className="border border-line px-3 py-2 text-sm text-ink bg-white focus:outline-none focus:border-ink"
-          />
+          <div className="flex items-center gap-2 ml-auto">
+            <input
+              type="date"
+              value={from}
+              max={to}
+              onChange={(e) => setFrom(e.target.value)}
+              className="border border-line px-3 py-1.5 text-sm text-ink bg-white focus:outline-none focus:border-ink"
+            />
+            <span className="text-ink-muted text-sm">–</span>
+            <input
+              type="date"
+              value={to}
+              min={from}
+              max={today}
+              onChange={(e) => setTo(e.target.value)}
+              className="border border-line px-3 py-1.5 text-sm text-ink bg-white focus:outline-none focus:border-ink"
+            />
+          </div>
         </div>
       </div>
+
+      {/* 결과 카운트 */}
+      {!loading && (
+        <p className="text-xs text-ink-muted mb-4">
+          {filtered.length}건
+        </p>
+      )}
 
       {/* 결과 */}
       {loading ? (
         <p className="text-sm text-ink-muted text-center py-16">불러오는 중...</p>
-      ) : orders.length === 0 ? (
-        <p className="text-sm text-ink-muted text-center py-16">해당 기간에 주문 내역이 없습니다.</p>
+      ) : filtered.length === 0 ? (
+        <p className="text-sm text-ink-muted text-center py-16">검색 결과가 없습니다.</p>
       ) : (
         <div className="flex flex-col divide-y divide-line">
-          {orders.map((order) => (
+          {filtered.map((order) => (
             <div key={order.id} className="py-5">
               <div className="flex items-center justify-between mb-2">
                 <div className="flex items-center gap-2">
@@ -141,16 +172,14 @@ export default function OrdersPage() {
               </div>
               <div className="flex flex-col gap-1 mb-2">
                 {order.order_items?.map((item) => (
-                  <div key={item.id} className="flex justify-between text-sm">
-                    <span className="text-ink">
-                      {item.product_name}
-                      {(item.option_color || item.option_size) && (
-                        <span className="text-ink-muted text-xs ml-1.5">
-                          {[item.option_color, item.option_size].filter(Boolean).join(' / ')}
-                        </span>
-                      )}
-                      <span className="text-ink-muted text-xs ml-1.5">×{item.quantity}</span>
-                    </span>
+                  <div key={item.id} className="text-sm text-ink">
+                    {item.product_name}
+                    {(item.option_color || item.option_size) && (
+                      <span className="text-ink-muted text-xs ml-1.5">
+                        {[item.option_color, item.option_size].filter(Boolean).join(' / ')}
+                      </span>
+                    )}
+                    <span className="text-ink-muted text-xs ml-1.5">×{item.quantity}</span>
                   </div>
                 ))}
               </div>
