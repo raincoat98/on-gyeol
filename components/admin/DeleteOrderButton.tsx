@@ -1,11 +1,9 @@
 'use client'
 
 import { useState } from 'react'
-import { useRouter } from 'next/navigation'
-import { createClient } from '@/lib/supabase/client'
+import { deleteOrder } from '@/app/admin/(protected)/orders/actions'
 
 export default function DeleteOrderButton({ orderId }: { orderId: string }) {
-  const router = useRouter()
   const [open, setOpen] = useState(false)
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState('')
@@ -13,12 +11,13 @@ export default function DeleteOrderButton({ orderId }: { orderId: string }) {
   async function handleDelete() {
     setLoading(true)
     setError('')
-    const supabase = createClient()
-    const { error: dbError } = await supabase.from('orders').delete().eq('id', orderId)
-    setLoading(false)
-    if (dbError) { setError('삭제에 실패했습니다.'); return }
-    setOpen(false)
-    router.refresh()
+    try {
+      await deleteOrder(orderId)
+      setOpen(false)
+    } catch {
+      setError('삭제에 실패했습니다.')
+      setLoading(false)
+    }
   }
 
   return (
