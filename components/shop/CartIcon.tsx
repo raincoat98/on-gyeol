@@ -3,15 +3,15 @@
 import Link from 'next/link'
 import { ShoppingBag } from 'lucide-react'
 import { useCartStore } from '@/lib/store/cart'
-import { useEffect, useState } from 'react'
+import { useSyncExternalStore } from 'react'
 
 export default function CartIcon() {
-  const totalCount = useCartStore((s) => s.totalCount)
-  // Avoid hydration mismatch — render count only on client
-  const [count, setCount] = useState(0)
-  useEffect(() => {
-    setCount(totalCount())
-  })
+  // useSyncExternalStore: 세 번째 인자(server snapshot)가 0이므로 SSR/hydration mismatch 없음
+  const count = useSyncExternalStore(
+    useCartStore.subscribe,
+    () => useCartStore.getState().items.reduce((sum, i) => sum + i.quantity, 0),
+    () => 0,
+  )
 
   return (
     <Link href="/cart" className="relative text-[#5C4A2A] hover:text-[#8B6F47]">

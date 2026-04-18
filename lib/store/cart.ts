@@ -22,6 +22,10 @@ type CartStore = {
   clearCart: () => void
   totalCount: () => number
   totalAmount: () => number
+  // 바로 구매 — 장바구니와 별개
+  buyNowItem: CartItem | null
+  setBuyNow: (item: Omit<CartItem, 'quantity'>) => void
+  clearBuyNow: () => void
 }
 
 export const useCartStore = create<CartStore>()(
@@ -70,6 +74,10 @@ export const useCartStore = create<CartStore>()(
       totalCount: () => get().items.reduce((sum, i) => sum + i.quantity, 0),
 
       totalAmount: () => get().items.reduce((sum, i) => sum + i.price * i.quantity, 0),
+
+      buyNowItem: null,
+      setBuyNow: (item) => set({ buyNowItem: { ...item, quantity: 1 } }),
+      clearBuyNow: () => set({ buyNowItem: null }),
     }),
     { name: 'ongyeol-cart' }
   )

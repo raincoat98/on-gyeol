@@ -1,12 +1,13 @@
 'use client'
 
 import { useEffect, useState } from 'react'
-import { useRouter } from 'next/navigation'
+import { useRouter, useSearchParams } from 'next/navigation'
 import Link from 'next/link'
 import Image from 'next/image'
 import { loadTossPayments, ANONYMOUS } from '@tosspayments/tosspayments-sdk'
 import { createClient } from '@/lib/supabase/client'
 import { useCartStore } from '@/lib/store/cart'
+import type { CartItem } from '@/lib/store/cart'
 import type { Address } from '@/types'
 
 const DELIVERY_FEE = 3000
@@ -15,7 +16,10 @@ const CLIENT_KEY = process.env.NEXT_PUBLIC_TOSS_CLIENT_KEY ?? 'test_ck_D5GePWvyJ
 
 export default function CheckoutPage() {
   const router = useRouter()
-  const { items, totalAmount, clearCart } = useCartStore()
+  const searchParams = useSearchParams()
+  const isBuyNow = searchParams.get('mode') === 'buynow'
+  const { items: cartItems, clearCart, buyNowItem, clearBuyNow } = useCartStore()
+  const items: CartItem[] = isBuyNow ? (buyNowItem ? [buyNowItem] : []) : cartItems
 
   const [hydrated, setHydrated] = useState(false)
   const [userId, setUserId] = useState<string | null>(null)
@@ -65,7 +69,7 @@ export default function CheckoutPage() {
     )
   }
 
-  const subtotal = totalAmount()
+  const subtotal = items.reduce((sum, i) => sum + i.price * i.quantity, 0)
   const deliveryFee = subtotal >= FREE_DELIVERY_THRESHOLD ? 0 : DELIVERY_FEE
   const total = subtotal + deliveryFee
 
@@ -145,7 +149,8 @@ export default function CheckoutPage() {
         customerMobilePhone: phone.replace(/-/g, ''),
       })
 
-      clearCart()
+      if (isBuyNow) clearBuyNow()
+      else clearCart()
     } catch (err) {
       const msg = err instanceof Error ? err.message : '오류가 발생했습니다.'
       if (!msg.includes('PAY_PROCESS_CANCELED')) {

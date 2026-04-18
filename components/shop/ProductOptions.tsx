@@ -22,6 +22,7 @@ type Props = {
 export default function ProductOptions({ product, imageUrl, options }: Props) {
   const router = useRouter()
   const addItem = useCartStore((s) => s.addItem)
+  const setBuyNow = useCartStore((s) => s.setBuyNow)
 
   const colors = [...new Set(options.map((o) => o.color).filter(Boolean))] as string[]
   const sizes = [...new Set(options.map((o) => o.size).filter(Boolean))] as string[]
@@ -58,8 +59,8 @@ export default function ProductOptions({ product, imageUrl, options }: Props) {
   }
 
   function handleBuyNow() {
-    addItem(buildCartItem())
-    router.push('/checkout')
+    setBuyNow(buildCartItem())
+    router.push('/checkout?mode=buynow')
   }
 
   return (
