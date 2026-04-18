@@ -34,10 +34,10 @@ async function getNewProducts(): Promise<ProductWithImages[]> {
 }
 
 const CATEGORIES = [
-  { name: '상의', slug: 'tops', emoji: '👚' },
-  { name: '하의', slug: 'bottoms', emoji: '👖' },
-  { name: '원피스', slug: 'onepiece', emoji: '👗' },
-  { name: '아우터', slug: 'outer', emoji: '🧥' },
+  { name: '상의', slug: 'tops', en: 'Tops' },
+  { name: '하의', slug: 'bottoms', en: 'Bottoms' },
+  { name: '원피스', slug: 'onepiece', en: 'One-piece' },
+  { name: '아우터', slug: 'outer', en: 'Outer' },
 ]
 
 export default async function HomePage() {
@@ -87,9 +87,9 @@ export default async function HomePage() {
             <Link
               key={cat.slug}
               href={`/category/${cat.slug}`}
-              className="flex flex-col items-center gap-2 bg-white border border-line rounded-xl py-5 hover:border-ink-sub hover:bg-surface transition-colors"
+              className="group flex flex-col items-center gap-1.5 bg-white border border-line py-6 hover:border-ink transition-colors"
             >
-              <span className="text-2xl">{cat.emoji}</span>
+              <span className="text-xs tracking-widest text-ink-muted uppercase group-hover:text-ink transition-colors">{cat.en}</span>
               <span className="text-sm font-medium text-ink">{cat.name}</span>
             </Link>
           ))}
