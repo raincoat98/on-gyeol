@@ -165,7 +165,13 @@ function CheckoutContent() {
       else clearCart()
     } catch (err) {
       const msg = err instanceof Error ? err.message : '오류가 발생했습니다.'
-      if (!msg.includes('PAY_PROCESS_CANCELED')) {
+      if (msg.includes('PAY_PROCESS_CANCELED')) {
+        setName('')
+        setPhone('')
+        setAddress('')
+        setMemo('')
+        setSaveAddress(false)
+      } else {
         setError(msg)
       }
       setLoading(false)
