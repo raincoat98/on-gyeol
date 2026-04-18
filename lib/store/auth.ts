@@ -30,8 +30,8 @@ export const useAuthStore = create<AuthStore>()((set) => ({
         hydrated: true,
       })
       if (userId) {
-        supabase.from('profiles').select('full_name').eq('id', userId).single()
-          .then(({ data }) => set({ fullName: data?.full_name ?? null }))
+        supabase.from('profiles').select('full_name').eq('id', userId).limit(1)
+          .then(({ data }) => set({ fullName: data?.[0]?.full_name ?? null }))
       }
     })
     return () => subscription.unsubscribe()

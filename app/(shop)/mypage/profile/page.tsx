@@ -22,10 +22,11 @@ export default function ProfilePage() {
     if (!hydrated) return
     if (!userId) { router.push('/auth/login?next=/mypage/profile'); return }
     const supabase = createClient()
-    supabase.from('profiles').select('full_name, phone').eq('id', userId).maybeSingle().then(({ data }) => {
-      if (data) {
-        setName(data.full_name ?? '')
-        setPhone(data.phone ?? '')
+    supabase.from('profiles').select('full_name, phone').eq('id', userId).limit(1).then(({ data }) => {
+      const row = data?.[0]
+      if (row) {
+        setName(row.full_name ?? '')
+        setPhone(row.phone ?? '')
       }
       setLoading(false)
     })
@@ -39,7 +40,8 @@ export default function ProfilePage() {
     const supabase = createClient()
     const { error } = await supabase
       .from('profiles')
-      .upsert({ id: userId, full_name: name, phone })
+      .update({ full_name: name, phone })
+      .eq('id', userId)
     setSaving(false)
     if (error) console.error('profile upsert error:', error)
     if (!error) setFullName(name)
