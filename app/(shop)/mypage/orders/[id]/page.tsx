@@ -4,6 +4,7 @@ import Image from 'next/image'
 import { createClient } from '@/lib/supabase/server'
 import type { OrderWithItems } from '@/types'
 import CancelOrderButton from '@/components/shop/CancelOrderButton'
+import EditShippingButton from '@/components/shop/EditShippingButton'
 
 const STATUS_LABEL: Record<string, string> = {
   pending: '결제 대기',
@@ -149,7 +150,20 @@ export default async function OrderDetailPage({
 
       {/* 배송지 */}
       <section className="mb-6">
-        <p className="text-xs tracking-widest text-ink-muted uppercase mb-3">배송지</p>
+        <div className="flex items-center justify-between mb-3">
+          <p className="text-xs tracking-widest text-ink-muted uppercase">배송지</p>
+          {(o.status === 'pending' || o.status === 'paid') && (
+            <EditShippingButton
+              orderId={o.id}
+              current={{
+                name: o.customer_name,
+                phone: o.customer_phone,
+                address: o.customer_address,
+                memo: o.customer_memo,
+              }}
+            />
+          )}
+        </div>
         <div className="text-sm text-ink-sub border-t border-b border-line py-4 flex flex-col gap-1">
           <p className="font-medium text-ink">{o.customer_name}</p>
           <p>{o.customer_phone}</p>
