@@ -138,7 +138,9 @@ export default async function MyPage() {
                       {new Date(order.created_at).toLocaleDateString('ko-KR')}
                     </span>
                   </div>
-                  <span className="text-[11px] text-ink-faint">#{order.order_number}</span>
+                  <Link href={`/mypage/orders/${order.id}`} className="text-[11px] text-ink-muted hover:text-ink transition">
+                    #{order.order_number} →
+                  </Link>
                 </div>
                 <div className="flex flex-col gap-2 mb-3">
                   {order.order_items?.map((item) => (
