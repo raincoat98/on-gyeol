@@ -2,7 +2,7 @@
 
 import Link from 'next/link'
 import { usePathname, useRouter } from 'next/navigation'
-import { Package, PlusCircle, MessageSquare, LayoutDashboard, LogOut, ShoppingCart, Star } from 'lucide-react'
+import { Package, PlusCircle, MessageSquare, LayoutDashboard, LogOut, ShoppingCart, Star, ExternalLink } from 'lucide-react'
 import { createClient } from '@/lib/supabase/client'
 
 const NAV = [
@@ -49,6 +49,14 @@ export default function AdminSidebar() {
           )
         })}
       </nav>
+      <Link
+        href="/"
+        target="_blank"
+        className="flex items-center gap-3 px-6 py-3 text-sm text-white/40 hover:text-white/70 hover:bg-white/5 transition-colors border-t border-white/10"
+      >
+        <ExternalLink size={16} />
+        쇼핑몰 보기
+      </Link>
       <button
         onClick={handleLogout}
         className="flex items-center gap-3 px-6 py-4 text-sm text-white/40 hover:text-white/70 hover:bg-white/5 transition-colors border-t border-white/10"
