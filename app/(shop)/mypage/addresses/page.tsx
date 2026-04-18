@@ -99,6 +99,12 @@ export default function AddressesPage() {
     await loadAddresses(userId)
   }
 
+  async function handleUnsetDefault(id: string) {
+    if (!userId) return
+    await supabase.from('addresses').update({ is_default: false }).eq('id', id)
+    await loadAddresses(userId)
+  }
+
   if (loading) return null
 
   return (
@@ -150,15 +156,13 @@ export default function AddressesPage() {
                 <p className="text-sm text-ink-sub">{addr.address}</p>
               </div>
               <div className="flex items-center gap-2 ml-3">
-                {!addr.is_default && (
-                  <button
-                    onClick={() => handleSetDefault(addr.id)}
-                    title="기본 배송지로 설정"
-                    className="text-ink-faint hover:text-ink transition"
-                  >
-                    <Star size={16} />
-                  </button>
-                )}
+                <button
+                  onClick={() => addr.is_default ? handleUnsetDefault(addr.id) : handleSetDefault(addr.id)}
+                  title={addr.is_default ? '기본 배송지 해제' : '기본 배송지로 설정'}
+                  className={`transition ${addr.is_default ? 'text-ink hover:text-ink-muted' : 'text-ink-faint hover:text-ink'}`}
+                >
+                  <Star size={16} fill={addr.is_default ? 'currentColor' : 'none'} />
+                </button>
                 <button
                   onClick={() => handleDelete(addr.id)}
                   className="text-ink-faint hover:text-red-400 transition"
