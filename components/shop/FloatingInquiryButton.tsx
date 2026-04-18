@@ -4,7 +4,7 @@ import { Phone, MessageCircle } from 'lucide-react'
 
 export default function FloatingInquiryButton() {
   return (
-    <div className="fixed bottom-6 right-4 z-50 flex flex-col gap-3">
+    <div className="hidden md:flex fixed bottom-6 right-4 z-50 flex-col gap-3">
       {/* 카카오 문의 */}
       <a
         href="https://pf.kakao.com/_your_kakao_id"
