@@ -1,8 +1,9 @@
 'use client'
 
 import Link from 'next/link'
-import { useState } from 'react'
-import { Menu, X, Search, Phone } from 'lucide-react'
+import { useState, useEffect } from 'react'
+import { usePathname } from 'next/navigation'
+import { Menu, X, Search } from 'lucide-react'
 import CartIcon from '@/components/shop/CartIcon'
 import UserMenu from '@/components/shop/UserMenu'
 
@@ -17,22 +18,38 @@ const CATEGORIES = [
 
 export default function Header() {
   const [menuOpen, setMenuOpen] = useState(false)
+  const [scrolled, setScrolled] = useState(false)
+  const pathname = usePathname()
+  const isHome = pathname === '/'
+
+  useEffect(() => {
+    const onScroll = () => setScrolled(window.scrollY > 10)
+    window.addEventListener('scroll', onScroll, { passive: true })
+    return () => window.removeEventListener('scroll', onScroll)
+  }, [])
+
+  const transparent = isHome && !scrolled && !menuOpen
+  const textColor = transparent ? 'text-white' : 'text-[#5C4A2A]'
 
   return (
-    <header className="sticky top-0 z-40 bg-[#FAF8F4] border-b border-[#E8DFD0]">
+    <header className={`sticky top-0 z-40 transition-all duration-300 ${
+      transparent
+        ? 'bg-transparent border-b border-transparent'
+        : 'bg-white/80 backdrop-blur-md border-b border-[#E8DFD0]/60'
+    }`}>
       <div className="max-w-5xl mx-auto px-4 h-16 flex items-center justify-between">
         {/* 로고 */}
-        <Link href="/" className="font-brand text-2xl font-bold text-[#5C4A2A] tracking-widest">
+        <Link href="/" className={`font-brand text-2xl font-bold tracking-widest transition-colors duration-300 ${textColor}`}>
           온결
         </Link>
 
         {/* 데스크탑 네비게이션 */}
-        <nav className="hidden md:flex gap-6 text-sm font-medium text-[#5C4A2A]">
+        <nav className="hidden md:flex gap-6 text-sm font-medium">
           {CATEGORIES.map((cat) => (
             <Link
               key={cat.slug}
               href={`/category/${cat.slug}`}
-              className="hover:text-[#8B6F47] transition-colors"
+              className={`transition-colors duration-300 hover:opacity-70 ${textColor}`}
             >
               {cat.name}
             </Link>
@@ -40,18 +57,15 @@ export default function Header() {
         </nav>
 
         {/* 아이콘 */}
-        <div className="flex items-center gap-4">
-          <Link href="/search" className="text-[#5C4A2A] hover:text-[#8B6F47]">
+        <div className={`flex items-center gap-4 transition-colors duration-300 ${textColor}`}>
+          <Link href="/search" className={`flex items-center hover:opacity-70 transition-opacity ${textColor}`}>
             <Search size={22} />
           </Link>
-          <CartIcon />
-          <UserMenu />
-          <a href="tel:01000000000" className="hidden md:block text-[#5C4A2A] hover:text-[#8B6F47]">
-            <Phone size={22} />
-          </a>
+          <CartIcon transparent={transparent} />
+          <UserMenu transparent={transparent} />
           {/* 모바일 메뉴 */}
           <button
-            className="md:hidden text-[#5C4A2A]"
+            className={`md:hidden ${textColor}`}
             onClick={() => setMenuOpen(!menuOpen)}
             aria-label="메뉴"
           >
@@ -62,7 +76,7 @@ export default function Header() {
 
       {/* 모바일 드롭다운 메뉴 */}
       {menuOpen && (
-        <div className="md:hidden bg-[#FAF8F4] border-t border-[#E8DFD0] px-4 py-4 flex flex-col gap-4">
+        <div className="md:hidden bg-white/90 backdrop-blur-md border-t border-[#E8DFD0] px-4 py-4 flex flex-col gap-4">
           {CATEGORIES.map((cat) => (
             <Link
               key={cat.slug}
@@ -73,13 +87,6 @@ export default function Header() {
               {cat.name}
             </Link>
           ))}
-          <a
-            href="tel:01000000000"
-            className="flex items-center gap-2 text-[#8B6F47] font-medium mt-2"
-          >
-            <Phone size={18} />
-            전화 문의
-          </a>
         </div>
       )}
     </header>

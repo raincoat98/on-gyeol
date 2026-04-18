@@ -1,5 +1,6 @@
 import type { Metadata } from 'next'
 import Link from 'next/link'
+import Image from 'next/image'
 import { createClient } from '@/lib/supabase/server'
 import ProductCard from '@/components/shop/ProductCard'
 import type { ProductWithImages } from '@/types'
@@ -48,18 +49,35 @@ export default async function HomePage() {
   return (
     <div>
       {/* 히어로 배너 */}
-      <section className="bg-[#E8DFD0] py-16 px-4 text-center">
-        <p className="text-sm text-[#9C9189] mb-2 tracking-widest">ONGYEOL</p>
-        <h1 className="font-brand text-4xl md:text-5xl font-bold text-[#5C4A2A] mb-4">
-          온결
-        </h1>
-        <p className="text-lg text-[#8B6F47] mb-8">마음의 결을 담은 옷</p>
-        <Link
-          href="/products"
-          className="inline-block bg-[#5C4A2A] text-white text-base font-semibold px-8 py-4 rounded-full hover:bg-[#8B6F47] transition-colors"
-        >
-          전체 상품 보기
-        </Link>
+      <section className="relative -mt-16 h-[calc(70vh+4rem)] min-h-[480px] flex items-center justify-center overflow-hidden bg-[#E8DFD0]">
+        <Image
+          src="/hero.jpg"
+          alt="온결 히어로 이미지"
+          fill
+          priority
+          className="object-cover object-center"
+          sizes="100vw"
+        />
+        {/* 오버레이 */}
+        <div className="absolute inset-0 bg-black/45" />
+
+        {/* 텍스트 */}
+        <div className="relative z-10 text-center px-4">
+          <p className="text-xs text-white/70 tracking-[0.4em] mb-4 uppercase">Ongyeol</p>
+          <h1 className="font-brand text-5xl md:text-7xl font-bold text-white mb-5 tracking-widest">
+            온결
+          </h1>
+          <div className="w-12 h-px bg-white/50 mx-auto mb-5" />
+          <p className="text-base md:text-lg text-white/85 mb-10 tracking-wide font-light">
+            마음의 결을 담은 옷
+          </p>
+          <Link
+            href="/products"
+            className="inline-block border border-white text-white text-sm font-medium tracking-widest px-10 py-3.5 hover:bg-white hover:text-[#5C4A2A] transition-colors duration-300"
+          >
+            SHOP NOW
+          </Link>
+        </div>
       </section>
 
       {/* 카테고리 바로가기 */}

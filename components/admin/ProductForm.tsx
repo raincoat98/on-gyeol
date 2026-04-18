@@ -22,18 +22,22 @@ interface ProductFormProps {
     seo_title: string | null
     seo_description: string | null
   }
+  initialImages?: { id: string; image_url: string; is_main: boolean }[]
+  initialOptions?: { id: string; color: string | null; size: string | null; stock_qty: number }[]
 }
 
 interface OptionRow {
   color: string
   size: string
+  stock_qty: string
 }
 
 const SIZES = ['S', 'M', 'L', 'XL', 'XXL', 'FREE']
 
-export default function ProductForm({ categories, initialData }: ProductFormProps) {
+export default function ProductForm({ categories, initialData, initialImages = [], initialOptions = [] }: ProductFormProps) {
   const router = useRouter()
   const fileInputRef = useRef<HTMLInputElement>(null)
+  const isEdit = !!initialData?.id
 
   const [name, setName] = useState(initialData?.name ?? '')
   const [categoryId, setCategoryId] = useState(initialData?.category_id ?? '')
@@ -45,7 +49,12 @@ export default function ProductForm({ categories, initialData }: ProductFormProp
   const [isFeatured, setIsFeatured] = useState(initialData?.is_featured ?? false)
   const [images, setImages] = useState<File[]>([])
   const [previewUrls, setPreviewUrls] = useState<string[]>([])
-  const [options, setOptions] = useState<OptionRow[]>([{ color: '', size: '' }])
+  const [existingImages, setExistingImages] = useState(initialImages)
+  const [options, setOptions] = useState<OptionRow[]>(
+    initialOptions.length > 0
+      ? initialOptions.map((o) => ({ color: o.color ?? '', size: o.size ?? '', stock_qty: String(o.stock_qty) }))
+      : [{ color: '', size: '', stock_qty: '99' } satisfies OptionRow]
+  )
   const [loading, setLoading] = useState(false)
   const [message, setMessage] = useState('')
 
@@ -56,7 +65,7 @@ export default function ProductForm({ categories, initialData }: ProductFormProp
   }
 
   function addOption() {
-    setOptions([...options, { color: '', size: '' }])
+    setOptions([...options, { color: '', size: '', stock_qty: '99' }])
   }
 
   function removeOption(i: number) {
@@ -83,38 +92,68 @@ export default function ProductForm({ categories, initialData }: ProductFormProp
 
     setLoading(true)
     const supabase = createClient()
-    const slug = slugify(name)
 
-    // 상품 등록
-    const { data: product, error: productError } = await supabase
-      .from('products')
-      .insert({
-        name,
-        slug,
-        category_id: categoryId || null,
-        price: Number(price),
-        sale_price: salePrice ? Number(salePrice) : null,
-        short_description: shortDesc || null,
-        description: description || null,
-        status: status as 'active' | 'soldout' | 'hidden',
-        is_featured: isFeatured,
-        seo_title: name,
-        seo_description: shortDesc || null,
-      })
-      .select()
-      .single()
+    let productId: string
 
-    if (productError || !product) {
-      setLoading(false)
-      setMessage('상품 등록 중 오류가 발생했습니다.')
-      return
+    if (isEdit) {
+      // 수정
+      const { error } = await supabase
+        .from('products')
+        .update({
+          name,
+          category_id: categoryId || null,
+          price: Number(price),
+          sale_price: salePrice ? Number(salePrice) : null,
+          short_description: shortDesc || null,
+          description: description || null,
+          status: status as 'active' | 'soldout' | 'hidden',
+          is_featured: isFeatured,
+          seo_title: name,
+          seo_description: shortDesc || null,
+        })
+        .eq('id', initialData!.id)
+
+      if (error) {
+        setLoading(false)
+        setMessage('상품 수정 중 오류가 발생했습니다.')
+        return
+      }
+      productId = initialData!.id
+    } else {
+      // 신규 등록
+      const slug = slugify(name)
+      const { data: product, error: productError } = await supabase
+        .from('products')
+        .insert({
+          name,
+          slug,
+          category_id: categoryId || null,
+          price: Number(price),
+          sale_price: salePrice ? Number(salePrice) : null,
+          short_description: shortDesc || null,
+          description: description || null,
+          status: status as 'active' | 'soldout' | 'hidden',
+          is_featured: isFeatured,
+          seo_title: name,
+          seo_description: shortDesc || null,
+        })
+        .select()
+        .single()
+
+      if (productError || !product) {
+        setLoading(false)
+        setMessage('상품 등록 중 오류가 발생했습니다.')
+        return
+      }
+      productId = product.id
     }
 
-    // 이미지 업로드
+    // 새 이미지 업로드
+    const existingCount = existingImages.length
     for (let i = 0; i < images.length; i++) {
       const file = images[i]
       const ext = file.name.split('.').pop()
-      const path = `products/${product.id}/${Date.now()}-${i}.${ext}`
+      const path = `products/${productId}/${Date.now()}-${i}.${ext}`
       const { data: uploadData } = await supabase.storage
         .from('product-images')
         .upload(path, file)
@@ -125,30 +164,31 @@ export default function ProductForm({ categories, initialData }: ProductFormProp
           .getPublicUrl(path)
 
         await supabase.from('product_images').insert({
-          product_id: product.id,
+          product_id: productId,
           image_url: publicUrl,
-          sort_order: i,
-          is_main: i === 0,
+          sort_order: existingCount + i,
+          is_main: existingCount === 0 && i === 0,
         })
       }
     }
 
-    // 옵션 등록
+    // 옵션: 기존 삭제 후 재등록
+    await supabase.from('product_options').delete().eq('product_id', productId)
     const validOptions = options.filter((o) => o.color || o.size)
     if (validOptions.length > 0) {
       await supabase.from('product_options').insert(
         validOptions.map((o) => ({
-          product_id: product.id,
+          product_id: productId,
           color: o.color || null,
           size: o.size || null,
-          stock_qty: 99,
+          stock_qty: Number(o.stock_qty) || 99,
           status: 'active' as const,
         }))
       )
     }
 
     setLoading(false)
-    setMessage('상품이 온결에 잘 담겼습니다! ✓')
+    setMessage(isEdit ? '수정되었습니다. ✓' : '상품이 온결에 잘 담겼습니다! ✓')
     setTimeout(() => router.push('/admin/products'), 1500)
   }
 
@@ -161,16 +201,34 @@ export default function ProductForm({ categories, initialData }: ProductFormProp
           className="border-2 border-dashed border-[#E8DFD0] rounded-xl p-8 text-center cursor-pointer hover:border-[#8B6F47] transition"
           onClick={() => fileInputRef.current?.click()}
         >
-          {previewUrls.length > 0 ? (
+          {(existingImages.length > 0 || previewUrls.length > 0) ? (
             <div className="flex gap-3 flex-wrap justify-center">
-              {previewUrls.map((url, i) => (
-                <div key={i} className="relative w-24 h-28 rounded-lg overflow-hidden">
-                  <Image src={url} alt="" fill className="object-cover" sizes="96px" />
-                  {i === 0 && (
+              {existingImages.map((img) => (
+                <div key={img.id} className="relative w-24 h-28 rounded-lg overflow-hidden group">
+                  <Image src={img.image_url} alt="" fill className="object-cover" sizes="96px" />
+                  {img.is_main && (
                     <span className="absolute bottom-0 left-0 right-0 bg-[#5C4A2A] text-white text-xs text-center py-0.5">
                       대표
                     </span>
                   )}
+                  <button
+                    type="button"
+                    onClick={async (e) => {
+                      e.stopPropagation()
+                      const supabase = createClient()
+                      await supabase.from('product_images').delete().eq('id', img.id)
+                      setExistingImages((prev) => prev.filter((i) => i.id !== img.id))
+                    }}
+                    className="absolute top-1 right-1 bg-black/50 text-white rounded-full w-5 h-5 text-xs flex items-center justify-center opacity-0 group-hover:opacity-100 transition"
+                  >
+                    ×
+                  </button>
+                </div>
+              ))}
+              {previewUrls.map((url, i) => (
+                <div key={`new-${i}`} className="relative w-24 h-28 rounded-lg overflow-hidden">
+                  <Image src={url} alt="" fill className="object-cover" sizes="96px" />
+                  <span className="absolute bottom-0 left-0 right-0 bg-[#8B6F47] text-white text-xs text-center py-0.5">NEW</span>
                 </div>
               ))}
               <div className="w-24 h-28 border-2 border-dashed border-[#E8DFD0] rounded-lg flex items-center justify-center text-[#9C9189] text-sm">
@@ -271,34 +329,28 @@ export default function ProductForm({ categories, initialData }: ProductFormProp
             <input
               type="text"
               value={opt.color}
-              onChange={(e) => {
-                const next = [...options]
-                next[i].color = e.target.value
-                setOptions(next)
-              }}
+              onChange={(e) => { const next = [...options]; next[i].color = e.target.value; setOptions(next) }}
               placeholder="색상 (예: 아이보리)"
               className="flex-1 border border-[#E8DFD0] rounded-xl px-4 py-3 text-sm focus:outline-none focus:border-[#8B6F47]"
             />
             <select
               value={opt.size}
-              onChange={(e) => {
-                const next = [...options]
-                next[i].size = e.target.value
-                setOptions(next)
-              }}
+              onChange={(e) => { const next = [...options]; next[i].size = e.target.value; setOptions(next) }}
               className="flex-1 border border-[#E8DFD0] rounded-xl px-4 py-3 text-sm focus:outline-none focus:border-[#8B6F47] bg-white"
             >
-              <option value="">사이즈 선택</option>
+              <option value="">사이즈</option>
               {SIZES.map((s) => <option key={s} value={s}>{s}</option>)}
             </select>
+            <input
+              type="number"
+              value={opt.stock_qty}
+              onChange={(e) => { const next = [...options]; next[i].stock_qty = e.target.value; setOptions(next) }}
+              placeholder="재고"
+              min="0"
+              className="w-20 border border-[#E8DFD0] rounded-xl px-3 py-3 text-sm focus:outline-none focus:border-[#8B6F47]"
+            />
             {options.length > 1 && (
-              <button
-                type="button"
-                onClick={() => removeOption(i)}
-                className="text-[#9C9189] hover:text-red-500 text-xl font-bold px-2"
-              >
-                ×
-              </button>
+              <button type="button" onClick={() => removeOption(i)} className="text-[#9C9189] hover:text-red-500 text-xl font-bold px-2">×</button>
             )}
           </div>
         ))}
@@ -371,7 +423,7 @@ export default function ProductForm({ categories, initialData }: ProductFormProp
         disabled={loading}
         className="bg-[#5C4A2A] text-white font-bold py-5 rounded-xl text-lg hover:bg-[#8B6F47] transition disabled:opacity-60"
       >
-        {loading ? '등록 중...' : '상품 등록하기'}
+        {loading ? (isEdit ? '저장 중...' : '등록 중...') : (isEdit ? '저장하기' : '상품 등록하기')}
       </button>
     </form>
   )

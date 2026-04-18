@@ -2,14 +2,14 @@
 
 import Link from 'next/link'
 import { usePathname, useRouter } from 'next/navigation'
-import { Package, PlusCircle, Image, MessageSquare, LayoutDashboard, LogOut } from 'lucide-react'
+import { Package, PlusCircle, MessageSquare, LayoutDashboard, LogOut, ShoppingCart } from 'lucide-react'
 import { createClient } from '@/lib/supabase/client'
 
 const NAV = [
   { href: '/admin/dashboard', label: '대시보드', icon: LayoutDashboard },
   { href: '/admin/products', label: '상품 관리', icon: Package },
   { href: '/admin/products/new', label: '상품 등록', icon: PlusCircle },
-  { href: '/admin/banners', label: '배너 관리', icon: Image },
+  { href: '/admin/orders', label: '주문 관리', icon: ShoppingCart },
   { href: '/admin/inquiries', label: '문의 관리', icon: MessageSquare },
 ]
 

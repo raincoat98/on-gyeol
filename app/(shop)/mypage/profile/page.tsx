@@ -8,7 +8,8 @@ import { useAuthStore } from '@/lib/store/auth'
 
 export default function ProfilePage() {
   const router = useRouter()
-  const { userId, hydrated } = useAuthStore((s) => ({ userId: s.userId, hydrated: s.hydrated }))
+  const userId = useAuthStore((s) => s.userId)
+  const hydrated = useAuthStore((s) => s.hydrated)
 
   const [name, setName] = useState('')
   const [phone, setPhone] = useState('')

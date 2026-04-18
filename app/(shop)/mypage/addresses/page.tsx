@@ -28,7 +28,8 @@ const EMPTY_FORM: FormState = {
 
 export default function AddressesPage() {
   const router = useRouter()
-  const { userId, hydrated } = useAuthStore((s) => ({ userId: s.userId, hydrated: s.hydrated }))
+  const userId = useAuthStore((s) => s.userId)
+  const hydrated = useAuthStore((s) => s.hydrated)
   const supabase = createClient()
 
   const [addresses, setAddresses] = useState<Address[]>([])

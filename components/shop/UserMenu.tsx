@@ -6,7 +6,7 @@ import { useRouter } from 'next/navigation'
 import { User } from 'lucide-react'
 import { useAuthStore } from '@/lib/store/auth'
 
-export default function UserMenu() {
+export default function UserMenu({ transparent = false }: { transparent?: boolean }) {
   const router = useRouter()
   const email = useAuthStore((s) => s.email)
   const signOut = useAuthStore((s) => s.signOut)
@@ -29,19 +29,21 @@ export default function UserMenu() {
     router.refresh()
   }
 
+  const colorClass = transparent ? 'text-white hover:opacity-70' : 'text-[#5C4A2A] hover:text-[#8B6F47]'
+
   if (!email) {
     return (
-      <Link href="/auth/login" className="text-[#5C4A2A] hover:text-[#8B6F47] text-sm font-medium">
+      <Link href="/auth/login" className={`text-sm font-medium transition-colors duration-300 ${colorClass}`}>
         로그인
       </Link>
     )
   }
 
   return (
-    <div ref={ref} className="relative">
+    <div ref={ref} className="relative flex items-center">
       <button
         onClick={() => setOpen((v) => !v)}
-        className="text-[#5C4A2A] hover:text-[#8B6F47]"
+        className={`flex items-center transition-colors duration-300 ${colorClass}`}
         aria-label="내 계정"
       >
         <User size={22} />

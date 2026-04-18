@@ -22,7 +22,8 @@ export default function CheckoutPage() {
   const { items: cartItems, clearCart, buyNowItem, clearBuyNow } = useCartStore()
   const items: CartItem[] = isBuyNow ? (buyNowItem ? [buyNowItem] : []) : cartItems
 
-  const { userId, hydrated } = useAuthStore((s) => ({ userId: s.userId, hydrated: s.hydrated }))
+  const userId = useAuthStore((s) => s.userId)
+  const hydrated = useAuthStore((s) => s.hydrated)
   const [addresses, setAddresses] = useState<Address[]>([])
 
   const [name, setName] = useState('')
