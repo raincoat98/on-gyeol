@@ -4,6 +4,7 @@ import { useEffect, useState, Suspense } from 'react'
 import { useRouter, useSearchParams } from 'next/navigation'
 import Link from 'next/link'
 import Image from 'next/image'
+import { ChevronRight, X } from 'lucide-react'
 import { loadTossPayments, ANONYMOUS } from '@tosspayments/tosspayments-sdk'
 import { createClient } from '@/lib/supabase/client'
 import { useCartStore } from '@/lib/store/cart'
@@ -23,6 +24,13 @@ export default function CheckoutPage() {
   )
 }
 
+type ShippingInfo = {
+  name: string
+  phone: string
+  address: string
+  savedAddressId?: string
+}
+
 function CheckoutContent() {
   const router = useRouter()
   const searchParams = useSearchParams()
@@ -34,11 +42,20 @@ function CheckoutContent() {
   const hydrated = useAuthStore((s) => s.hydrated)
   const [addresses, setAddresses] = useState<Address[]>([])
 
-  const [name, setName] = useState('')
-  const [phone, setPhone] = useState('')
-  const [address, setAddress] = useState('')
+  const [shipping, setShipping] = useState<ShippingInfo>({ name: '', phone: '', address: '' })
   const [memo, setMemo] = useState('')
-  const [saveAddress, setSaveAddress] = useState(false)
+
+  // 주소 모달
+  const [showAddressModal, setShowAddressModal] = useState(false)
+  const [customMode, setCustomMode] = useState(false)
+  const [customName, setCustomName] = useState('')
+  const [customPhone, setCustomPhone] = useState('')
+  const [customAddress, setCustomAddress] = useState('')
+  const [saveCustom, setSaveCustom] = useState(false)
+
+  // 메모 편집
+  const [editingMemo, setEditingMemo] = useState(false)
+  const [memoInput, setMemoInput] = useState('')
 
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState('')
@@ -55,12 +72,9 @@ function CheckoutContent() {
       .then(({ data: addrs }) => {
         const list = addrs ?? []
         setAddresses(list)
-        // 기본 배송지 자동 입력
         const def = list.find((a) => a.is_default) ?? list[0]
         if (def) {
-          setName(def.recipient_name)
-          setPhone(def.phone)
-          setAddress(def.address)
+          setShipping({ name: def.recipient_name, phone: def.phone, address: def.address, savedAddressId: def.id })
         }
       })
   }, [userId])
@@ -80,34 +94,56 @@ function CheckoutContent() {
   const deliveryFee = subtotal >= FREE_DELIVERY_THRESHOLD ? 0 : DELIVERY_FEE
   const total = subtotal + deliveryFee
 
-  function fillAddress(addr: Address) {
-    setName(addr.recipient_name)
-    setPhone(addr.phone)
-    setAddress(addr.address)
+  function openAddressModal() {
+    setCustomMode(false)
+    setCustomName(shipping.name)
+    setCustomPhone(shipping.phone)
+    setCustomAddress(shipping.address)
+    setSaveCustom(false)
+    setShowAddressModal(true)
   }
 
-  async function handleSubmit(e: React.FormEvent) {
-    e.preventDefault()
+  function selectSavedAddress(addr: Address) {
+    setShipping({ name: addr.recipient_name, phone: addr.phone, address: addr.address, savedAddressId: addr.id })
+    setShowAddressModal(false)
+  }
+
+  function confirmCustomAddress() {
+    if (!customName.trim() || !customPhone.trim() || !customAddress.trim()) return
+    setShipping({ name: customName, phone: customPhone, address: customAddress })
+    setShowAddressModal(false)
+  }
+
+  function openMemoEdit() {
+    setMemoInput(memo)
+    setEditingMemo(true)
+  }
+
+  function saveMemo() {
+    setMemo(memoInput)
+    setEditingMemo(false)
+  }
+
+  async function handleSubmit() {
     setError('')
-    if (!name.trim() || !phone.trim() || !address.trim()) {
-      setError('이름, 연락처, 주소를 모두 입력해주세요.')
+    if (!shipping.name.trim() || !shipping.phone.trim() || !shipping.address.trim()) {
+      setError('배송지를 입력해주세요.')
       return
     }
     setLoading(true)
     try {
-      // 배송지 저장 (로그인 + 체크한 경우, 동일 주소 미존재 시)
-      if (userId && saveAddress) {
+      if (userId && saveCustom && !shipping.savedAddressId) {
         const supabase = createClient()
         const duplicate = addresses.some(
-          (a) => a.recipient_name === name && a.phone === phone && a.address === address
+          (a) => a.recipient_name === shipping.name && a.phone === shipping.phone && a.address === shipping.address
         )
         if (!duplicate) {
           await supabase.from('addresses').insert({
             user_id: userId,
             label: '최근 배송지',
-            recipient_name: name,
-            phone,
-            address,
+            recipient_name: shipping.name,
+            phone: shipping.phone,
+            address: shipping.address,
             is_default: addresses.length === 0,
           })
         }
@@ -118,9 +154,9 @@ function CheckoutContent() {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           userId,
-          customerName: name,
-          customerPhone: phone,
-          customerAddress: address,
+          customerName: shipping.name,
+          customerPhone: shipping.phone,
+          customerAddress: shipping.address,
           customerMemo: memo,
           totalAmount: total,
           deliveryFee,
@@ -157,8 +193,8 @@ function CheckoutContent() {
             : `${items[0].productName} 외 ${items.length - 1}건`,
         successUrl: `${window.location.origin}/order/complete?orderNumber=${orderNumber}`,
         failUrl: `${window.location.origin}/checkout?error=payment_failed`,
-        customerName: name,
-        customerMobilePhone: phone.replace(/-/g, ''),
+        customerName: shipping.name,
+        customerMobilePhone: shipping.phone.replace(/-/g, ''),
       })
 
       if (isBuyNow) clearBuyNow()
@@ -169,11 +205,12 @@ function CheckoutContent() {
       const isCanceled = code === 'PAY_PROCESS_CANCELED' || msg.includes('PAY_PROCESS_CANCELED')
       if (isCanceled) {
         const def = addresses.find((a) => a.is_default) ?? addresses[0]
-        setName(def?.recipient_name ?? '')
-        setPhone(def?.phone ?? '')
-        setAddress(def?.address ?? '')
+        if (def) {
+          setShipping({ name: def.recipient_name, phone: def.phone, address: def.address, savedAddressId: def.id })
+        } else {
+          setShipping({ name: '', phone: '', address: '' })
+        }
         setMemo('')
-        setSaveAddress(false)
       } else {
         setError(msg)
       }
@@ -181,32 +218,36 @@ function CheckoutContent() {
     }
   }
 
+  const selectedAddr = addresses.find((a) => a.id === shipping.savedAddressId)
+
   return (
-    <div className="max-w-3xl mx-auto px-4 py-8">
+    <div className="max-w-2xl mx-auto px-4 py-10">
       <h1 className="font-brand text-2xl font-bold text-ink mb-8">주문 / 결제</h1>
 
-      <form onSubmit={handleSubmit} className="flex flex-col gap-8">
+      <div className="flex flex-col gap-4">
         {/* 주문 상품 */}
-        <section>
-          <h2 className="text-base font-semibold text-ink mb-4">주문 상품</h2>
-          <div className="flex flex-col gap-3">
+        <section className="bg-white border border-line rounded-xl overflow-hidden">
+          <div className="px-5 py-4 border-b border-line">
+            <h2 className="text-sm font-semibold text-ink">주문 상품</h2>
+          </div>
+          <div className="flex flex-col divide-y divide-line">
             {items.map((item) => (
               <div
                 key={`${item.productId}-${item.color}-${item.size}`}
-                className="flex gap-3 items-center bg-white border border-line rounded-xl p-3"
+                className="flex gap-3 items-center px-5 py-4"
               >
-                <div className="relative w-14 h-16 rounded-lg overflow-hidden bg-line flex-shrink-0">
+                <div className="relative w-12 h-14 rounded-lg overflow-hidden bg-surface flex-shrink-0">
                   {item.imageUrl && (
-                    <Image src={item.imageUrl} alt={item.productName} fill className="object-cover" sizes="56px" />
+                    <Image src={item.imageUrl} alt={item.productName} fill className="object-cover" sizes="48px" />
                   )}
                 </div>
                 <div className="flex-1 min-w-0">
                   <p className="text-sm font-medium text-ink truncate">{item.productName}</p>
-                  <p className="text-xs text-ink-muted">
+                  <p className="text-xs text-ink-muted mt-0.5">
                     {[item.color, item.size].filter(Boolean).join(' / ')} · {item.quantity}개
                   </p>
                 </div>
-                <span className="text-sm font-bold text-ink flex-shrink-0">
+                <span className="text-sm font-semibold text-ink shrink-0">
                   {(item.price * item.quantity).toLocaleString()}원
                 </span>
               </div>
@@ -214,87 +255,100 @@ function CheckoutContent() {
           </div>
         </section>
 
-        {/* 저장된 배송지 선택 (로그인 시) */}
-        {addresses.length > 0 && (
-          <section>
-            <h2 className="text-base font-semibold text-ink mb-3">저장된 배송지</h2>
-            <div className="flex flex-col gap-2">
-              {addresses.map((addr) => (
-                <button
-                  key={addr.id}
-                  type="button"
-                  onClick={() => fillAddress(addr)}
-                  className={`text-left border rounded-xl p-3 transition ${
-                    name === addr.recipient_name && phone === addr.phone && address === addr.address
-                      ? 'border-ink bg-surface'
-                      : 'border-line hover:border-ink-sub'
-                  }`}
-                >
-                  <div className="flex items-center gap-2 mb-0.5">
-                    <span className="text-xs font-semibold text-ink-sub bg-surface-muted px-2 py-0.5 rounded-full">
-                      {addr.label}
+        {/* 배송지 */}
+        <section className="bg-white border border-line rounded-xl overflow-hidden">
+          <div className="flex items-center justify-between px-5 py-4 border-b border-line">
+            <div className="flex items-center gap-2">
+              <h2 className="text-sm font-semibold text-ink">배송지</h2>
+              {shipping.name && (
+                <span className="text-sm text-ink-muted">| {shipping.name}</span>
+              )}
+            </div>
+            <button
+              type="button"
+              onClick={openAddressModal}
+              className="flex items-center gap-1 text-xs text-ink border border-line px-3 py-1.5 rounded-full hover:border-ink transition"
+            >
+              배송지 변경
+              <ChevronRight size={12} />
+            </button>
+          </div>
+
+          <div className="px-5 py-4">
+            {shipping.address ? (
+              <div className="flex flex-col gap-1">
+                {selectedAddr && (
+                  <div className="flex items-center gap-1.5 mb-1">
+                    <span className="text-xs text-ink-sub bg-surface-muted px-2 py-0.5 rounded-full">
+                      {selectedAddr.label}
                     </span>
-                    {addr.is_default && (
-                      <span className="text-xs font-semibold text-white bg-surface-dark px-2 py-0.5 rounded-full">
-                        기본
+                    {selectedAddr.is_default && (
+                      <span className="text-xs text-white bg-surface-dark px-2 py-0.5 rounded-full">
+                        기본배송지
                       </span>
                     )}
                   </div>
-                  <p className="text-sm font-medium text-ink">{addr.recipient_name} · {addr.phone}</p>
-                  <p className="text-xs text-ink-muted">{addr.address}</p>
-                </button>
-              ))}
-            </div>
-          </section>
-        )}
-
-        {/* 배송 정보 입력 */}
-        <section>
-          <h2 className="text-base font-semibold text-ink mb-4">배송 정보</h2>
-          <div className="flex flex-col gap-3">
-            <input
-              type="text"
-              value={name}
-              onChange={(e) => setName(e.target.value)}
-              placeholder="받는 분 이름 *"
-              className="w-full border border-line rounded-xl px-4 py-3 text-sm text-ink focus:outline-none focus:border-ink bg-white"
-            />
-            <input
-              type="tel"
-              value={phone}
-              onChange={(e) => setPhone(e.target.value)}
-              placeholder="연락처 *"
-              className="w-full border border-line rounded-xl px-4 py-3 text-sm text-ink focus:outline-none focus:border-ink bg-white"
-            />
-            <input
-              type="text"
-              value={address}
-              onChange={(e) => setAddress(e.target.value)}
-              placeholder="배송 주소 (우편번호 포함) *"
-              className="w-full border border-line rounded-xl px-4 py-3 text-sm text-ink focus:outline-none focus:border-ink bg-white"
-            />
-            <input
-              type="text"
-              value={memo}
-              onChange={(e) => setMemo(e.target.value)}
-              placeholder="배송 메모 (선택)"
-              className="w-full border border-line rounded-xl px-4 py-3 text-sm text-ink focus:outline-none focus:border-ink bg-white"
-            />
-            {userId && (
-              <label className="flex items-center gap-2 text-sm text-ink-sub cursor-pointer">
-                <input
-                  type="checkbox"
-                  checked={saveAddress}
-                  onChange={(e) => setSaveAddress(e.target.checked)}
-                  className="rounded"
-                />
-                이 배송지를 저장하기
-              </label>
+                )}
+                <p className="text-sm text-ink">{shipping.address}</p>
+                <p className="text-sm text-ink-muted">휴대폰 : {shipping.phone}</p>
+                {userId && !shipping.savedAddressId && (
+                  <label className="flex items-center gap-2 text-xs text-ink-muted cursor-pointer mt-2">
+                    <input
+                      type="checkbox"
+                      checked={saveCustom}
+                      onChange={(e) => setSaveCustom(e.target.checked)}
+                      className="rounded"
+                    />
+                    이 배송지를 저장하기
+                  </label>
+                )}
+              </div>
+            ) : (
+              <button
+                type="button"
+                onClick={openAddressModal}
+                className="text-sm text-ink-muted hover:text-ink transition"
+              >
+                + 배송지를 추가해주세요
+              </button>
             )}
-            {!userId && (
-              <p className="text-xs text-ink-muted">
-                <Link href="/auth/login?next=/checkout" className="text-ink underline">로그인</Link>하면 배송지를 저장할 수 있습니다.
-              </p>
+          </div>
+        </section>
+
+        {/* 배송 요청사항 */}
+        <section className="bg-white border border-line rounded-xl overflow-hidden">
+          <div className="flex items-center justify-between px-5 py-4 border-b border-line">
+            <h2 className="text-sm font-semibold text-ink">배송 요청사항</h2>
+            <button
+              type="button"
+              onClick={openMemoEdit}
+              className="text-xs text-ink border border-line px-3 py-1.5 rounded-full hover:border-ink transition"
+            >
+              변경
+            </button>
+          </div>
+          <div className="px-5 py-4">
+            {editingMemo ? (
+              <div className="flex gap-2">
+                <input
+                  type="text"
+                  value={memoInput}
+                  onChange={(e) => setMemoInput(e.target.value)}
+                  placeholder="예: 문 앞에 놓아주세요"
+                  className="flex-1 border border-line rounded-lg px-3 py-2 text-sm focus:outline-none focus:border-ink"
+                  autoFocus
+                  onKeyDown={(e) => e.key === 'Enter' && saveMemo()}
+                />
+                <button
+                  type="button"
+                  onClick={saveMemo}
+                  className="text-xs bg-surface-dark text-white px-4 py-2 rounded-lg"
+                >
+                  확인
+                </button>
+              </div>
+            ) : (
+              <p className="text-sm text-ink-muted">{memo || '없음'}</p>
             )}
           </div>
         </section>
@@ -318,13 +372,122 @@ function CheckoutContent() {
         {error && <p className="text-red-500 text-sm text-center">{error}</p>}
 
         <button
-          type="submit"
+          type="button"
+          onClick={handleSubmit}
           disabled={loading}
           className="w-full bg-surface-dark text-white font-bold py-4 rounded-xl text-base hover:bg-surface-hover transition disabled:opacity-60 disabled:cursor-not-allowed"
         >
           {loading ? '처리 중...' : `${total.toLocaleString()}원 결제하기`}
         </button>
-      </form>
+      </div>
+
+      {/* 배송지 선택 모달 */}
+      {showAddressModal && (
+        <div className="fixed inset-0 bg-black/40 z-50 flex items-end sm:items-center justify-center">
+          <div className="bg-white w-full max-w-md rounded-t-2xl sm:rounded-2xl max-h-[80vh] flex flex-col">
+            <div className="flex items-center justify-between px-5 py-4 border-b border-line">
+              <h3 className="font-semibold text-ink">배송지 선택</h3>
+              <button onClick={() => setShowAddressModal(false)} className="text-ink-muted hover:text-ink">
+                <X size={18} />
+              </button>
+            </div>
+
+            <div className="flex-1 overflow-y-auto p-4 flex flex-col gap-2">
+              {/* 저장된 배송지 */}
+              {addresses.map((addr) => {
+                const isSelected = addr.id === shipping.savedAddressId
+                return (
+                  <button
+                    key={addr.id}
+                    type="button"
+                    onClick={() => selectSavedAddress(addr)}
+                    className={`text-left border rounded-xl p-4 transition w-full ${
+                      isSelected ? 'border-ink bg-surface' : 'border-line hover:border-ink-sub'
+                    }`}
+                  >
+                    <div className="flex items-center gap-1.5 mb-1.5">
+                      <span className="text-xs text-ink-sub bg-surface-muted px-2 py-0.5 rounded-full">
+                        {addr.label}
+                      </span>
+                      {addr.is_default && (
+                        <span className="text-xs text-white bg-surface-dark px-2 py-0.5 rounded-full">
+                          기본
+                        </span>
+                      )}
+                    </div>
+                    <p className="text-sm font-medium text-ink">{addr.recipient_name}</p>
+                    <p className="text-xs text-ink-muted mt-0.5">{addr.phone}</p>
+                    <p className="text-xs text-ink-muted">{addr.address}</p>
+                  </button>
+                )
+              })}
+
+              {/* 직접 입력 */}
+              {!customMode ? (
+                <button
+                  type="button"
+                  onClick={() => setCustomMode(true)}
+                  className="w-full border border-dashed border-line rounded-xl p-4 text-sm text-ink-muted hover:border-ink-sub hover:text-ink transition"
+                >
+                  + 새 배송지 직접 입력
+                </button>
+              ) : (
+                <div className="border border-line rounded-xl p-4 flex flex-col gap-3">
+                  <p className="text-sm font-medium text-ink">새 배송지 입력</p>
+                  <input
+                    type="text"
+                    value={customName}
+                    onChange={(e) => setCustomName(e.target.value)}
+                    placeholder="받는 분 이름 *"
+                    className="w-full border border-line rounded-lg px-3 py-2.5 text-sm focus:outline-none focus:border-ink"
+                  />
+                  <input
+                    type="tel"
+                    value={customPhone}
+                    onChange={(e) => setCustomPhone(e.target.value)}
+                    placeholder="연락처 *"
+                    className="w-full border border-line rounded-lg px-3 py-2.5 text-sm focus:outline-none focus:border-ink"
+                  />
+                  <input
+                    type="text"
+                    value={customAddress}
+                    onChange={(e) => setCustomAddress(e.target.value)}
+                    placeholder="주소 (우편번호 포함) *"
+                    className="w-full border border-line rounded-lg px-3 py-2.5 text-sm focus:outline-none focus:border-ink"
+                  />
+                  <div className="flex gap-2">
+                    <button
+                      type="button"
+                      onClick={() => setCustomMode(false)}
+                      className="flex-1 border border-line rounded-lg py-2.5 text-sm text-ink-sub hover:bg-surface transition"
+                    >
+                      취소
+                    </button>
+                    <button
+                      type="button"
+                      onClick={confirmCustomAddress}
+                      className="flex-1 bg-surface-dark text-white rounded-lg py-2.5 text-sm font-medium hover:bg-surface-hover transition"
+                    >
+                      이 주소로 배송
+                    </button>
+                  </div>
+                </div>
+              )}
+            </div>
+
+            {!customMode && (
+              <div className="p-4 border-t border-line">
+                <Link
+                  href="/mypage/addresses"
+                  className="block text-center text-xs text-ink-muted hover:text-ink transition"
+                >
+                  배송지 관리 →
+                </Link>
+              </div>
+            )}
+          </div>
+        </div>
+      )}
     </div>
   )
 }
