@@ -119,7 +119,7 @@ export default function AddressesPage() {
 
       {/* 주소 목록 */}
       {addresses.length === 0 && !showForm && (
-        <div className="text-center py-12 text-ink-muted bg-surface-muted rounded-xl">
+        <div className="text-center py-12 text-ink-muted border border-line rounded-xl">
           <p className="mb-2">저장된 배송지가 없습니다.</p>
           <button
             onClick={() => setShowForm(true)}
@@ -173,7 +173,7 @@ export default function AddressesPage() {
 
       {/* 추가 폼 */}
       {showForm && (
-        <form onSubmit={handleSave} className="bg-surface-muted rounded-xl p-5 flex flex-col gap-3">
+        <form onSubmit={handleSave} className="bg-white border border-line rounded-xl p-5 flex flex-col gap-3">
           <h2 className="font-semibold text-ink mb-1">새 배송지</h2>
 
           {/* 라벨 */}

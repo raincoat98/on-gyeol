@@ -1,55 +1,67 @@
-import type { Metadata } from 'next'
-import { createClient } from '@/lib/supabase/server'
+'use client'
+
+import { useState, useEffect, useRef } from 'react'
+import { Search } from 'lucide-react'
+import { createClient } from '@/lib/supabase/client'
 import ProductCard from '@/components/shop/ProductCard'
 import type { ProductWithImages } from '@/types'
 
-export const metadata: Metadata = { title: '검색' }
+export default function SearchPage() {
+  const [query, setQuery] = useState('')
+  const [products, setProducts] = useState<ProductWithImages[]>([])
+  const [loading, setLoading] = useState(false)
+  const [searched, setSearched] = useState(false)
+  const timer = useRef<ReturnType<typeof setTimeout> | null>(null)
 
-export default async function SearchPage({
-  searchParams,
-}: {
-  searchParams: Promise<{ q?: string }>
-}) {
-  const { q } = await searchParams
-  let products: ProductWithImages[] = []
+  useEffect(() => {
+    if (timer.current) clearTimeout(timer.current)
 
-  if (q && q.trim()) {
-    const supabase = await createClient()
-    const { data } = await supabase
-      .from('products')
-      .select('*, product_images(*), categories(*)')
-      .eq('status', 'active')
-      .ilike('name', `%${q}%`)
-      .order('created_at', { ascending: false })
-      .limit(40)
-    products = (data ?? []) as ProductWithImages[]
-  }
+    const q = query.trim()
+    if (!q) {
+      setProducts([])
+      setSearched(false)
+      return
+    }
+
+    setLoading(true)
+    timer.current = setTimeout(async () => {
+      const supabase = createClient()
+      const { data } = await supabase
+        .from('products')
+        .select('*, product_images(*), categories(*)')
+        .eq('status', 'active')
+        .ilike('name', `%${q}%`)
+        .order('created_at', { ascending: false })
+        .limit(40)
+      setProducts((data ?? []) as ProductWithImages[])
+      setSearched(true)
+      setLoading(false)
+    }, 300)
+  }, [query])
 
   return (
     <div className="max-w-5xl mx-auto px-4 py-8">
-      <form method="GET" action="/search" className="mb-8">
-        <div className="flex gap-2">
-          <input
-            type="text"
-            name="q"
-            defaultValue={q}
-            placeholder="상품명을 검색하세요"
-            className="flex-1 border border-line rounded-xl px-4 py-3 text-base bg-white focus:outline-none focus:border-ink"
-            autoFocus
-          />
-          <button
-            type="submit"
-            className="bg-surface-dark text-white font-semibold px-6 py-3 rounded-xl hover:bg-surface-hover transition"
-          >
-            검색
-          </button>
-        </div>
-      </form>
+      <div className="relative mb-8">
+        <Search size={18} className="absolute left-4 top-1/2 -translate-y-1/2 text-ink-muted" />
+        <input
+          type="text"
+          value={query}
+          onChange={(e) => setQuery(e.target.value)}
+          placeholder="상품명을 검색하세요"
+          className="w-full border border-line rounded-xl pl-11 pr-4 py-3.5 text-base bg-white focus:outline-none focus:border-ink"
+          autoFocus
+        />
+        {loading && (
+          <span className="absolute right-4 top-1/2 -translate-y-1/2 text-xs text-ink-muted animate-pulse">
+            검색 중...
+          </span>
+        )}
+      </div>
 
-      {q ? (
+      {searched ? (
         <>
           <p className="text-sm text-ink-muted mb-6">
-            &ldquo;{q}&rdquo; 검색 결과 {products.length}건
+            &ldquo;{query}&rdquo; 검색 결과 {products.length}건
           </p>
           {products.length > 0 ? (
             <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
