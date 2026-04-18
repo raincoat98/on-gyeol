@@ -5,6 +5,7 @@ import { useRouter } from 'next/navigation'
 import Link from 'next/link'
 import { Plus, Trash2, Star } from 'lucide-react'
 import { createClient } from '@/lib/supabase/client'
+import { useAuthStore } from '@/lib/store/auth'
 import type { Address } from '@/types'
 
 const LABELS = ['집', '회사', '기타']
@@ -27,10 +28,10 @@ const EMPTY_FORM: FormState = {
 
 export default function AddressesPage() {
   const router = useRouter()
+  const { userId, hydrated } = useAuthStore((s) => ({ userId: s.userId, hydrated: s.hydrated }))
   const supabase = createClient()
 
   const [addresses, setAddresses] = useState<Address[]>([])
-  const [userId, setUserId] = useState<string | null>(null)
   const [loading, setLoading] = useState(true)
   const [showForm, setShowForm] = useState(false)
   const [form, setForm] = useState<FormState>(EMPTY_FORM)
@@ -48,15 +49,10 @@ export default function AddressesPage() {
   }, [supabase])
 
   useEffect(() => {
-    async function init() {
-      const { data: { user } } = await supabase.auth.getUser()
-      if (!user) { router.push('/auth/login?next=/mypage/addresses'); return }
-      setUserId(user.id)
-      await loadAddresses(user.id)
-      setLoading(false)
-    }
-    init()
-  }, [loadAddresses, router, supabase])
+    if (!hydrated) return
+    if (!userId) { router.push('/auth/login?next=/mypage/addresses'); return }
+    loadAddresses(userId).then(() => setLoading(false))
+  }, [hydrated, userId, router, loadAddresses])
 
   async function handleSave(e: React.FormEvent) {
     e.preventDefault()

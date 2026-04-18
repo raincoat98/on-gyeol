@@ -1,27 +1,17 @@
 'use client'
 
-import { useEffect, useState, useRef } from 'react'
+import { useState, useRef, useEffect } from 'react'
 import Link from 'next/link'
 import { useRouter } from 'next/navigation'
 import { User } from 'lucide-react'
-import { createClient } from '@/lib/supabase/client'
+import { useAuthStore } from '@/lib/store/auth'
 
 export default function UserMenu() {
   const router = useRouter()
-  const [email, setEmail] = useState<string | null>(null)
+  const email = useAuthStore((s) => s.email)
+  const signOut = useAuthStore((s) => s.signOut)
   const [open, setOpen] = useState(false)
   const ref = useRef<HTMLDivElement>(null)
-
-  useEffect(() => {
-    const supabase = createClient()
-    supabase.auth.getUser().then(({ data: { user } }) => {
-      setEmail(user?.email ?? null)
-    })
-    const { data: { subscription } } = supabase.auth.onAuthStateChange((_e, session) => {
-      setEmail(session?.user?.email ?? null)
-    })
-    return () => subscription.unsubscribe()
-  }, [])
 
   // 외부 클릭 시 닫기
   useEffect(() => {
@@ -33,8 +23,7 @@ export default function UserMenu() {
   }, [])
 
   async function handleLogout() {
-    const supabase = createClient()
-    await supabase.auth.signOut()
+    await signOut()
     setOpen(false)
     router.push('/')
     router.refresh()

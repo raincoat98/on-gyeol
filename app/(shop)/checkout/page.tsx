@@ -8,6 +8,7 @@ import { loadTossPayments, ANONYMOUS } from '@tosspayments/tosspayments-sdk'
 import { createClient } from '@/lib/supabase/client'
 import { useCartStore } from '@/lib/store/cart'
 import type { CartItem } from '@/lib/store/cart'
+import { useAuthStore } from '@/lib/store/auth'
 import type { Address } from '@/types'
 
 const DELIVERY_FEE = 3000
@@ -21,8 +22,7 @@ export default function CheckoutPage() {
   const { items: cartItems, clearCart, buyNowItem, clearBuyNow } = useCartStore()
   const items: CartItem[] = isBuyNow ? (buyNowItem ? [buyNowItem] : []) : cartItems
 
-  const [hydrated, setHydrated] = useState(false)
-  const [userId, setUserId] = useState<string | null>(null)
+  const { userId, hydrated } = useAuthStore((s) => ({ userId: s.userId, hydrated: s.hydrated }))
   const [addresses, setAddresses] = useState<Address[]>([])
 
   const [name, setName] = useState('')
@@ -35,28 +35,26 @@ export default function CheckoutPage() {
   const [error, setError] = useState('')
 
   useEffect(() => {
-    setHydrated(true)
+    if (!userId) return
     const supabase = createClient()
-    supabase.auth.getUser().then(async ({ data: { user } }) => {
-      if (!user) return
-      setUserId(user.id)
-      const { data: addrs } = await supabase
-        .from('addresses')
-        .select('*')
-        .eq('user_id', user.id)
-        .order('is_default', { ascending: false })
-        .order('created_at', { ascending: true })
-      const list = addrs ?? []
-      setAddresses(list)
-      // 기본 배송지 자동 입력
-      const def = list.find((a) => a.is_default) ?? list[0]
-      if (def) {
-        setName(def.recipient_name)
-        setPhone(def.phone)
-        setAddress(def.address)
-      }
-    })
-  }, [])
+    supabase
+      .from('addresses')
+      .select('*')
+      .eq('user_id', userId)
+      .order('is_default', { ascending: false })
+      .order('created_at', { ascending: true })
+      .then(({ data: addrs }) => {
+        const list = addrs ?? []
+        setAddresses(list)
+        // 기본 배송지 자동 입력
+        const def = list.find((a) => a.is_default) ?? list[0]
+        if (def) {
+          setName(def.recipient_name)
+          setPhone(def.phone)
+          setAddress(def.address)
+        }
+      })
+  }, [userId])
 
   if (!hydrated) return null
 

@@ -4,10 +4,11 @@ import { useState, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
 import Link from 'next/link'
 import { createClient } from '@/lib/supabase/client'
+import { useAuthStore } from '@/lib/store/auth'
 
 export default function ProfilePage() {
   const router = useRouter()
-  const supabase = createClient()
+  const { userId, hydrated } = useAuthStore((s) => ({ userId: s.userId, hydrated: s.hydrated }))
 
   const [name, setName] = useState('')
   const [phone, setPhone] = useState('')
@@ -16,29 +17,28 @@ export default function ProfilePage() {
   const [message, setMessage] = useState('')
 
   useEffect(() => {
-    async function load() {
-      const { data: { user } } = await supabase.auth.getUser()
-      if (!user) { router.push('/auth/login?next=/mypage/profile'); return }
-      const { data } = await supabase.from('profiles').select('full_name, phone').eq('id', user.id).single()
+    if (!hydrated) return
+    if (!userId) { router.push('/auth/login?next=/mypage/profile'); return }
+    const supabase = createClient()
+    supabase.from('profiles').select('full_name, phone').eq('id', userId).single().then(({ data }) => {
       if (data) {
         setName(data.full_name ?? '')
         setPhone(data.phone ?? '')
       }
       setLoading(false)
-    }
-    load()
-  }, [])
+    })
+  }, [hydrated, userId, router])
 
   async function handleSave(e: React.FormEvent) {
     e.preventDefault()
+    if (!userId) return
     setSaving(true)
     setMessage('')
-    const { data: { user } } = await supabase.auth.getUser()
-    if (!user) return
+    const supabase = createClient()
     const { error } = await supabase
       .from('profiles')
       .update({ full_name: name, phone })
-      .eq('id', user.id)
+      .eq('id', userId)
     setSaving(false)
     setMessage(error ? '저장에 실패했습니다.' : '저장되었습니다.')
   }
