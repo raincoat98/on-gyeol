@@ -1,7 +1,7 @@
 'use client'
 
 import { useEffect, useState, Suspense } from 'react'
-import { useRouter, useSearchParams } from 'next/navigation'
+import { useSearchParams } from 'next/navigation'
 import Link from 'next/link'
 import Image from 'next/image'
 import { ChevronRight, X } from 'lucide-react'
@@ -32,7 +32,6 @@ type ShippingInfo = {
 }
 
 function CheckoutContent() {
-  const router = useRouter()
   const searchParams = useSearchParams()
   const isBuyNow = searchParams.get('mode') === 'buynow'
   const { items: cartItems, clearCart, buyNowItem, clearBuyNow } = useCartStore()
@@ -236,7 +235,7 @@ function CheckoutContent() {
                 key={`${item.productId}-${item.color}-${item.size}`}
                 className="flex gap-3 items-center px-5 py-4"
               >
-                <div className="relative w-12 h-14 rounded-lg overflow-hidden bg-surface flex-shrink-0">
+                <div className="relative w-12 h-14 rounded-lg overflow-hidden bg-surface shrink-0">
                   {item.imageUrl && (
                     <Image src={item.imageUrl} alt={item.productName} fill className="object-cover" sizes="48px" />
                   )}
@@ -247,7 +246,7 @@ function CheckoutContent() {
                     {[item.color, item.size].filter(Boolean).join(' / ')} · {item.quantity}개
                   </p>
                 </div>
-                <span className="text-sm font-semibold text-ink shrink-0">
+                <span className="text-sm font-semibold text-ink shrink-0 shrink-0">
                   {(item.price * item.quantity).toLocaleString()}원
                 </span>
               </div>
