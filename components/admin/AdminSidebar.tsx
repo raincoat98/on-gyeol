@@ -2,7 +2,7 @@
 
 import Link from 'next/link'
 import { usePathname, useRouter } from 'next/navigation'
-import { Package, PlusCircle, MessageSquare, LayoutDashboard, LogOut, ShoppingCart } from 'lucide-react'
+import { Package, PlusCircle, MessageSquare, LayoutDashboard, LogOut, ShoppingCart, Star } from 'lucide-react'
 import { createClient } from '@/lib/supabase/client'
 
 const NAV = [
@@ -11,6 +11,7 @@ const NAV = [
   { href: '/admin/products/new', label: '상품 등록', icon: PlusCircle },
   { href: '/admin/orders', label: '주문 관리', icon: ShoppingCart },
   { href: '/admin/inquiries', label: '문의 관리', icon: MessageSquare },
+  { href: '/admin/reviews', label: '리뷰 관리', icon: Star },
 ]
 
 export default function AdminSidebar() {

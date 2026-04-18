@@ -24,8 +24,10 @@ export default function InquiryForm({ productId, productName }: InquiryFormProps
 
     setLoading(true)
     const supabase = createClient()
+    const { data: { user } } = await supabase.auth.getUser()
     const { error: dbError } = await supabase.from('inquiries').insert({
-      product_id: productId,
+      product_id: productId || undefined,
+      user_id: user?.id ?? null,
       customer_name: form.name,
       phone: form.phone,
       message: form.message,
@@ -42,41 +44,41 @@ export default function InquiryForm({ productId, productName }: InquiryFormProps
 
   if (done) {
     return (
-      <div className="bg-surface-muted rounded-xl p-8 text-center">
-        <p className="text-lg font-semibold text-ink mb-2">문의가 접수되었습니다</p>
-        <p className="text-sm text-ink-muted">빠른 시일 내에 연락드리겠습니다.</p>
+      <div className="border border-line p-8 text-center">
+        <p className="text-sm font-medium text-ink mb-1">문의가 접수되었습니다</p>
+        <p className="text-xs text-ink-muted">빠른 시일 내에 연락드리겠습니다.</p>
       </div>
     )
   }
 
   return (
-    <form onSubmit={handleSubmit} className="flex flex-col gap-4">
+    <form onSubmit={handleSubmit} className="flex flex-col gap-3">
       <input
         type="text"
         placeholder="이름"
         value={form.name}
         onChange={(e) => setForm({ ...form, name: e.target.value })}
-        className="w-full border border-line rounded-xl px-4 py-3 text-base bg-white focus:outline-none focus:border-ink"
+        className="w-full border border-line px-4 py-3 text-sm bg-white focus:outline-none focus:border-ink"
       />
       <input
         type="tel"
         placeholder="연락처 (010-0000-0000)"
         value={form.phone}
         onChange={(e) => setForm({ ...form, phone: e.target.value })}
-        className="w-full border border-line rounded-xl px-4 py-3 text-base bg-white focus:outline-none focus:border-ink"
+        className="w-full border border-line px-4 py-3 text-sm bg-white focus:outline-none focus:border-ink"
       />
       <textarea
-        placeholder={`[${productName}] 에 대해 문의할 내용을 적어주세요.`}
+        placeholder={productName ? `${productName}에 대해 문의할 내용을 적어주세요.` : '문의할 내용을 적어주세요.'}
         value={form.message}
         onChange={(e) => setForm({ ...form, message: e.target.value })}
-        rows={4}
-        className="w-full border border-line rounded-xl px-4 py-3 text-base bg-white focus:outline-none focus:border-ink resize-none"
+        rows={5}
+        className="w-full border border-line px-4 py-3 text-sm bg-white focus:outline-none focus:border-ink resize-none"
       />
-      {error && <p className="text-red-500 text-sm">{error}</p>}
+      {error && <p className="text-red-500 text-xs">{error}</p>}
       <button
         type="submit"
         disabled={loading}
-        className="bg-surface-dark text-white font-bold py-4 rounded-xl text-base hover:bg-surface-hover transition disabled:opacity-60"
+        className="bg-ink text-white text-sm tracking-widest py-4 hover:bg-ink-sub transition disabled:opacity-60"
       >
         {loading ? '접수 중...' : '문의 접수하기'}
       </button>

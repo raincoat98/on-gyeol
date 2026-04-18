@@ -4,6 +4,7 @@ import Image from 'next/image'
 import { createClient } from '@/lib/supabase/server'
 import InquiryForm from '@/components/shop/InquiryForm'
 import ProductOptions from '@/components/shop/ProductOptions'
+import StarRating from '@/components/shop/StarRating'
 import type { ProductDetail } from '@/types'
 
 async function getProduct(slug: string): Promise<ProductDetail | null> {
@@ -15,6 +16,17 @@ async function getProduct(slug: string): Promise<ProductDetail | null> {
     .neq('status', 'hidden')
     .single()
   return data as ProductDetail | null
+}
+
+async function getReviews(productId: string) {
+  const supabase = await createClient()
+  const { data } = await supabase
+    .from('reviews')
+    .select('*')
+    .eq('product_id', productId)
+    .order('created_at', { ascending: false })
+    .limit(20)
+  return data ?? []
 }
 
 export async function generateMetadata({
@@ -46,6 +58,11 @@ export default async function ProductDetailPage({
   const product = await getProduct(slug)
 
   if (!product) notFound()
+
+  const reviews = await getReviews(product.id)
+  const avgRating = reviews.length > 0
+    ? Math.round(reviews.reduce((s, r) => s + r.rating, 0) / reviews.length * 10) / 10
+    : 0
 
   const images = [...(product.product_images ?? [])].sort((a, b) => a.sort_order - b.sort_order)
   const mainImage = images.find((img) => img.is_main) ?? images[0]
@@ -166,6 +183,35 @@ export default async function ProductDetailPage({
           />
         </div>
       )}
+
+      {/* 리뷰 */}
+      <div className="mt-14">
+        <div className="flex items-baseline gap-3 mb-6 pb-3 border-b border-line">
+          <h2 className="font-brand text-xl font-bold text-ink">리뷰</h2>
+          {reviews.length > 0 && (
+            <span className="text-sm text-ink-muted">
+              ★ {avgRating} ({reviews.length}개)
+            </span>
+          )}
+        </div>
+        {reviews.length === 0 ? (
+          <p className="text-sm text-ink-muted py-8 text-center">아직 리뷰가 없습니다.</p>
+        ) : (
+          <div className="flex flex-col divide-y divide-line">
+            {reviews.map((review) => (
+              <div key={review.id} className="py-5">
+                <div className="flex items-center gap-3 mb-2">
+                  <StarRating value={review.rating} size="sm" />
+                  <span className="text-xs text-ink-faint">
+                    {new Date(review.created_at).toLocaleDateString('ko-KR')}
+                  </span>
+                </div>
+                <p className="text-sm text-ink leading-relaxed">{review.content}</p>
+              </div>
+            ))}
+          </div>
+        )}
+      </div>
 
       {/* 문의 폼 */}
       <div className="mt-14">

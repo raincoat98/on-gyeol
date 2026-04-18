@@ -3,7 +3,8 @@ import Link from 'next/link'
 import { createClient } from '@/lib/supabase/server'
 import type { OrderWithItems } from '@/types'
 import LogoutButton from '@/components/shop/LogoutButton'
-import { Package, MessageCircle, ChevronRight } from 'lucide-react'
+import StarRating from '@/components/shop/StarRating'
+import { Package, MessageCircle, ChevronRight, Star } from 'lucide-react'
 
 const ORDER_STATUS_LABEL: Record<string, string> = {
   pending: '결제 대기',
@@ -27,7 +28,7 @@ export default async function MyPage() {
 
   if (!user) redirect('/auth/login?next=/mypage')
 
-  const [{ data: profile }, { data: orders }] = await Promise.all([
+  const [{ data: profile }, { data: orders }, { data: inquiries }, { data: reviews }] = await Promise.all([
     supabase.from('profiles').select('*').eq('id', user.id).single(),
     supabase
       .from('orders')
@@ -35,7 +36,19 @@ export default async function MyPage() {
       .eq('user_id', user.id)
       .order('created_at', { ascending: false })
       .limit(10),
+    supabase
+      .from('inquiries')
+      .select('*, products(name, slug)')
+      .eq('user_id', user.id)
+      .order('created_at', { ascending: false })
+      .limit(10),
+    supabase
+      .from('reviews')
+      .select('order_item_id')
+      .eq('user_id', user.id),
   ])
+
+  const reviewedItemIds = new Set((reviews ?? []).map((r) => r.order_item_id).filter(Boolean))
 
   return (
     <div className="max-w-2xl mx-auto px-4 py-10">
@@ -63,23 +76,33 @@ export default async function MyPage() {
       </section>
 
       {/* 빠른 메뉴 */}
-      <div className="grid grid-cols-2 gap-3 mb-10">
+      <div className="grid grid-cols-3 gap-3 mb-10">
         <Link
           href="/mypage/addresses"
-          className="group flex items-center justify-between bg-white border border-line rounded-2xl px-5 py-4 hover:border-ink transition"
+          className="group flex items-center justify-between bg-white border border-line px-4 py-4 hover:border-ink transition"
         >
-          <div className="flex items-center gap-3">
-            <Package size={18} className="text-ink-muted group-hover:text-ink transition" />
-            <span className="text-sm font-medium text-ink">배송지 관리</span>
+          <div className="flex items-center gap-2">
+            <Package size={16} className="text-ink-muted group-hover:text-ink transition" />
+            <span className="text-sm font-medium text-ink">배송지</span>
+          </div>
+          <ChevronRight size={14} className="text-ink-faint group-hover:text-ink-muted transition" />
+        </Link>
+        <Link
+          href="/mypage/reviews"
+          className="group flex items-center justify-between bg-white border border-line px-4 py-4 hover:border-ink transition"
+        >
+          <div className="flex items-center gap-2">
+            <Star size={16} className="text-ink-muted group-hover:text-ink transition" />
+            <span className="text-sm font-medium text-ink">내 리뷰</span>
           </div>
           <ChevronRight size={14} className="text-ink-faint group-hover:text-ink-muted transition" />
         </Link>
         <Link
           href="/contact"
-          className="group flex items-center justify-between bg-white border border-line rounded-2xl px-5 py-4 hover:border-ink transition"
+          className="group flex items-center justify-between bg-white border border-line px-4 py-4 hover:border-ink transition"
         >
-          <div className="flex items-center gap-3">
-            <MessageCircle size={18} className="text-ink-muted group-hover:text-ink transition" />
+          <div className="flex items-center gap-2">
+            <MessageCircle size={16} className="text-ink-muted group-hover:text-ink transition" />
             <span className="text-sm font-medium text-ink">1:1 문의</span>
           </div>
           <ChevronRight size={14} className="text-ink-faint group-hover:text-ink-muted transition" />
@@ -117,10 +140,10 @@ export default async function MyPage() {
                   </div>
                   <span className="text-[11px] text-ink-faint">#{order.order_number}</span>
                 </div>
-                <div className="flex flex-col gap-1 mb-3">
+                <div className="flex flex-col gap-2 mb-3">
                   {order.order_items?.map((item) => (
-                    <div key={item.id} className="flex justify-between text-sm">
-                      <span className="text-ink">
+                    <div key={item.id} className="flex items-center justify-between text-sm gap-2">
+                      <span className="text-ink flex-1 min-w-0">
                         {item.product_name}
                         {(item.option_color || item.option_size) && (
                           <span className="text-ink-muted text-xs ml-1.5">
@@ -129,9 +152,23 @@ export default async function MyPage() {
                         )}
                         <span className="text-ink-muted text-xs ml-1.5">×{item.quantity}</span>
                       </span>
-                      <span className="text-ink text-xs">
-                        {(item.price * item.quantity).toLocaleString()}원
-                      </span>
+                      <div className="flex items-center gap-2 flex-shrink-0">
+                        <span className="text-ink text-xs">
+                          {(item.price * item.quantity).toLocaleString()}원
+                        </span>
+                        {order.status === 'delivered' && (
+                          reviewedItemIds.has(item.id) ? (
+                            <span className="text-[10px] text-ink-muted border border-line px-2 py-0.5">리뷰 완료</span>
+                          ) : (
+                            <Link
+                              href={`/mypage/reviews/write?order_item_id=${item.id}`}
+                              className="text-[10px] border border-ink text-ink px-2 py-0.5 hover:bg-ink hover:text-white transition"
+                            >
+                              리뷰 쓰기
+                            </Link>
+                          )
+                        )}
+                      </div>
                     </div>
                   ))}
                 </div>
@@ -141,6 +178,49 @@ export default async function MyPage() {
                 </div>
               </div>
             ))}
+          </div>
+        )}
+      </section>
+      {/* 문의 내역 */}
+      <section className="mt-10">
+        <div className="flex items-center justify-between mb-4">
+          <h2 className="text-sm font-semibold text-ink tracking-wider uppercase">문의 내역</h2>
+          <Link href="/contact" className="text-xs text-ink-muted hover:text-ink transition">
+            새 문의 →
+          </Link>
+        </div>
+
+        {!inquiries || inquiries.length === 0 ? (
+          <div className="text-center py-10 text-ink-muted border-t border-line">
+            <p className="text-sm">문의 내역이 없습니다.</p>
+          </div>
+        ) : (
+          <div className="flex flex-col divide-y divide-line border-t border-line">
+            {inquiries.map((inq) => {
+              const product = inq.products as { name: string; slug: string } | null
+              const statusLabel: Record<string, string> = { pending: '대기', replied: '답변 완료', closed: '종료' }
+              const statusStyle: Record<string, string> = {
+                pending: 'text-ink-muted',
+                replied: 'text-emerald-600',
+                closed: 'text-ink-faint',
+              }
+              return (
+                <div key={inq.id} className="py-4">
+                  <div className="flex items-start justify-between gap-2 mb-1">
+                    <p className="text-sm text-ink leading-relaxed flex-1">{inq.message}</p>
+                    <span className={`text-xs shrink-0 ${statusStyle[inq.status] ?? 'text-ink-muted'}`}>
+                      {statusLabel[inq.status] ?? inq.status}
+                    </span>
+                  </div>
+                  {product && (
+                    <p className="text-xs text-ink-muted">상품: {product.name}</p>
+                  )}
+                  <p className="text-xs text-ink-faint mt-1">
+                    {new Date(inq.created_at).toLocaleDateString('ko-KR')}
+                  </p>
+                </div>
+              )
+            })}
           </div>
         )}
       </section>

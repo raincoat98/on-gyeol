@@ -1,5 +1,6 @@
 export type ProductStatus = 'active' | 'soldout' | 'hidden'
 export type InquiryStatus = 'pending' | 'replied' | 'closed'
+export type ReviewStatus = 'visible' | 'hidden'
 
 export interface Database {
   public: {
@@ -167,6 +168,7 @@ export interface Database {
         Row: {
           id: string
           product_id: string | null
+          user_id: string | null
           customer_name: string
           phone: string
           message: string
@@ -176,6 +178,7 @@ export interface Database {
         Insert: {
           id?: string
           product_id?: string | null
+          user_id?: string | null
           customer_name: string
           phone: string
           message: string
@@ -185,6 +188,7 @@ export interface Database {
         Update: {
           id?: string
           product_id?: string | null
+          user_id?: string | null
           customer_name?: string
           phone?: string
           message?: string
@@ -373,7 +377,55 @@ export interface Database {
           quantity?: number
         }
         Update: Record<string, never>
-        Relationships: []
+        Relationships: [
+          {
+            foreignKeyName: 'order_items_order_id_fkey'
+            columns: ['order_id']
+            isOneToOne: false
+            referencedRelation: 'orders'
+            referencedColumns: ['id']
+          }
+        ]
+      }
+      reviews: {
+        Row: {
+          id: string
+          product_id: string
+          order_item_id: string | null
+          user_id: string
+          rating: number
+          content: string
+          created_at: string
+        }
+        Insert: {
+          id?: string
+          product_id: string
+          order_item_id?: string | null
+          user_id: string
+          rating: number
+          content: string
+          created_at?: string
+        }
+        Update: {
+          rating?: number
+          content?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: 'reviews_product_id_fkey'
+            columns: ['product_id']
+            isOneToOne: false
+            referencedRelation: 'products'
+            referencedColumns: ['id']
+          },
+          {
+            foreignKeyName: 'reviews_order_item_id_fkey'
+            columns: ['order_item_id']
+            isOneToOne: true
+            referencedRelation: 'order_items'
+            referencedColumns: ['id']
+          }
+        ]
       }
     }
     Views: Record<string, never>
