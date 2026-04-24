@@ -1,6 +1,7 @@
 import { createClient } from '@/lib/supabase/server'
 import Link from 'next/link'
 import ProductStatusToggle from '@/components/admin/ProductStatusToggle'
+import RefreshButton from '@/components/admin/RefreshButton'
 import type { ProductWithImages } from '@/types'
 
 export default async function AdminProductsPage({
@@ -28,12 +29,15 @@ export default async function AdminProductsPage({
     <div className="p-8">
       <div className="flex items-center justify-between mb-8">
         <h1 className="text-xl font-semibold text-ink tracking-tight">상품 관리</h1>
-        <Link
-          href="/admin/products/new"
-          className="bg-surface-dark text-white font-medium px-5 py-2.5 rounded-xl hover:bg-surface-hover transition text-sm"
-        >
-          + 새 상품 등록
-        </Link>
+        <div className="flex items-center gap-3">
+          <RefreshButton />
+          <Link
+            href="/admin/products/new"
+            className="bg-surface-dark text-white font-medium px-5 py-2.5 rounded-xl hover:bg-surface-hover transition text-sm"
+          >
+            + 새 상품 등록
+          </Link>
+        </div>
       </div>
 
       {/* 필터 탭 */}

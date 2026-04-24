@@ -1,5 +1,6 @@
 import { createClient } from '@/lib/supabase/server'
 import StarRating from '@/components/shop/StarRating'
+import RefreshButton from '@/components/admin/RefreshButton'
 
 export default async function AdminReviewsPage() {
   const supabase = await createClient()
@@ -15,11 +16,14 @@ export default async function AdminReviewsPage() {
 
   return (
     <div className="p-8">
-      <div className="flex items-baseline gap-3 mb-8">
-        <h1 className="text-xl font-semibold text-ink tracking-tight">리뷰 관리</h1>
-        {avgRating && (
-          <span className="text-sm text-ink-muted">평균 ★ {avgRating} ({reviews?.length}개)</span>
-        )}
+      <div className="flex items-center justify-between mb-8">
+        <div className="flex items-baseline gap-3">
+          <h1 className="text-xl font-semibold text-ink tracking-tight">리뷰 관리</h1>
+          {avgRating && (
+            <span className="text-sm text-ink-muted">평균 ★ {avgRating} ({reviews?.length}개)</span>
+          )}
+        </div>
+        <RefreshButton />
       </div>
 
       {reviews && reviews.length > 0 ? (

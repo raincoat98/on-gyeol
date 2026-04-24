@@ -2,6 +2,7 @@ import { createClient } from '@/lib/supabase/server'
 import OrderStatusSelect from '@/components/admin/OrderStatusSelect'
 import OrderDeliveryEditor from '@/components/admin/OrderDeliveryEditor'
 import DeleteOrderButton from '@/components/admin/DeleteOrderButton'
+import RefreshButton from '@/components/admin/RefreshButton'
 
 export const dynamic = 'force-dynamic'
 
@@ -91,7 +92,10 @@ export default async function AdminOrdersPage({
 
   return (
     <div className="p-8">
-      <h1 className="text-xl font-semibold text-ink mb-8 tracking-tight">주문 관리</h1>
+      <div className="flex items-center justify-between mb-8">
+        <h1 className="text-xl font-semibold text-ink tracking-tight">주문 관리</h1>
+        <RefreshButton />
+      </div>
 
       {/* 필터 탭 */}
       <div className="flex gap-2 mb-6 flex-wrap">
