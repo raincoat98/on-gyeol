@@ -173,6 +173,8 @@ export interface Database {
           phone: string
           message: string
           status: InquiryStatus
+          admin_reply: string | null
+          replied_at: string | null
           created_at: string
         }
         Insert: {
@@ -183,6 +185,8 @@ export interface Database {
           phone: string
           message: string
           status?: InquiryStatus
+          admin_reply?: string | null
+          replied_at?: string | null
           created_at?: string
         }
         Update: {
@@ -193,6 +197,8 @@ export interface Database {
           phone?: string
           message?: string
           status?: InquiryStatus
+          admin_reply?: string | null
+          replied_at?: string | null
           created_at?: string
         }
         Relationships: [

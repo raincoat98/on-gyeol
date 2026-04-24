@@ -42,7 +42,7 @@ export default async function MyPage() {
       .select('*, products(name, slug)')
       .eq('user_id', user.id)
       .order('created_at', { ascending: false })
-      .limit(10),
+      .limit(20),
     supabase
       .from('reviews')
       .select('order_item_id')
@@ -204,26 +204,39 @@ export default async function MyPage() {
           <div className="flex flex-col divide-y divide-line border-t border-line">
             {inquiries.map((inq) => {
               const product = inq.products as { name: string; slug: string } | null
-              const statusLabel: Record<string, string> = { pending: '대기', replied: '답변 완료', closed: '종료' }
+              const statusLabel: Record<string, string> = { pending: '답변 대기', replied: '답변 완료', closed: '종료' }
               const statusStyle: Record<string, string> = {
-                pending: 'text-ink-muted',
-                replied: 'text-emerald-600',
-                closed: 'text-ink-faint',
+                pending: 'bg-amber-50 text-amber-600',
+                replied: 'bg-emerald-50 text-emerald-600',
+                closed: 'bg-surface-muted text-ink-faint',
               }
               return (
-                <div key={inq.id} className="py-4">
-                  <div className="flex items-start justify-between gap-2 mb-1">
+                <div key={inq.id} className="py-5">
+                  {/* 문의 */}
+                  <div className="flex items-start justify-between gap-2 mb-2">
                     <p className="text-sm text-ink leading-relaxed flex-1">{inq.message}</p>
-                    <span className={`text-xs shrink-0 ${statusStyle[inq.status] ?? 'text-ink-muted'}`}>
+                    <span className={`text-[11px] font-semibold px-2 py-0.5 rounded-full shrink-0 ${statusStyle[inq.status] ?? 'bg-surface-muted text-ink-muted'}`}>
                       {statusLabel[inq.status] ?? inq.status}
                     </span>
                   </div>
                   {product && (
-                    <p className="text-xs text-ink-muted">상품: {product.name}</p>
+                    <p className="text-xs text-ink-muted mb-1">상품: {product.name}</p>
                   )}
-                  <p className="text-xs text-ink-faint mt-1">
+                  <p className="text-xs text-ink-faint">
                     {new Date(inq.created_at).toLocaleDateString('ko-KR')}
                   </p>
+                  {/* 관리자 답변 */}
+                  {inq.admin_reply && (
+                    <div className="mt-3 bg-emerald-50 rounded-xl px-4 py-3">
+                      <p className="text-[11px] font-semibold text-emerald-700 mb-1.5">답변</p>
+                      <p className="text-sm text-ink leading-relaxed whitespace-pre-wrap">{inq.admin_reply}</p>
+                      {inq.replied_at && (
+                        <p className="text-xs text-ink-faint mt-2">
+                          {new Date(inq.replied_at).toLocaleDateString('ko-KR')}
+                        </p>
+                      )}
+                    </div>
+                  )}
                 </div>
               )
             })}

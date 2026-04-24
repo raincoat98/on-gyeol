@@ -1,6 +1,6 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
 import { createClient } from '@/lib/supabase/client'
 import type { InquiryStatus } from '@/types'
@@ -26,6 +26,10 @@ const COLORS: Record<InquiryStatus, string> = {
 export default function InquiryStatusButton({ inquiryId, currentStatus }: { inquiryId: string; currentStatus: InquiryStatus }) {
   const [status, setStatus] = useState(currentStatus)
   const router = useRouter()
+
+  useEffect(() => {
+    setStatus(currentStatus)
+  }, [currentStatus])
 
   async function handleClick() {
     const supabase = createClient()
