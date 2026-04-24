@@ -193,7 +193,7 @@ function CheckoutContent() {
             ? items[0].productName
             : `${items[0].productName} 외 ${items.length - 1}건`,
         successUrl: `${window.location.origin}/order/complete?orderNumber=${orderNumber}`,
-        failUrl: `${window.location.origin}/checkout?error=payment_failed`,
+        failUrl: `${window.location.origin}/checkout?error=payment_failed${isBuyNow ? '&mode=buynow' : ''}`,
         customerName: shipping.name,
         customerMobilePhone: shipping.phone.replace(/-/g, ''),
       })
