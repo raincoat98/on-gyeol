@@ -105,9 +105,11 @@ export default async function HomePage() {
           </Link>
         </div>
         {newProducts.length > 0 ? (
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+          <div className="flex gap-4 overflow-x-auto pb-2 md:grid md:grid-cols-4 md:overflow-visible md:pb-0 -mx-4 px-4 md:mx-0 md:px-0">
             {newProducts.map((product) => (
-              <ProductCard key={product.id} product={product} />
+              <div key={product.id} className="w-[44vw] shrink-0 md:w-auto">
+                <ProductCard product={product} />
+              </div>
             ))}
           </div>
         ) : (
@@ -125,9 +127,11 @@ export default async function HomePage() {
                 더보기 →
               </Link>
             </div>
-            <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+            <div className="flex gap-4 overflow-x-auto pb-2 md:grid md:grid-cols-4 md:overflow-visible md:pb-0 -mx-4 px-4 md:mx-0 md:px-0">
               {featuredProducts.map((product) => (
-                <ProductCard key={product.id} product={product} />
+                <div key={product.id} className="w-[44vw] shrink-0 md:w-auto">
+                  <ProductCard product={product} />
+                </div>
               ))}
             </div>
           </div>
