@@ -16,7 +16,7 @@ export default function ProductCard({ product }: ProductCardProps) {
 
   return (
     <Link href={`/products/${product.slug}`} className="group block">
-      <div className="relative aspect-[3/4] bg-line rounded-lg overflow-hidden mb-3">
+      <div className="relative aspect-square md:aspect-3/4 bg-line rounded-lg overflow-hidden mb-3">
         {mainImage ? (
           <Image
             src={mainImage.image_url}
