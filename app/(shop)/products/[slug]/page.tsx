@@ -82,7 +82,7 @@ export default async function ProductDetailPage({
       <div className="grid grid-cols-1 md:grid-cols-2 gap-10">
         {/* 이미지 */}
         <div className="flex flex-col gap-3">
-          <div className="relative aspect-[3/4] bg-line rounded-xl overflow-hidden">
+          <div className="relative aspect-square md:aspect-[3/4] bg-line rounded-xl overflow-hidden">
             {mainImage ? (
               <Image
                 src={mainImage.image_url}
