@@ -1,18 +1,37 @@
 name: Supabase Keep Alive
 
 on:
+
   schedule:
-    - cron: '0 0 */5 * *'  # 5일마다 실행
-  workflow_dispatch:        # 수동 실행 가능
+
+    - cron: '0 0 */5 * *'
+
+  workflow_dispatch:
 
 jobs:
+
   ping:
+
     runs-on: ubuntu-latest
+
     steps:
+
       - name: Ping Supabase
+
         run: |
-          curl -s -o /dev/null \
-            -H "apikey: ${{ secrets.SUPABASE_ANON_KEY }}" \
-            -H "Authorization: Bearer ${{ secrets.SUPABASE_ANON_KEY }}" \
-            "${{ secrets.SUPABASE_URL }}/rest/v1/" \
-            && echo "Supabase is alive"
+
+          response=$(curl -s -o /dev/null -w "%{http_code}" \
+
+            "${{ secrets.SUPABASE_URL }}/auth/v1/health")
+
+          echo "Response code: $response"
+
+          if [ "$response" -ne 200 ]; then
+
+            echo "Ping failed"
+
+            exit 1
+
+          fi
+
+          echo "Supabase is alive." 
