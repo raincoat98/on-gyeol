@@ -1,9 +1,9 @@
-name: Keep Supabase Alive
+name: Supabase Keep Alive
 
 on:
   schedule:
-    - cron: '0 0 */3 * *'  # 3일마다 실행 (7일 정지 방지)
-  workflow_dispatch:
+    - cron: '0 0 */5 * *'  # 5일마다 실행
+  workflow_dispatch:        # 수동 실행 가능
 
 jobs:
   ping:
@@ -11,11 +11,8 @@ jobs:
     steps:
       - name: Ping Supabase
         run: |
-          response=$(curl -s -o /dev/null -w "%{http_code}" \
-            "${{ secrets.SUPABASE_URL }}/rest/v1/")
-          echo "Response code: $response"
-          if [ "$response" = "000" ] || [ "$response" -ge 500 ]; then
-            echo "Ping failed with status $response"
-            exit 1
-          fi
-          echo "Supabase is alive (status: $response)"
+          curl -sf \
+            -H "apikey: ${{ secrets.SUPABASE_ANON_KEY }}" \
+            -H "Authorization: Bearer ${{ secrets.SUPABASE_ANON_KEY }}" \
+            "${{ secrets.SUPABASE_URL }}/rest/v1/" \
+            && echo "Supabase is alive"
