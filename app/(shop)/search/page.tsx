@@ -3,7 +3,7 @@
 import { useState, useEffect, useRef, Suspense } from 'react'
 import { useRouter, useSearchParams } from 'next/navigation'
 import { Search, X } from 'lucide-react'
-import { createClient } from '@/lib/supabase/client'
+import { api } from '@/lib/api/client'
 import ProductCard from '@/components/shop/ProductCard'
 import type { ProductWithImages } from '@/types'
 
@@ -44,15 +44,15 @@ function SearchContent() {
 
     setLoading(true)
     timer.current = setTimeout(async () => {
-      const supabase = createClient()
-      const { data } = await supabase
-        .from('products')
-        .select('*, product_images(*), categories(*)')
-        .eq('status', 'active')
-        .ilike('name', `%${q}%`)
-        .order('created_at', { ascending: false })
-        .limit(40)
-      setProducts((data ?? []) as ProductWithImages[])
+      let results: ProductWithImages[]
+      try {
+        results = await api.get<ProductWithImages[]>(
+          `/products?status=active&search=${encodeURIComponent(q)}&limit=40`,
+        )
+      } catch {
+        results = []
+      }
+      setProducts(results)
       setSearched(true)
       setLoading(false)
     }, 300)

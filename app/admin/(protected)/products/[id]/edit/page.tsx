@@ -1,6 +1,7 @@
 import { notFound } from 'next/navigation'
-import { createClient } from '@/lib/supabase/server'
+import { apiFetch, apiFetchOrNull } from '@/lib/api/server'
 import ProductForm from '@/components/admin/ProductForm'
+import type { Category, ProductDetail } from '@/types'
 
 export default async function EditProductPage({
   params,
@@ -8,18 +9,10 @@ export default async function EditProductPage({
   params: Promise<{ id: string }>
 }) {
   const { id } = await params
-  const supabase = await createClient()
 
-  const [
-    { data: product },
-    { data: categories },
-    { data: images },
-    { data: options },
-  ] = await Promise.all([
-    supabase.from('products').select('*').eq('id', id).single(),
-    supabase.from('categories').select('*').order('sort_order'),
-    supabase.from('product_images').select('*').eq('product_id', id).order('sort_order'),
-    supabase.from('product_options').select('*').eq('product_id', id).order('created_at'),
+  const [product, categories] = await Promise.all([
+    apiFetchOrNull<ProductDetail>(`/products/${id}`),
+    apiFetch<Category[]>('/categories'),
   ])
 
   if (!product) notFound()
@@ -28,10 +21,10 @@ export default async function EditProductPage({
     <div className="p-8 max-w-3xl">
       <h1 className="text-xl font-semibold text-ink mb-8 tracking-tight">상품 수정</h1>
       <ProductForm
-        categories={categories ?? []}
+        categories={categories}
         initialData={product}
-        initialImages={images ?? []}
-        initialOptions={options ?? []}
+        initialImages={product.product_images}
+        initialOptions={product.product_options}
       />
     </div>
   )

@@ -1,16 +1,12 @@
-import { createClient } from '@/lib/supabase/server'
+import { apiFetch } from '@/lib/api/server'
 import StarRating from '@/components/shop/StarRating'
 import RefreshButton from '@/components/admin/RefreshButton'
+import type { Review } from '@/types'
 
 export default async function AdminReviewsPage() {
-  const supabase = await createClient()
-  const { data: reviews } = await supabase
-    .from('reviews')
-    .select('*, products(name, slug)')
-    .order('created_at', { ascending: false })
-    .limit(100)
+  const reviews = await apiFetch<Review[]>('/reviews?limit=100')
 
-  const avgRating = reviews && reviews.length > 0
+  const avgRating = reviews.length > 0
     ? (reviews.reduce((s, r) => s + r.rating, 0) / reviews.length).toFixed(1)
     : null
 

@@ -1,8 +1,8 @@
 import type { Metadata } from 'next'
 import { notFound } from 'next/navigation'
-import { createClient } from '@/lib/supabase/server'
+import { apiFetch, apiFetchOrNull } from '@/lib/api/server'
 import ProductCard from '@/components/shop/ProductCard'
-import type { ProductWithImages } from '@/types'
+import type { Category, ProductWithImages } from '@/types'
 
 export async function generateMetadata({
   params,
@@ -10,12 +10,7 @@ export async function generateMetadata({
   params: Promise<{ slug: string }>
 }): Promise<Metadata> {
   const { slug } = await params
-  const supabase = await createClient()
-  const { data: category } = await supabase
-    .from('categories')
-    .select()
-    .eq('slug', slug)
-    .single()
+  const category = await apiFetchOrNull<Category>(`/categories/slug/${slug}`)
 
   if (!category) return {}
   return {
@@ -31,18 +26,18 @@ export default async function CategoryPage({
 }) {
   const { slug } = await params
   if (slug === 'all') {
-    const supabase = await createClient()
-    const { data: products } = await supabase
-      .from('products')
-      .select('*, product_images(*), categories(*)')
-      .eq('status', 'active')
-      .order('created_at', { ascending: false })
+    let products: ProductWithImages[]
+    try {
+      products = await apiFetch<ProductWithImages[]>('/products?status=active&limit=200')
+    } catch {
+      products = []
+    }
 
     return (
       <div className="max-w-5xl mx-auto px-4 py-8">
         <h1 className="font-brand text-2xl font-bold text-ink mb-6">전체</h1>
         <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-          {(products as ProductWithImages[] ?? []).map((p) => (
+          {products.map((p) => (
             <ProductCard key={p.id} product={p} />
           ))}
         </div>
@@ -50,21 +45,18 @@ export default async function CategoryPage({
     )
   }
 
-  const supabase = await createClient()
-  const { data: category } = await supabase
-    .from('categories')
-    .select()
-    .eq('slug', slug)
-    .single()
+  const category = await apiFetchOrNull<Category>(`/categories/slug/${slug}`)
 
   if (!category) notFound()
 
-  const { data: products } = await supabase
-    .from('products')
-    .select('*, product_images(*), categories(*)')
-    .eq('status', 'active')
-    .eq('category_id', category.id)
-    .order('created_at', { ascending: false })
+  let products: ProductWithImages[]
+  try {
+    products = await apiFetch<ProductWithImages[]>(
+      `/products?status=active&categoryId=${category.id}&limit=200`,
+    )
+  } catch {
+    products = []
+  }
 
   return (
     <div className="max-w-5xl mx-auto px-4 py-8">
@@ -72,9 +64,9 @@ export default async function CategoryPage({
       {category.description && (
         <p className="text-sm text-ink-muted mb-6">{category.description}</p>
       )}
-      {(products as ProductWithImages[] ?? []).length > 0 ? (
+      {products.length > 0 ? (
         <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-          {(products as ProductWithImages[]).map((p) => (
+          {products.map((p) => (
             <ProductCard key={p.id} product={p} />
           ))}
         </div>

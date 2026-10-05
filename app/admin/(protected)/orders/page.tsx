@@ -1,8 +1,9 @@
-import { createClient } from '@/lib/supabase/server'
+import { apiFetch } from '@/lib/api/server'
 import OrderStatusSelect from '@/components/admin/OrderStatusSelect'
 import OrderDeliveryEditor from '@/components/admin/OrderDeliveryEditor'
 import DeleteOrderButton from '@/components/admin/DeleteOrderButton'
 import RefreshButton from '@/components/admin/RefreshButton'
+import type { OrderLog, OrderWithItems } from '@/types'
 
 export const dynamic = 'force-dynamic'
 
@@ -16,68 +17,26 @@ const STATUS_LABELS = {
 
 type OrderStatus = keyof typeof STATUS_LABELS
 
-type Log = {
-  id: string
-  action: string
-  detail: string | null
-  created_at: string
-}
-
-type OrderRow = {
-  id: string
-  order_number: string
-  customer_name: string
-  customer_phone: string
-  customer_address: string
-  customer_memo: string | null
-  total_amount: number
-  delivery_fee: number
-  status: OrderStatus
-  created_at: string
-  order_items: {
-    id: string
-    product_name: string
-    option_color: string | null
-    option_size: string | null
-    quantity: number
-    price: number
-  }[]
-}
-
 export default async function AdminOrdersPage({
   searchParams,
 }: {
   searchParams: Promise<{ status?: string }>
 }) {
   const params = await searchParams
-  const supabase = await createClient()
 
-  let query = supabase
-    .from('orders')
-    .select('*, order_items(*)')
-    .order('created_at', { ascending: false })
-    .limit(100)
+  const statusQuery = params.status && params.status in STATUS_LABELS ? `&status=${params.status}` : ''
+  const orders = await apiFetch<OrderWithItems[]>(`/orders?limit=100${statusQuery}`)
 
-  if (params.status && params.status in STATUS_LABELS) {
-    query = query.eq('status', params.status as OrderStatus)
-  }
+  const orderIds = orders.map((o) => o.id)
 
-  const { data: orders } = await query as { data: OrderRow[] | null }
-
-  const orderIds = (orders ?? []).map((o) => o.id)
-
-  const [{ data: counts }, { data: allLogs }] = await Promise.all([
-    supabase.from('orders').select('status'),
+  const [countMap, allLogs] = await Promise.all([
+    apiFetch<Record<string, number>>('/orders/counts'),
     orderIds.length > 0
-      ? supabase
-          .from('order_logs')
-          .select('*')
-          .in('order_id', orderIds)
-          .order('created_at', { ascending: false })
-      : Promise.resolve({ data: [] }),
+      ? apiFetch<OrderLog[]>(`/order-logs?orderIds=${orderIds.join(',')}`)
+      : Promise.resolve([] as OrderLog[]),
   ])
 
-  const logsByOrder = ((allLogs ?? []) as (Log & { order_id: string })[]).reduce<Record<string, Log[]>>(
+  const logsByOrder = allLogs.reduce<Record<string, OrderLog[]>>(
     (acc, log) => {
       acc[log.order_id] = [...(acc[log.order_id] ?? []), log]
       return acc
@@ -85,10 +44,7 @@ export default async function AdminOrdersPage({
     {}
   )
 
-  const countMap = (counts ?? []).reduce<Record<string, number>>((acc, o) => {
-    acc[o.status] = (acc[o.status] ?? 0) + 1
-    return acc
-  }, {})
+  const totalCount = Object.values(countMap).reduce((sum, n) => sum + n, 0)
 
   return (
     <div className="p-8">
@@ -105,7 +61,7 @@ export default async function AdminOrdersPage({
             !params.status ? 'bg-surface-dark text-white border-ink' : 'border-line text-ink-muted hover:border-ink hover:text-ink'
           }`}
         >
-          전체 ({counts?.length ?? 0})
+          전체 ({totalCount})
         </a>
         {(Object.entries(STATUS_LABELS) as [OrderStatus, string][]).map(([v, label]) => (
           <a

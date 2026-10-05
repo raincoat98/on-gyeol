@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
-import { createClient } from '@/lib/supabase/client'
+import { api } from '@/lib/api/client'
 import type { InquiryStatus } from '@/types'
 
 const NEXT_STATUS: Record<InquiryStatus, InquiryStatus> = {
@@ -32,9 +32,8 @@ export default function InquiryStatusButton({ inquiryId, currentStatus }: { inqu
   }, [currentStatus])
 
   async function handleClick() {
-    const supabase = createClient()
     const next = NEXT_STATUS[status]
-    await supabase.from('inquiries').update({ status: next }).eq('id', inquiryId)
+    await api.patch(`/inquiries/${inquiryId}`, { status: next })
     setStatus(next)
     router.refresh()
   }

@@ -1,7 +1,8 @@
-import { createClient } from '@/lib/supabase/server'
+import { apiFetch } from '@/lib/api/server'
 import InquiryStatusButton from '@/components/admin/InquiryStatusButton'
 import InquiryReplyForm from '@/components/admin/InquiryReplyForm'
 import RefreshButton from '@/components/admin/RefreshButton'
+import type { Inquiry, InquiryStatus } from '@/types'
 
 const STATUS_LABELS = {
   pending: '미답변',
@@ -17,25 +18,13 @@ export default async function AdminInquiriesPage({
   searchParams: Promise<{ status?: string }>
 }) {
   const params = await searchParams
-  const supabase = await createClient()
 
-  const { data: counts } = await supabase.from('inquiries').select('status')
-  const countMap = (counts ?? []).reduce<Record<string, number>>((acc, i) => {
-    acc[i.status] = (acc[i.status] ?? 0) + 1
-    return acc
-  }, {})
+  const [countMap, inquiries] = await Promise.all([
+    apiFetch<Record<InquiryStatus, number>>('/inquiries/counts'),
+    apiFetch<Inquiry[]>(`/inquiries?limit=100${params.status ? `&status=${params.status}` : ''}`),
+  ])
 
-  let query = supabase
-    .from('inquiries')
-    .select('*, products(name, slug)')
-    .order('created_at', { ascending: false })
-    .limit(100)
-
-  if (params.status && params.status in STATUS_LABELS) {
-    query = query.eq('status', params.status as InquiryStatusKey)
-  }
-
-  const { data: inquiries } = await query
+  const totalCount = Object.values(countMap).reduce((sum, n) => sum + n, 0)
 
   return (
     <div className="p-8">
@@ -52,7 +41,7 @@ export default async function AdminInquiriesPage({
             !params.status ? 'bg-surface-dark text-white border-ink' : 'border-line text-ink-muted hover:border-ink hover:text-ink'
           }`}
         >
-          전체 ({counts?.length ?? 0})
+          전체 ({totalCount})
         </a>
         {(Object.entries(STATUS_LABELS) as [InquiryStatusKey, string][]).map(([v, label]) => (
           <a

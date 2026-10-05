@@ -2,6 +2,7 @@
 
 import { useState } from 'react'
 import { useRouter } from 'next/navigation'
+import { api, ApiError } from '@/lib/api/client'
 
 interface Props {
   orderId: string
@@ -41,17 +42,20 @@ export default function EditShippingButton({ orderId, current }: Props) {
     setLoading(true)
     setError('')
 
-    const res = await fetch('/api/orders/update-shipping', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ orderId, customerName: name, customerPhone: phone, customerAddress: address, customerMemo: memo }),
-    })
-    const data = await res.json()
-    setLoading(false)
-
-    if (!res.ok) { setError(data.error ?? '수정에 실패했습니다.'); return }
-    setOpen(false)
-    router.refresh()
+    try {
+      await api.patch(`/orders/${orderId}/shipping`, {
+        customerName: name,
+        customerPhone: phone,
+        customerAddress: address,
+        customerMemo: memo,
+      })
+      setOpen(false)
+      router.refresh()
+    } catch (error) {
+      setError(error instanceof ApiError ? error.message : '수정에 실패했습니다.')
+    } finally {
+      setLoading(false)
+    }
   }
 
   return (

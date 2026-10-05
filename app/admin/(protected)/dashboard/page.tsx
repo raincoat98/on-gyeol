@@ -1,60 +1,47 @@
-import { createClient } from '@/lib/supabase/server'
+import { apiFetch } from '@/lib/api/server'
 import Link from 'next/link'
 import RefreshButton from '@/components/admin/RefreshButton'
+import type { Inquiry, OrderWithItems } from '@/types'
 
 export const dynamic = 'force-dynamic'
 
 export default async function DashboardPage() {
-  const supabase = await createClient()
-
-  const todayStart = new Date()
-  todayStart.setHours(0, 0, 0, 0)
-
-  const [
-    { count: pendingInquiries },
-    { count: paidOrders },
-    { data: todayOrders },
-    { data: recentInquiries },
-    { data: recentPaidOrders },
-  ] = await Promise.all([
-    supabase.from('inquiries').select('*', { count: 'exact', head: true }).eq('status', 'pending'),
-    supabase.from('orders').select('*', { count: 'exact', head: true }).eq('status', 'paid'),
-    supabase.from('orders').select('total_amount').gte('created_at', todayStart.toISOString()).neq('status', 'cancelled'),
-    supabase.from('inquiries')
-      .select('*, products(name)')
-      .eq('status', 'pending')
-      .order('created_at', { ascending: false })
-      .limit(5),
-    supabase.from('orders')
-      .select('*, order_items(*)')
-      .eq('status', 'paid')
-      .order('created_at', { ascending: false })
-      .limit(5),
-  ])
-
-  const todayCount = todayOrders?.length ?? 0
-  const todayRevenue = todayOrders?.reduce((sum, o) => sum + o.total_amount, 0) ?? 0
+  const {
+    pendingInquiryCount,
+    paidOrderCount,
+    todayOrderCount,
+    todaySales,
+    recentInquiries,
+    paidOrders: recentPaidOrders,
+  } = await apiFetch<{
+    pendingInquiryCount: number
+    paidOrderCount: number
+    todayOrderCount: number
+    todaySales: number
+    recentInquiries: Inquiry[]
+    paidOrders: OrderWithItems[]
+  }>('/admin/dashboard')
 
   const stats = [
     {
       label: '오늘 주문',
-      value: todayCount,
-      sub: `${todayRevenue.toLocaleString()}원`,
+      value: todayOrderCount,
+      sub: `${todaySales.toLocaleString()}원`,
       numColor: 'text-ink',
       href: '/admin/orders',
     },
     {
       label: '결제완료 (처리 필요)',
-      value: paidOrders ?? 0,
+      value: paidOrderCount,
       sub: '배송 준비 대기',
-      numColor: paidOrders ? 'text-blue-600' : 'text-ink',
+      numColor: paidOrderCount ? 'text-blue-600' : 'text-ink',
       href: '/admin/orders?status=paid',
     },
     {
       label: '미답변 문의',
-      value: pendingInquiries ?? 0,
+      value: pendingInquiryCount,
       sub: '답변 필요',
-      numColor: pendingInquiries ? 'text-rose-500' : 'text-ink',
+      numColor: pendingInquiryCount ? 'text-rose-500' : 'text-ink',
       href: '/admin/inquiries?status=pending',
     },
   ]

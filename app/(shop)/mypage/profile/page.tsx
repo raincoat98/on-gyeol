@@ -3,8 +3,9 @@
 import { useState, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
 import Link from 'next/link'
-import { createClient } from '@/lib/supabase/client'
+import { api } from '@/lib/api/client'
 import { useAuthStore } from '@/lib/store/auth'
+import type { User } from '@/types'
 
 export default function ProfilePage() {
   const router = useRouter()
@@ -21,15 +22,11 @@ export default function ProfilePage() {
   useEffect(() => {
     if (!hydrated) return
     if (!userId) { router.push('/auth/login?next=/mypage/profile'); return }
-    const supabase = createClient()
-    supabase.from('profiles').select('full_name, phone').eq('id', userId).limit(1).then(({ data }) => {
-      const row = data?.[0]
-      if (row) {
-        setName(row.full_name ?? '')
-        setPhone(row.phone ?? '')
-      }
+    api.get<User>('/auth/me').then((user) => {
+      setName(user.full_name ?? '')
+      setPhone(user.phone ?? '')
       setLoading(false)
-    })
+    }).catch(() => setLoading(false))
   }, [hydrated, userId, router])
 
   async function handleSave(e: React.FormEvent) {
@@ -37,15 +34,16 @@ export default function ProfilePage() {
     if (!userId) return
     setSaving(true)
     setMessage('')
-    const supabase = createClient()
-    const { error } = await supabase
-      .from('profiles')
-      .update({ full_name: name, phone })
-      .eq('id', userId)
-    setSaving(false)
-    if (error) console.error('profile upsert error:', error)
-    if (!error) setFullName(name)
-    setMessage(error ? '저장에 실패했습니다.' : '저장되었습니다.')
+    try {
+      await api.patch<User>('/auth/me', { fullName: name, phone })
+      setFullName(name)
+      setMessage('저장되었습니다.')
+    } catch (error) {
+      console.error('profile update error:', error)
+      setMessage('저장에 실패했습니다.')
+    } finally {
+      setSaving(false)
+    }
   }
 
   if (loading) return null

@@ -1,7 +1,8 @@
 import { notFound, redirect } from 'next/navigation'
 import Link from 'next/link'
 import Image from 'next/image'
-import { createClient } from '@/lib/supabase/server'
+import { apiFetch, apiFetchOrNull, apiFetchUser } from '@/lib/api/server'
+import type { OrderItem, Review, User } from '@/types'
 import ReviewForm from '@/components/shop/ReviewForm'
 
 export default async function WriteReviewPage({
@@ -12,30 +13,19 @@ export default async function WriteReviewPage({
   const { order_item_id } = await searchParams
   if (!order_item_id) notFound()
 
-  const supabase = await createClient()
-  const { data: { user } } = await supabase.auth.getUser()
+  const user = await apiFetchUser<User>()
   if (!user) redirect('/auth/login?next=/mypage/reviews')
 
   // 주문 아이템 검증: 본인 것, delivered 상태, 리뷰 미작성
-  const { data: item } = await supabase
-    .from('order_items')
-    .select('*, orders!inner(user_id, status)')
-    .eq('id', order_item_id)
-    .single()
-
+  const item = await apiFetchOrNull<OrderItem>(`/order-items/${order_item_id}`)
   if (!item) notFound()
 
-  const order = item.orders as { user_id: string | null; status: string }
-  if (order.user_id !== user.id) notFound()
+  const order = item.orders
+  if (!order || order.user_id !== user.id) notFound()
   if (order.status !== 'delivered') notFound()
 
-  const { data: existing } = await supabase
-    .from('reviews')
-    .select('id')
-    .eq('order_item_id', order_item_id)
-    .maybeSingle()
-
-  if (existing) redirect('/mypage/reviews')
+  const existing = await apiFetch<Review[]>(`/reviews?orderItemId=${order_item_id}&limit=1`)
+  if (existing.length > 0) redirect('/mypage/reviews')
 
   return (
     <div className="max-w-lg mx-auto px-4 py-12">

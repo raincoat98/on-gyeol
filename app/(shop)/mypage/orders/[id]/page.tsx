@@ -1,8 +1,8 @@
 import { notFound, redirect } from 'next/navigation'
 import Link from 'next/link'
 import Image from 'next/image'
-import { createClient } from '@/lib/supabase/server'
-import type { OrderWithItems } from '@/types'
+import { apiFetchOrNull, apiFetchUser } from '@/lib/api/server'
+import type { OrderWithItems, User } from '@/types'
 import CancelOrderButton from '@/components/shop/CancelOrderButton'
 import EditShippingButton from '@/components/shop/EditShippingButton'
 
@@ -27,20 +27,13 @@ export default async function OrderDetailPage({
   params: Promise<{ id: string }>
 }) {
   const { id } = await params
-  const supabase = await createClient()
-  const { data: { user } } = await supabase.auth.getUser()
+  const user = await apiFetchUser<User>()
   if (!user) redirect('/auth/login?next=/mypage')
 
-  const { data: order } = await supabase
-    .from('orders')
-    .select('*, order_items(*)')
-    .eq('id', id)
-    .eq('user_id', user.id)
-    .single()
-
+  const order = await apiFetchOrNull<OrderWithItems>(`/orders/${id}`)
   if (!order) notFound()
 
-  const o = order as OrderWithItems
+  const o = order
   const currentStep = STATUS_STEPS.indexOf(o.status)
   const isCancelled = o.status === 'cancelled'
   const isPending = o.status === 'pending'

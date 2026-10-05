@@ -1,5 +1,5 @@
 import type { Metadata } from 'next'
-import { createClient } from '@/lib/supabase/server'
+import { apiFetch } from '@/lib/api/server'
 import ProductCard from '@/components/shop/ProductCard'
 import type { ProductWithImages } from '@/types'
 
@@ -15,27 +15,24 @@ interface SearchParams {
 }
 
 async function getProducts(searchParams: SearchParams): Promise<ProductWithImages[]> {
-  const supabase = await createClient()
+  const query = new URLSearchParams({ status: 'active', limit: '60' })
 
-  let query = supabase
-    .from('products')
-    .select('*, product_images(*), categories(*)')
-    .eq('status', 'active')
-
-  if (searchParams.filter === 'featured') {
-    query = query.eq('is_featured', true)
-  }
+  if (searchParams.filter === 'featured') query.set('featured', 'true')
+  if (searchParams.category) query.set('categorySlug', searchParams.category)
 
   if (searchParams.sort === 'price_asc') {
-    query = query.order('price', { ascending: true })
+    query.set('sort', 'price.asc')
   } else if (searchParams.sort === 'price_desc') {
-    query = query.order('price', { ascending: false })
+    query.set('sort', 'price.desc')
   } else {
-    query = query.order('created_at', { ascending: false })
+    query.set('sort', 'created_at.desc')
   }
 
-  const { data } = await query.limit(60)
-  return (data ?? []) as ProductWithImages[]
+  try {
+    return await apiFetch<ProductWithImages[]>(`/products?${query.toString()}`)
+  } catch {
+    return []
+  }
 }
 
 export default async function ProductsPage({

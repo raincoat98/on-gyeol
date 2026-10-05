@@ -3,10 +3,13 @@
 import { useState } from 'react'
 import { useRouter } from 'next/navigation'
 import Link from 'next/link'
-import { createClient } from '@/lib/supabase/client'
+import { api, ApiError } from '@/lib/api/client'
+import { useAuthStore } from '@/lib/store/auth'
+import type { User } from '@/types'
 
 export default function SignupPage() {
   const router = useRouter()
+  const setUser = useAuthStore((s) => s.setUser)
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
   const [passwordConfirm, setPasswordConfirm] = useState('')
@@ -14,7 +17,6 @@ export default function SignupPage() {
   const [phone, setPhone] = useState('')
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState('')
-  const [success, setSuccess] = useState(false)
 
   async function handleSignup(e: React.FormEvent) {
     e.preventDefault()
@@ -30,50 +32,17 @@ export default function SignupPage() {
     }
 
     setLoading(true)
-    const supabase = createClient()
-    const { data, error: authError } = await supabase.auth.signUp({
-      email,
-      password,
-      options: {
-        data: { full_name: name, phone },
-        emailRedirectTo: `${window.location.origin}/auth/callback?next=/`,
-      },
-    })
-    setLoading(false)
-
-    if (authError) {
-      if (authError.message.includes('already registered')) {
-        setError('이미 가입된 이메일입니다.')
-      } else {
-        setError('회원가입에 실패했습니다. 다시 시도해주세요.')
-      }
+    try {
+      const user = await api.post<User>('/auth/signup', { email, password, fullName: name, phone })
+      setUser(user)
+    } catch (err) {
+      setError(err instanceof ApiError ? err.message : '회원가입에 실패했습니다. 다시 시도해주세요.')
+      setLoading(false)
       return
     }
-
-    // 이메일 확인 불필요 설정인 경우 바로 로그인 상태
-    if (data.session) {
-      // 프로필 업데이트
-      await supabase.from('profiles').update({ full_name: name, phone }).eq('id', data.user!.id)
-      router.push('/')
-      router.refresh()
-    } else {
-      setSuccess(true)
-    }
-  }
-
-  if (success) {
-    return (
-      <div className="max-w-sm mx-auto px-4 py-16 text-center">
-        <h2 className="font-brand text-2xl font-bold text-ink mb-4">이메일을 확인해주세요</h2>
-        <p className="text-ink-sub text-sm leading-relaxed mb-6">
-          {email}로 확인 메일을 발송했습니다.<br />
-          메일의 링크를 클릭하면 가입이 완료됩니다.
-        </p>
-        <Link href="/auth/login" className="text-ink font-semibold hover:underline text-sm">
-          로그인 페이지로
-        </Link>
-      </div>
-    )
+    setLoading(false)
+    router.push('/')
+    router.refresh()
   }
 
   return (

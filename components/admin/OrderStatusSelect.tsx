@@ -1,7 +1,7 @@
 'use client'
 
 import { useState } from 'react'
-import { createClient } from '@/lib/supabase/client'
+import { api } from '@/lib/api/client'
 import { useRouter } from 'next/navigation'
 
 type Status = 'pending' | 'paid' | 'shipping' | 'delivered' | 'cancelled'
@@ -35,8 +35,7 @@ export default function OrderStatusSelect({
 
   async function handleChange(next: Status) {
     setLoading(true)
-    const supabase = createClient()
-    await supabase.from('orders').update({ status: next }).eq('id', orderId)
+    await api.patch(`/orders/${orderId}`, { status: next })
     setStatus(next)
     setLoading(false)
     router.refresh()
