@@ -1,0 +1,13 @@
+node_modules
+dist
+uploads
+.git
+.env
+.env.*
+!.env.example
+*.md
+docker-compose.yml
+Dockerfile
+.dockerignore
+*.tsbuildinfo
+.DS_Store
