@@ -15,6 +15,9 @@ npm run seed                  # 카테고리/상품/관리자 계정 시드
 npm run start:dev             # http://localhost:4000
 ```
 
+프로덕션은 루트 [`docker-compose.yml`](../docker-compose.yml) + [`server/Dockerfile`](Dockerfile) 로
+빌드되며, 컨테이너 기동 시 `prisma migrate deploy` 를 자동 실행한다. 자세한 내용은 루트 README 참고.
+
 ## 환경변수
 
 | 키 | 설명 | 기본값 |
