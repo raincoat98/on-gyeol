@@ -1,7 +1,7 @@
 import type { Metadata } from 'next'
 import Link from 'next/link'
 import Image from 'next/image'
-import { createClient } from '@/lib/supabase/server'
+import { apiFetch } from '@/lib/api/server'
 import ProductCard from '@/components/shop/ProductCard'
 import type { ProductWithImages } from '@/types'
 
@@ -11,26 +11,19 @@ export const metadata: Metadata = {
 }
 
 async function getFeaturedProducts(): Promise<ProductWithImages[]> {
-  const supabase = await createClient()
-  const { data } = await supabase
-    .from('products')
-    .select('*, product_images(*), categories(*)')
-    .eq('status', 'active')
-    .eq('is_featured', true)
-    .order('created_at', { ascending: false })
-    .limit(8)
-  return (data ?? []) as ProductWithImages[]
+  try {
+    return await apiFetch<ProductWithImages[]>('/products?status=active&featured=true&limit=8')
+  } catch {
+    return []
+  }
 }
 
 async function getNewProducts(): Promise<ProductWithImages[]> {
-  const supabase = await createClient()
-  const { data } = await supabase
-    .from('products')
-    .select('*, product_images(*), categories(*)')
-    .eq('status', 'active')
-    .order('created_at', { ascending: false })
-    .limit(8)
-  return (data ?? []) as ProductWithImages[]
+  try {
+    return await apiFetch<ProductWithImages[]>('/products?status=active&limit=8')
+  } catch {
+    return []
+  }
 }
 
 const CATEGORIES = [

@@ -2,6 +2,7 @@
 
 import { useState } from 'react'
 import { useRouter } from 'next/navigation'
+import { api, ApiError } from '@/lib/api/client'
 
 export default function CancelOrderButton({ orderId }: { orderId: string }) {
   const router = useRouter()
@@ -13,19 +14,14 @@ export default function CancelOrderButton({ orderId }: { orderId: string }) {
     setLoading(true)
     setError('')
 
-    const res = await fetch('/api/orders/cancel', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ orderId }),
-    })
-    const data = await res.json()
-    setLoading(false)
-
-    if (!res.ok) {
-      setError(data.error ?? '취소에 실패했습니다.')
-      return
+    try {
+      await api.post(`/orders/${orderId}/cancel`)
+      router.push('/mypage/orders')
+    } catch (error) {
+      setError(error instanceof ApiError ? error.message : '취소에 실패했습니다.')
+    } finally {
+      setLoading(false)
     }
-    router.push('/mypage/orders')
   }
 
   return (

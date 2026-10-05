@@ -4,7 +4,7 @@ import { useState, useEffect, useCallback } from 'react'
 import { useRouter } from 'next/navigation'
 import Link from 'next/link'
 import { Plus, Trash2, Star, Pencil } from 'lucide-react'
-import { createClient } from '@/lib/supabase/client'
+import { api } from '@/lib/api/client'
 import { useAuthStore } from '@/lib/store/auth'
 import type { Address } from '@/types'
 
@@ -30,7 +30,6 @@ export default function AddressesPage() {
   const router = useRouter()
   const userId = useAuthStore((s) => s.userId)
   const hydrated = useAuthStore((s) => s.hydrated)
-  const supabase = createClient()
 
   const [addresses, setAddresses] = useState<Address[]>([])
   const [loading, setLoading] = useState(true)
@@ -40,20 +39,15 @@ export default function AddressesPage() {
   const [saving, setSaving] = useState(false)
   const [error, setError] = useState('')
 
-  const loadAddresses = useCallback(async (uid: string) => {
-    const { data } = await supabase
-      .from('addresses')
-      .select('*')
-      .eq('user_id', uid)
-      .order('is_default', { ascending: false })
-      .order('created_at', { ascending: true })
-    setAddresses(data ?? [])
-  }, [supabase])
+  const loadAddresses = useCallback(async () => {
+    const data = await api.get<Address[]>('/addresses')
+    setAddresses(data)
+  }, [])
 
   useEffect(() => {
     if (!hydrated) return
     if (!userId) { router.push('/auth/login?next=/mypage/addresses'); return }
-    loadAddresses(userId).then(() => setLoading(false))
+    loadAddresses().then(() => setLoading(false))
   }, [hydrated, userId, router, loadAddresses])
 
   function openAdd() {
@@ -88,54 +82,58 @@ export default function AddressesPage() {
     setError('')
     setSaving(true)
 
-    if (form.is_default) {
-      await supabase.from('addresses').update({ is_default: false }).eq('user_id', userId)
+    const body = {
+      label: form.label,
+      recipientName: form.recipient_name,
+      phone: form.phone,
+      address: form.address,
+      isDefault: form.is_default,
     }
-
-    if (editingId) {
-      const { error: updateError } = await supabase.from('addresses').update({
-        label: form.label,
-        recipient_name: form.recipient_name,
-        phone: form.phone,
-        address: form.address,
-        is_default: form.is_default,
-      }).eq('id', editingId)
+    try {
+      if (editingId) {
+        await api.patch<Address>(`/addresses/${editingId}`, body)
+      } else {
+        await api.post<Address>('/addresses', body)
+      }
+    } catch (err) {
+      console.error('save address error:', err)
       setSaving(false)
-      if (updateError) { setError('수정에 실패했습니다.'); return }
-    } else {
-      const { error: insertError } = await supabase.from('addresses').insert({
-        user_id: userId,
-        label: form.label,
-        recipient_name: form.recipient_name,
-        phone: form.phone,
-        address: form.address,
-        is_default: form.is_default,
-      })
-      setSaving(false)
-      if (insertError) { setError('저장에 실패했습니다.'); return }
+      setError(editingId ? '수정에 실패했습니다.' : '저장에 실패했습니다.')
+      return
     }
-
+    setSaving(false)
     closeForm()
-    await loadAddresses(userId)
+    await loadAddresses()
   }
 
   async function handleDelete(id: string) {
     if (!userId) return
-    await supabase.from('addresses').delete().eq('id', id)
-    await loadAddresses(userId)
+    try {
+      await api.del(`/addresses/${id}`)
+    } catch (err) {
+      console.error('delete address error:', err)
+    }
+    await loadAddresses()
   }
 
   async function handleSetDefault(id: string) {
     if (!userId) return
-    await supabase.from('addresses').update({ is_default: false }).eq('user_id', userId)
-    await supabase.from('addresses').update({ is_default: true }).eq('id', id)
-    await loadAddresses(userId)
+    try {
+      await api.patch(`/addresses/${id}`, { isDefault: true })
+    } catch (err) {
+      console.error('set default address error:', err)
+    }
+    await loadAddresses()
   }
 
   async function handleUnsetDefault(id: string) {
     if (!userId) return
-    await supabase.from('addresses').update({ is_default: false }).eq('id', id)
-    await loadAddresses(userId)
+    try {
+      await api.patch(`/addresses/${id}`, { isDefault: false })
+    } catch (err) {
+      console.error('unset default address error:', err)
+    }
+    await loadAddresses()
   }
 
   if (loading) return null

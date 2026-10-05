@@ -1,20 +1,15 @@
 import { redirect } from 'next/navigation'
 import Link from 'next/link'
 import Image from 'next/image'
-import { createClient } from '@/lib/supabase/server'
-import type { Review } from '@/types'
+import { apiFetch, apiFetchUser } from '@/lib/api/server'
+import type { Review, User } from '@/types'
 import StarRating from '@/components/shop/StarRating'
 
 export default async function MyReviewsPage() {
-  const supabase = await createClient()
-  const { data: { user } } = await supabase.auth.getUser()
+  const user = await apiFetchUser<User>()
   if (!user) redirect('/auth/login?next=/mypage/reviews')
 
-  const { data: reviews } = await supabase
-    .from('reviews')
-    .select('*, products(name, slug, product_images(image_url, is_main))')
-    .eq('user_id', user.id)
-    .order('created_at', { ascending: false })
+  const reviews = await apiFetch<Review[]>('/reviews/mine')
 
   return (
     <div className="max-w-2xl mx-auto px-4 py-12">

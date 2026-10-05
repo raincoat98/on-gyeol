@@ -3,8 +3,8 @@
 import { useState, useRef } from 'react'
 import { useRouter } from 'next/navigation'
 import Image from 'next/image'
-import { createClient } from '@/lib/supabase/client'
-import type { Category } from '@/types'
+import { api } from '@/lib/api/client'
+import type { Category, Product, ProductImage, ProductOption } from '@/types'
 
 interface ProductFormProps {
   categories: Category[]
@@ -91,100 +91,67 @@ export default function ProductForm({ categories, initialData, initialImages = [
     }
 
     setLoading(true)
-    const supabase = createClient()
 
-    let productId: string
+    try {
+      let productId: string
 
-    if (isEdit) {
-      // 수정
-      const { error } = await supabase
-        .from('products')
-        .update({
+      if (isEdit) {
+        // 수정
+        await api.patch<Product>(`/products/${initialData!.id}`, {
           name,
-          category_id: categoryId || null,
+          categoryId: categoryId || null,
           price: Number(price),
-          sale_price: salePrice ? Number(salePrice) : null,
-          short_description: shortDesc || null,
+          salePrice: salePrice ? Number(salePrice) : null,
+          shortDescription: shortDesc || null,
           description: description || null,
-          status: status as 'active' | 'soldout' | 'hidden',
-          is_featured: isFeatured,
-          seo_title: name,
-          seo_description: shortDesc || null,
+          status,
+          isFeatured,
+          seoTitle: name,
+          seoDescription: shortDesc || null,
         })
-        .eq('id', initialData!.id)
-
-      if (error) {
-        setLoading(false)
-        setMessage('상품 수정 중 오류가 발생했습니다.')
-        return
-      }
-      productId = initialData!.id
-    } else {
-      // 신규 등록
-      const slug = slugify(name)
-      const { data: product, error: productError } = await supabase
-        .from('products')
-        .insert({
+        productId = initialData!.id
+      } else {
+        // 신규 등록
+        const slug = slugify(name)
+        const product = await api.post<Product>('/products', {
           name,
           slug,
-          category_id: categoryId || null,
+          categoryId: categoryId || null,
           price: Number(price),
-          sale_price: salePrice ? Number(salePrice) : null,
-          short_description: shortDesc || null,
+          salePrice: salePrice ? Number(salePrice) : null,
+          shortDescription: shortDesc || null,
           description: description || null,
-          status: status as 'active' | 'soldout' | 'hidden',
-          is_featured: isFeatured,
-          seo_title: name,
-          seo_description: shortDesc || null,
+          status,
+          isFeatured,
+          seoTitle: name,
+          seoDescription: shortDesc || null,
         })
-        .select()
-        .single()
-
-      if (productError || !product) {
-        setLoading(false)
-        setMessage('상품 등록 중 오류가 발생했습니다.')
-        return
+        productId = product.id
       }
-      productId = product.id
-    }
 
-    // 새 이미지 업로드
-    const existingCount = existingImages.length
-    for (let i = 0; i < images.length; i++) {
-      const file = images[i]
-      const ext = file.name.split('.').pop()
-      const path = `products/${productId}/${Date.now()}-${i}.${ext}`
-      const { data: uploadData } = await supabase.storage
-        .from('product-images')
-        .upload(path, file)
-
-      if (uploadData) {
-        const { data: { publicUrl } } = supabase.storage
-          .from('product-images')
-          .getPublicUrl(path)
-
-        await supabase.from('product_images').insert({
-          product_id: productId,
-          image_url: publicUrl,
-          sort_order: existingCount + i,
-          is_main: existingCount === 0 && i === 0,
-        })
+      // 새 이미지 업로드 — 서버가 파일 저장과 product_image 생성을 함께 처리한다.
+      const existingCount = existingImages.length
+      for (let i = 0; i < images.length; i++) {
+        const form = new FormData()
+        form.append('file', images[i])
+        form.append('isMain', String(existingCount === 0 && i === 0))
+        await api.upload<ProductImage>(`/products/${productId}/images`, form)
       }
-    }
 
-    // 옵션: 기존 삭제 후 재등록
-    await supabase.from('product_options').delete().eq('product_id', productId)
-    const validOptions = options.filter((o) => o.color || o.size)
-    if (validOptions.length > 0) {
-      await supabase.from('product_options').insert(
+      // 옵션 일괄 교체
+      const validOptions = options.filter((o) => o.color || o.size)
+      await api.put<ProductOption[]>(
+        `/products/${productId}/options`,
         validOptions.map((o) => ({
-          product_id: productId,
           color: o.color || null,
           size: o.size || null,
-          stock_qty: Number(o.stock_qty) || 99,
-          status: 'active' as const,
+          stockQty: Number(o.stock_qty) || 99,
         }))
       )
+    } catch {
+      setLoading(false)
+      setMessage(isEdit ? '상품 수정 중 오류가 발생했습니다.' : '상품 등록 중 오류가 발생했습니다.')
+      return
     }
 
     setLoading(false)
@@ -215,8 +182,7 @@ export default function ProductForm({ categories, initialData, initialImages = [
                     type="button"
                     onClick={async (e) => {
                       e.stopPropagation()
-                      const supabase = createClient()
-                      await supabase.from('product_images').delete().eq('id', img.id)
+                      await api.del(`/product-images/${img.id}`)
                       setExistingImages((prev) => prev.filter((i) => i.id !== img.id))
                     }}
                     className="absolute top-1 right-1 bg-black/50 text-white rounded-full w-5 h-5 text-xs flex items-center justify-center opacity-0 group-hover:opacity-100 transition"

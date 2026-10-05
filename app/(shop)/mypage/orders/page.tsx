@@ -3,7 +3,7 @@
 import { useState, useEffect, useCallback, useMemo } from 'react'
 import Link from 'next/link'
 import { Search } from 'lucide-react'
-import { createClient } from '@/lib/supabase/client'
+import { api } from '@/lib/api/client'
 import { useAuthStore } from '@/lib/store/auth'
 import { useRouter } from 'next/navigation'
 import type { OrderWithItems } from '@/types'
@@ -51,16 +51,14 @@ export default function OrdersPage() {
   const fetchOrders = useCallback(async (fromDate: string, toDate: string) => {
     if (!userId) return
     setLoading(true)
-    const supabase = createClient()
-    const { data } = await supabase
-      .from('orders')
-      .select('*, order_items(*)')
-      .eq('user_id', userId)
-      .gte('created_at', `${fromDate}T00:00:00`)
-      .lte('created_at', `${toDate}T23:59:59`)
-      .order('created_at', { ascending: false })
-    setOrders((data ?? []) as OrderWithItems[])
-    setLoading(false)
+    try {
+      const data = await api.get<OrderWithItems[]>(`/orders/mine?from=${fromDate}&to=${toDate}&limit=50`)
+      setOrders(data)
+    } catch (err) {
+      console.error('fetch orders error:', err)
+    } finally {
+      setLoading(false)
+    }
   }, [userId])
 
   useEffect(() => {
@@ -77,7 +75,7 @@ export default function OrdersPage() {
   }
 
   const filtered = useMemo(() => {
-    let result = showCancelled ? orders : orders.filter((o) => o.status !== 'cancelled')
+    const result = showCancelled ? orders : orders.filter((o) => o.status !== 'cancelled')
     const q = keyword.trim().toLowerCase()
     if (!q) return result
     return result.filter((order) =>

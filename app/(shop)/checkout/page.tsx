@@ -6,7 +6,7 @@ import Link from 'next/link'
 import Image from 'next/image'
 import { ChevronRight, X } from 'lucide-react'
 import { loadTossPayments, ANONYMOUS } from '@tosspayments/tosspayments-sdk'
-import { createClient } from '@/lib/supabase/client'
+import { api } from '@/lib/api/client'
 import { useCartStore } from '@/lib/store/cart'
 import type { CartItem } from '@/lib/store/cart'
 import { useAuthStore } from '@/lib/store/auth'
@@ -61,21 +61,16 @@ function CheckoutContent() {
 
   useEffect(() => {
     if (!userId) return
-    const supabase = createClient()
-    supabase
-      .from('addresses')
-      .select('*')
-      .eq('user_id', userId)
-      .order('is_default', { ascending: false })
-      .order('created_at', { ascending: true })
-      .then(({ data: addrs }) => {
-        const list = addrs ?? []
+    api
+      .get<Address[]>('/addresses')
+      .then((list) => {
         setAddresses(list)
         const def = list.find((a) => a.is_default) ?? list[0]
         if (def) {
           setShipping({ name: def.recipient_name, phone: def.phone, address: def.address, savedAddressId: def.id })
         }
       })
+      .catch(() => {})
   }, [userId])
 
   if (!hydrated) return null
@@ -133,52 +128,38 @@ function CheckoutContent() {
     let createdOrderId: string | null = null
     try {
       if (userId && saveCustom && !shipping.savedAddressId) {
-        const supabase = createClient()
         const duplicate = addresses.some(
           (a) => a.recipient_name === shipping.name && a.phone === shipping.phone && a.address === shipping.address
         )
         if (!duplicate) {
-          await supabase.from('addresses').insert({
-            user_id: userId,
+          await api.post('/addresses', {
             label: '최근 배송지',
-            recipient_name: shipping.name,
+            recipientName: shipping.name,
             phone: shipping.phone,
             address: shipping.address,
-            is_default: addresses.length === 0,
+            isDefault: false,
           })
         }
       }
 
-      const res = await fetch('/api/orders/create', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          userId,
-          customerName: shipping.name,
-          customerPhone: shipping.phone,
-          customerAddress: shipping.address,
-          customerMemo: memo,
-          totalAmount: total,
-          deliveryFee,
-          items: items.map((i) => ({
-            productId: i.productId,
-            productName: i.productName,
-            productSlug: i.productSlug,
-            imageUrl: i.imageUrl,
-            optionColor: i.color,
-            optionSize: i.size,
-            price: i.price,
-            quantity: i.quantity,
-          })),
-        }),
+      const { orderId, orderNumber } = await api.post<{ orderId: string; orderNumber: string }>('/orders', {
+        customerName: shipping.name,
+        customerPhone: shipping.phone,
+        customerAddress: shipping.address,
+        customerMemo: memo,
+        totalAmount: total,
+        deliveryFee,
+        items: items.map((i) => ({
+          productId: i.productId,
+          productName: i.productName,
+          productSlug: i.productSlug,
+          imageUrl: i.imageUrl,
+          optionColor: i.color,
+          optionSize: i.size,
+          price: i.price,
+          quantity: i.quantity,
+        })),
       })
-
-      if (!res.ok) {
-        const data = await res.json()
-        throw new Error(data.error ?? '주문 생성에 실패했습니다.')
-      }
-
-      const { orderId, orderNumber } = await res.json()
       createdOrderId = orderId
 
       const tossPayments = await loadTossPayments(CLIENT_KEY)
@@ -202,11 +183,7 @@ function CheckoutContent() {
       else clearCart()
     } catch (err) {
       if (createdOrderId) {
-        fetch('/api/orders/delete-pending', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ orderId: createdOrderId }),
-        })
+        api.del(`/orders/${createdOrderId}`).catch(() => {})
       }
       const code = (err as { code?: string })?.code ?? ''
       const msg = err instanceof Error ? err.message : '오류가 발생했습니다.'

@@ -2,7 +2,8 @@
 
 import { useState } from 'react'
 import { useRouter } from 'next/navigation'
-import { createClient } from '@/lib/supabase/client'
+import { api } from '@/lib/api/client'
+import type { User } from '@/types'
 
 export default function AdminLoginPage() {
   const router = useRouter()
@@ -15,14 +16,25 @@ export default function AdminLoginPage() {
     e.preventDefault()
     setError('')
     setLoading(true)
-    const supabase = createClient()
-    const { error: authError } = await supabase.auth.signInWithPassword({ email, password })
-    setLoading(false)
-    if (authError) {
+    let user: User | null = null
+    try {
+      user = await api.post<User>('/auth/login', { email, password })
+    } catch {
       setError('이메일 또는 비밀번호가 올바르지 않습니다.')
+    }
+    if (!user) {
+      setLoading(false)
       return
     }
+    if (user.role !== 'admin') {
+      setError('관리자 권한이 없습니다.')
+      await api.post('/auth/logout')
+      setLoading(false)
+      return
+    }
+    setLoading(false)
     router.push('/admin/dashboard')
+    router.refresh()
   }
 
   return (

@@ -1,4 +1,4 @@
-import { createClient } from '@/lib/supabase/server'
+import { apiFetch } from '@/lib/api/server'
 import Link from 'next/link'
 import ProductStatusToggle from '@/components/admin/ProductStatusToggle'
 import RefreshButton from '@/components/admin/RefreshButton'
@@ -10,20 +10,10 @@ export default async function AdminProductsPage({
   searchParams: Promise<{ filter?: string }>
 }) {
   const params = await searchParams
-  const supabase = await createClient()
+  const statusQuery =
+    params.filter === 'soldout' || params.filter === 'hidden' ? `&status=${params.filter}` : ''
 
-  let query = supabase
-    .from('products')
-    .select('*, product_images(*), categories(*)')
-    .order('created_at', { ascending: false })
-
-  if (params.filter === 'soldout') {
-    query = query.eq('status', 'soldout')
-  } else if (params.filter === 'hidden') {
-    query = query.eq('status', 'hidden')
-  }
-
-  const { data: products } = await query.limit(100)
+  const products = await apiFetch<ProductWithImages[]>(`/products?limit=100${statusQuery}`)
 
   return (
     <div className="p-8">
@@ -63,7 +53,7 @@ export default async function AdminProductsPage({
 
       {products && products.length > 0 ? (
         <div className="flex flex-col gap-2">
-          {(products as ProductWithImages[]).map((product) => {
+          {products.map((product) => {
             const mainImage = product.product_images?.find((img) => img.is_main) ?? product.product_images?.[0]
             return (
               <div key={product.id} className="bg-white border border-line rounded-2xl p-4 flex items-center gap-4 hover:shadow-sm transition-shadow">

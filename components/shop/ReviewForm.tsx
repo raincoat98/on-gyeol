@@ -2,16 +2,17 @@
 
 import { useState } from 'react'
 import { useRouter } from 'next/navigation'
-import { createClient } from '@/lib/supabase/client'
+import { api } from '@/lib/api/client'
 import StarRating from './StarRating'
 
 interface ReviewFormProps {
   productId: string
   orderItemId: string
-  userId: string
+  // 서버가 쿠키로 사용자를 판별하므로 더 이상 사용하지 않는다. 기존 호출부 호환을 위해 optional 유지.
+  userId?: string
 }
 
-export default function ReviewForm({ productId, orderItemId, userId }: ReviewFormProps) {
+export default function ReviewForm({ productId, orderItemId }: ReviewFormProps) {
   const router = useRouter()
   const [rating, setRating] = useState(0)
   const [content, setContent] = useState('')
@@ -25,22 +26,20 @@ export default function ReviewForm({ productId, orderItemId, userId }: ReviewFor
     if (content.trim().length < 10) { setError('내용을 10자 이상 입력해 주세요.'); return }
 
     setLoading(true)
-    const supabase = createClient()
-    const { error: dbError } = await supabase.from('reviews').insert({
-      product_id: productId,
-      order_item_id: orderItemId,
-      user_id: userId,
-      rating,
-      content: content.trim(),
-    })
-    setLoading(false)
-
-    if (dbError) {
+    try {
+      await api.post('/reviews', {
+        productId,
+        orderItemId,
+        rating,
+        content: content.trim(),
+      })
+      router.push('/mypage/reviews')
+      router.refresh()
+    } catch {
       setError('리뷰 등록 중 오류가 발생했습니다.')
-      return
+    } finally {
+      setLoading(false)
     }
-    router.push('/mypage/reviews')
-    router.refresh()
   }
 
   return (

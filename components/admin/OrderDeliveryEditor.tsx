@@ -2,7 +2,7 @@
 
 import { useState } from 'react'
 import { useRouter } from 'next/navigation'
-import { createClient } from '@/lib/supabase/client'
+import { api } from '@/lib/api/client'
 import { ChevronDown, ChevronUp, Pencil, X, Check, Clock } from 'lucide-react'
 
 type Log = {
@@ -35,7 +35,6 @@ export default function OrderDeliveryEditor({
 
   async function handleSave() {
     setSaving(true)
-    const supabase = createClient()
 
     // 변경 항목 파악
     const changes: string[] = []
@@ -47,21 +46,21 @@ export default function OrderDeliveryEditor({
     if (changes.length === 0) { setEditing(false); setSaving(false); return }
 
     // 배송정보 업데이트
-    await supabase.from('orders').update({
-      customer_name: form.name,
-      customer_phone: form.phone,
-      customer_address: form.address,
-      customer_memo: form.memo || null,
-    }).eq('id', orderId)
+    await api.patch(`/orders/${orderId}`, {
+      customerName: form.name,
+      customerPhone: form.phone,
+      customerAddress: form.address,
+      customerMemo: form.memo || null,
+    })
 
     // 로그 기록
-    const { data: log } = await supabase.from('order_logs').insert({
-      order_id: orderId,
+    const log = await api.post<Log>('/order-logs', {
+      orderId,
       action: '배송정보 수정',
       detail: changes.join('\n'),
-    }).select().single()
+    })
 
-    if (log) setLogs([log as Log, ...logs])
+    setLogs([log, ...logs])
 
     setSaving(false)
     setEditing(false)

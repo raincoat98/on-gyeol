@@ -4,6 +4,7 @@ import { useEffect, useState, Suspense } from 'react'
 import { useSearchParams } from 'next/navigation'
 import Link from 'next/link'
 import { CheckCircle, XCircle } from 'lucide-react'
+import { api, ApiError } from '@/lib/api/client'
 
 function CompleteContent() {
   const searchParams = useSearchParams()
@@ -29,23 +30,14 @@ function CompleteContent() {
       return
     }
 
-    fetch('/api/orders/confirm', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ paymentKey, orderId, amount: Number(amount) }),
-    })
-      .then((res) => res.json())
-      .then((data) => {
-        if (data.success) {
-          setStatus('success')
-        } else {
-          setStatus('error')
-          setErrorMsg(data.error ?? '결제 확인에 실패했습니다.')
-        }
+    api
+      .post(`/orders/${orderId}/confirm`, { paymentKey, amount: Number(amount) })
+      .then(() => {
+        setStatus('success')
       })
-      .catch(() => {
+      .catch((error) => {
         setStatus('error')
-        setErrorMsg('네트워크 오류가 발생했습니다.')
+        setErrorMsg(error instanceof ApiError ? error.message : '네트워크 오류가 발생했습니다.')
       })
   }, [paymentKey, orderId, amount, orderNumber])
 

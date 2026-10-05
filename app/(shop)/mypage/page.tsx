@@ -1,7 +1,7 @@
 import { redirect } from 'next/navigation'
 import Link from 'next/link'
-import { createClient } from '@/lib/supabase/server'
-import type { OrderWithItems } from '@/types'
+import { apiFetch, apiFetchUser } from '@/lib/api/server'
+import type { Inquiry, OrderWithItems, Review, User } from '@/types'
 import LogoutButton from '@/components/shop/LogoutButton'
 import StarRating from '@/components/shop/StarRating'
 import { Package, MessageCircle, ChevronRight, Star } from 'lucide-react'
@@ -23,33 +23,16 @@ const ORDER_STATUS_STYLE: Record<string, string> = {
 }
 
 export default async function MyPage() {
-  const supabase = await createClient()
-  const { data: { user } } = await supabase.auth.getUser()
-
+  const user = await apiFetchUser<User>()
   if (!user) redirect('/auth/login?next=/mypage')
 
-  const [{ data: profile }, { data: orders }, { data: inquiries }, { data: reviews }] = await Promise.all([
-    supabase.from('profiles').select('*').eq('id', user.id).single(),
-    supabase
-      .from('orders')
-      .select('*, order_items(*)')
-      .eq('user_id', user.id)
-      .neq('status', 'cancelled')
-      .order('created_at', { ascending: false })
-      .limit(10),
-    supabase
-      .from('inquiries')
-      .select('*, products(name, slug)')
-      .eq('user_id', user.id)
-      .order('created_at', { ascending: false })
-      .limit(20),
-    supabase
-      .from('reviews')
-      .select('order_item_id')
-      .eq('user_id', user.id),
+  const [orders, inquiries, reviews] = await Promise.all([
+    apiFetch<OrderWithItems[]>('/orders/mine?excludeCancelled=true&limit=10'),
+    apiFetch<Inquiry[]>('/inquiries/mine?limit=20'),
+    apiFetch<Review[]>('/reviews/mine'),
   ])
 
-  const reviewedItemIds = new Set((reviews ?? []).map((r) => r.order_item_id).filter(Boolean))
+  const reviewedItemIds = new Set(reviews.map((r) => r.order_item_id).filter(Boolean))
 
   return (
     <div className="max-w-2xl mx-auto px-4 py-10">
@@ -59,7 +42,7 @@ export default async function MyPage() {
         <div className="flex items-end justify-between mb-1">
           <div>
             <p className="text-xs text-ink-muted mb-1 tracking-widest uppercase">My Account</p>
-            <p className="text-xl font-semibold text-ink">{profile?.full_name ?? '회원'}</p>
+            <p className="text-xl font-semibold text-ink">{user.full_name ?? '회원'}</p>
             <p className="text-sm text-ink-muted mt-0.5">{user.email}</p>
           </div>
           <div className="flex items-center gap-3">
@@ -131,7 +114,7 @@ export default async function MyPage() {
           </div>
         ) : (
           <div className="flex flex-col divide-y divide-line">
-            {(orders as OrderWithItems[]).map((order) => (
+            {orders.map((order) => (
               <div key={order.id} className="py-5">
                 <div className="flex items-center justify-between mb-2">
                   <div className="flex items-center gap-2">

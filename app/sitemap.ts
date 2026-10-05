@@ -1,18 +1,23 @@
 import type { MetadataRoute } from 'next'
-import { createClient } from '@/lib/supabase/server'
+import { apiFetch } from '@/lib/api/server'
+import type { Category, Product } from '@/types'
 
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
-  const supabase = await createClient()
   const baseUrl = 'https://ongyeol.com'
 
-  const { data: products } = await supabase
-    .from('products')
-    .select('slug, updated_at')
-    .eq('status', 'active')
+  let products: Pick<Product, 'slug' | 'updated_at'>[]
+  try {
+    products = await apiFetch<Pick<Product, 'slug' | 'updated_at'>[]>('/products?status=active')
+  } catch {
+    products = []
+  }
 
-  const { data: categories } = await supabase
-    .from('categories')
-    .select('slug')
+  let categories: Pick<Category, 'slug'>[]
+  try {
+    categories = await apiFetch<Pick<Category, 'slug'>[]>('/categories')
+  } catch {
+    categories = []
+  }
 
   const staticPages: MetadataRoute.Sitemap = [
     { url: baseUrl, lastModified: new Date(), changeFrequency: 'daily', priority: 1 },
@@ -22,14 +27,14 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     { url: `${baseUrl}/contact`, lastModified: new Date(), changeFrequency: 'monthly', priority: 0.4 },
   ]
 
-  const categoryPages: MetadataRoute.Sitemap = (categories ?? []).map((cat) => ({
+  const categoryPages: MetadataRoute.Sitemap = categories.map((cat) => ({
     url: `${baseUrl}/category/${cat.slug}`,
     lastModified: new Date(),
     changeFrequency: 'weekly',
     priority: 0.8,
   }))
 
-  const productPages: MetadataRoute.Sitemap = (products ?? []).map((p) => ({
+  const productPages: MetadataRoute.Sitemap = products.map((p) => ({
     url: `${baseUrl}/products/${p.slug}`,
     lastModified: new Date(p.updated_at),
     changeFrequency: 'weekly',

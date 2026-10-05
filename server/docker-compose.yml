@@ -1,0 +1,21 @@
+services:
+  db:
+    image: postgres:16-alpine
+    container_name: ongyeol-postgres
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: ongyeol
+      POSTGRES_PASSWORD: ongyeol
+      POSTGRES_DB: ongyeol
+    ports:
+      - '5433:5432'
+    volumes:
+      - ongyeol-pgdata:/var/lib/postgresql/data
+    healthcheck:
+      test: ['CMD-SHELL', 'pg_isready -U ongyeol -d ongyeol']
+      interval: 5s
+      timeout: 5s
+      retries: 10
+
+volumes:
+  ongyeol-pgdata:

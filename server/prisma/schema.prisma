@@ -1,0 +1,223 @@
+// 온결 쇼핑몰 스키마 — 기존 Supabase 마이그레이션(001~007)을 PostgreSQL + Prisma 로 이관한 것.
+// RLS/트리거/auth.users 는 제거되었고, 권한 검사는 NestJS 서비스 계층에서 수행한다.
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model Category {
+  id          String   @id @default(uuid()) @db.Uuid
+  name        String
+  slug        String   @unique
+  description String?
+  sortOrder   Int      @default(0) @map("sort_order")
+  createdAt   DateTime @default(now()) @map("created_at")
+
+  products Product[]
+
+  @@map("categories")
+}
+
+model Product {
+  id               String   @id @default(uuid()) @db.Uuid
+  name             String
+  slug             String   @unique
+  categoryId       String?  @map("category_id") @db.Uuid
+  price            Int
+  salePrice        Int?     @map("sale_price")
+  shortDescription String?  @map("short_description")
+  description      String?
+  status           String   @default("active") // active | soldout | hidden
+  isFeatured       Boolean  @default(false) @map("is_featured")
+  seoTitle         String?  @map("seo_title")
+  seoDescription   String?  @map("seo_description")
+  createdAt        DateTime @default(now()) @map("created_at")
+  updatedAt        DateTime @updatedAt @map("updated_at")
+
+  category       Category?       @relation(fields: [categoryId], references: [id], onDelete: SetNull)
+  productImages  ProductImage[]
+  productOptions ProductOption[]
+  inquiries      Inquiry[]
+  reviews        Review[]
+  orderItems     OrderItem[]
+
+  @@index([categoryId])
+  @@map("products")
+}
+
+model ProductImage {
+  id        String   @id @default(uuid()) @db.Uuid
+  productId String   @map("product_id") @db.Uuid
+  imageUrl  String   @map("image_url")
+  sortOrder Int      @default(0) @map("sort_order")
+  isMain    Boolean  @default(false) @map("is_main")
+  createdAt DateTime @default(now()) @map("created_at")
+
+  product Product @relation(fields: [productId], references: [id], onDelete: Cascade)
+
+  @@index([productId])
+  @@map("product_images")
+}
+
+model ProductOption {
+  id        String   @id @default(uuid()) @db.Uuid
+  productId String   @map("product_id") @db.Uuid
+  color     String?
+  size      String?
+  stockQty  Int      @default(0) @map("stock_qty")
+  status    String   @default("active")
+  createdAt DateTime @default(now()) @map("created_at")
+
+  product Product @relation(fields: [productId], references: [id], onDelete: Cascade)
+
+  @@index([productId])
+  @@map("product_options")
+}
+
+model Inquiry {
+  id           String    @id @default(uuid()) @db.Uuid
+  productId    String?   @map("product_id") @db.Uuid
+  userId       String?   @map("user_id") @db.Uuid
+  customerName String    @map("customer_name")
+  phone        String
+  message      String
+  status       String    @default("pending") // pending | replied | closed
+  adminReply   String?   @map("admin_reply")
+  repliedAt    DateTime? @map("replied_at")
+  createdAt    DateTime  @default(now()) @map("created_at")
+
+  product Product? @relation(fields: [productId], references: [id], onDelete: SetNull)
+  user    User?    @relation(fields: [userId], references: [id], onDelete: SetNull)
+
+  @@index([status])
+  @@index([userId])
+  @@map("inquiries")
+}
+
+model Banner {
+  id        String   @id @default(uuid()) @db.Uuid
+  title     String
+  imageUrl  String   @map("image_url")
+  linkUrl   String?  @map("link_url")
+  isActive  Boolean  @default(true) @map("is_active")
+  sortOrder Int      @default(0) @map("sort_order")
+  createdAt DateTime @default(now()) @map("created_at")
+
+  @@map("banners")
+}
+
+model User {
+  id           String   @id @default(uuid()) @db.Uuid
+  email        String   @unique
+  passwordHash String   @map("password_hash")
+  role         String   @default("customer") // admin | customer
+  fullName     String?  @map("full_name")
+  phone        String?
+  createdAt    DateTime @default(now()) @map("created_at")
+  updatedAt    DateTime @updatedAt @map("updated_at")
+
+  addresses Address[]
+  orders    Order[]
+  reviews   Review[]
+  inquiries Inquiry[]
+
+  @@map("users")
+}
+
+model Address {
+  id            String   @id @default(uuid()) @db.Uuid
+  userId        String   @map("user_id") @db.Uuid
+  label         String   @default("집")
+  recipientName String   @map("recipient_name")
+  phone         String
+  address       String
+  isDefault     Boolean  @default(false) @map("is_default")
+  createdAt     DateTime @default(now()) @map("created_at")
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+  @@map("addresses")
+}
+
+model Order {
+  id              String   @id @default(uuid()) @db.Uuid
+  orderNumber     String   @unique @map("order_number")
+  userId          String?  @map("user_id") @db.Uuid
+  customerName    String   @map("customer_name")
+  customerPhone   String   @map("customer_phone")
+  customerAddress String   @map("customer_address")
+  customerMemo    String?  @map("customer_memo")
+  totalAmount     Int      @map("total_amount")
+  deliveryFee     Int      @default(3000) @map("delivery_fee")
+  status          String   @default("pending") // pending | paid | shipping | delivered | cancelled
+  paymentKey      String?  @map("payment_key")
+  paymentMethod   String?  @map("payment_method")
+  createdAt       DateTime @default(now()) @map("created_at")
+  updatedAt       DateTime @updatedAt @map("updated_at")
+
+  user       User?       @relation(fields: [userId], references: [id], onDelete: SetNull)
+  orderItems OrderItem[]
+  orderLogs  OrderLog[]
+
+  @@index([userId])
+  @@index([status])
+  @@map("orders")
+}
+
+model OrderItem {
+  id          String   @id @default(uuid()) @db.Uuid
+  orderId     String   @map("order_id") @db.Uuid
+  productId   String?  @map("product_id") @db.Uuid
+  productName String   @map("product_name")
+  productSlug String   @map("product_slug")
+  imageUrl    String?  @map("image_url")
+  optionColor String?  @map("option_color")
+  optionSize  String?  @map("option_size")
+  price       Int
+  quantity    Int      @default(1)
+  createdAt   DateTime @default(now()) @map("created_at")
+
+  order   Order    @relation(fields: [orderId], references: [id], onDelete: Cascade)
+  product Product? @relation(fields: [productId], references: [id], onDelete: SetNull)
+  reviews Review[]
+
+  @@index([orderId])
+  @@map("order_items")
+}
+
+model OrderLog {
+  id        String   @id @default(uuid()) @db.Uuid
+  orderId   String   @map("order_id") @db.Uuid
+  action    String
+  detail    String?
+  createdAt DateTime @default(now()) @map("created_at")
+
+  order Order @relation(fields: [orderId], references: [id], onDelete: Cascade)
+
+  @@index([orderId])
+  @@map("order_logs")
+}
+
+model Review {
+  id          String   @id @default(uuid()) @db.Uuid
+  productId   String   @map("product_id") @db.Uuid
+  orderItemId String?  @map("order_item_id") @db.Uuid
+  userId      String   @map("user_id") @db.Uuid
+  rating      Int
+  content     String
+  createdAt   DateTime @default(now()) @map("created_at")
+
+  product   Product    @relation(fields: [productId], references: [id], onDelete: Cascade)
+  orderItem OrderItem? @relation(fields: [orderItemId], references: [id], onDelete: SetNull)
+  user      User       @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([productId])
+  @@index([userId])
+  @@map("reviews")
+}

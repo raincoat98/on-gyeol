@@ -1,7 +1,7 @@
 'use client'
 
 import { useState } from 'react'
-import { createClient } from '@/lib/supabase/client'
+import { api } from '@/lib/api/client'
 
 interface InquiryFormProps {
   productId: string
@@ -23,23 +23,19 @@ export default function InquiryForm({ productId, productName }: InquiryFormProps
     }
 
     setLoading(true)
-    const supabase = createClient()
-    const { data: { user } } = await supabase.auth.getUser()
-    const { error: dbError } = await supabase.from('inquiries').insert({
-      product_id: productId || undefined,
-      user_id: user?.id ?? null,
-      customer_name: form.name,
-      phone: form.phone,
-      message: form.message,
-      status: 'pending',
-    })
-
-    setLoading(false)
-    if (dbError) {
+    try {
+      await api.post('/inquiries', {
+        productId: productId || undefined,
+        customerName: form.name,
+        phone: form.phone,
+        message: form.message,
+      })
+      setDone(true)
+    } catch {
       setError('문의 등록 중 오류가 발생했습니다. 다시 시도해 주세요.')
-      return
+    } finally {
+      setLoading(false)
     }
-    setDone(true)
   }
 
   if (done) {

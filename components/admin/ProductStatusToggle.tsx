@@ -2,7 +2,7 @@
 
 import { useState } from 'react'
 import { useRouter } from 'next/navigation'
-import { createClient } from '@/lib/supabase/client'
+import { api } from '@/lib/api/client'
 import type { ProductStatus } from '@/types'
 
 interface Props {
@@ -17,9 +17,8 @@ export default function ProductStatusToggle({ productId, currentStatus }: Props)
 
   async function toggleSoldout() {
     setLoading(true)
-    const supabase = createClient()
     const newStatus: ProductStatus = status === 'soldout' ? 'active' : 'soldout'
-    await supabase.from('products').update({ status: newStatus }).eq('id', productId)
+    await api.patch(`/products/${productId}`, { status: newStatus })
     setStatus(newStatus)
     setLoading(false)
     router.refresh()

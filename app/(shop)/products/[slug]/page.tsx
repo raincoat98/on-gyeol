@@ -1,32 +1,26 @@
 import type { Metadata } from 'next'
 import { notFound } from 'next/navigation'
 import Image from 'next/image'
-import { createClient } from '@/lib/supabase/server'
+import { apiFetch, apiFetchOrNull } from '@/lib/api/server'
 import InquiryForm from '@/components/shop/InquiryForm'
 import ProductOptions from '@/components/shop/ProductOptions'
 import StarRating from '@/components/shop/StarRating'
-import type { ProductDetail } from '@/types'
+import type { ProductDetail, Review } from '@/types'
 
 async function getProduct(slug: string): Promise<ProductDetail | null> {
-  const supabase = await createClient()
-  const { data } = await supabase
-    .from('products')
-    .select('*, product_images(*), categories(*), product_options(*)')
-    .eq('slug', slug)
-    .neq('status', 'hidden')
-    .single()
-  return data as ProductDetail | null
+  try {
+    return await apiFetchOrNull<ProductDetail>(`/products/slug/${slug}`)
+  } catch {
+    return null
+  }
 }
 
-async function getReviews(productId: string) {
-  const supabase = await createClient()
-  const { data } = await supabase
-    .from('reviews')
-    .select('*')
-    .eq('product_id', productId)
-    .order('created_at', { ascending: false })
-    .limit(20)
-  return data ?? []
+async function getReviews(productId: string): Promise<Review[]> {
+  try {
+    return await apiFetch<Review[]>(`/reviews?productId=${productId}&limit=20`)
+  } catch {
+    return []
+  }
 }
 
 export async function generateMetadata({
