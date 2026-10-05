@@ -68,8 +68,8 @@ docker compose --env-file .env.production up -d --build
 | `api` 볼륨 | – | `uploads` (업로드 이미지 영구 저장) |
 
 - Tunnel Public Hostname **하나만** 추가한다:
-  `ongyeol.cloudrainit.com` → `http://host.docker.internal:4500`.
-- 브라우저는 공개 주소 `NEXT_PUBLIC_API_URL=https://ongyeol.cloudrainit.com/api`,
+  `on-gyeol.cloudrainit.com` → `http://host.docker.internal:4500`.
+- 브라우저는 공개 주소 `NEXT_PUBLIC_API_URL=https://on-gyeol.cloudrainit.com/api`,
   서버 컴포넌트(SSR)는 내부 주소 `API_URL=http://api:4000` 로 호출한다.
 - 단일 오리진이므로 인증 쿠키(`SameSite=Lax` + `secure`)와 CORS 제약이 없다.
 - `NEXT_PUBLIC_*` 는 빌드 시 번들에 인라인되므로 값 변경 시 `--build` 로 재빌드해야 한다.
