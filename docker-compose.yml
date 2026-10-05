@@ -1,0 +1,66 @@
+services:
+  nginx:
+    image: nginx:1.29-alpine
+    restart: unless-stopped
+    volumes:
+      - ./nginx/nginx.conf:/etc/nginx/nginx.conf:ro
+    ports:
+      # 유일한 공개 진입점. Cloudflare Tunnel → host.docker.internal:4500
+      - '4500:80'
+    depends_on:
+      - web
+      - api
+    networks:
+      - default
+
+  api:
+    build:
+      context: ./server
+    image: ongyeol-api:latest
+    restart: unless-stopped
+    env_file:
+      - .env.production
+    environment:
+      NODE_ENV: production
+      PORT: '4000'
+    volumes:
+      # 업로드 이미지 영구 저장 (PUBLIC_API_URL + /uploads/**)
+      - uploads:/app/uploads
+    expose:
+      - '4000'
+    networks:
+      - default
+      # prod-postgres 컨테이너와 같은 네트워크 → DATABASE_URL 의 호스트명 `db`
+      - prod-postgres
+
+  web:
+    build:
+      context: .
+      args:
+        # NEXT_PUBLIC_* 는 빌드 시 번들에 인라인된다.
+        NEXT_PUBLIC_API_URL: ${NEXT_PUBLIC_API_URL}
+        NEXT_PUBLIC_TOSS_CLIENT_KEY: ${NEXT_PUBLIC_TOSS_CLIENT_KEY}
+    image: ongyeol-web:latest
+    restart: unless-stopped
+    env_file:
+      - .env.production
+    environment:
+      NODE_ENV: production
+      # env_file 의 PORT 가 새어 들어와도 standalone server.js 는 3000 을 쓴다.
+      PORT: '3000'
+      # 서버 컴포넌트/SSR 은 컨테이너 네트워크 내부 주소로 API 를 호출한다.
+      API_URL: http://api:4000
+    expose:
+      - '3000'
+    depends_on:
+      - api
+    networks:
+      - default
+
+volumes:
+  uploads:
+
+networks:
+  prod-postgres:
+    external: true
+    name: prod-postgres_default
