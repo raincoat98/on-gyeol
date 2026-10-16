@@ -1,4 +1,25 @@
 services:
+  db:
+    image: postgres:16-alpine
+    container_name: ongyeol-postgres
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: ongyeol
+      POSTGRES_PASSWORD: ongyeol
+      POSTGRES_DB: ongyeol
+    ports:
+      # 호스트 로컬 개발/도구용 접속 포트 유지
+      - '5433:5432'
+    volumes:
+      - ongyeol-pgdata:/var/lib/postgresql/data
+    healthcheck:
+      test: ['CMD-SHELL', 'pg_isready -U ongyeol -d ongyeol']
+      interval: 5s
+      timeout: 3s
+      retries: 10
+    networks:
+      - default
+
   nginx:
     image: nginx:1.29-alpine
     restart: unless-stopped
@@ -28,10 +49,11 @@ services:
       - uploads:/app/uploads
     expose:
       - '4000'
+    depends_on:
+      db:
+        condition: service_healthy
     networks:
       - default
-      # prod-postgres 컨테이너와 같은 네트워크 → DATABASE_URL 의 호스트명 `db`
-      - prod-postgres
 
   web:
     build:
@@ -59,8 +81,6 @@ services:
 
 volumes:
   uploads:
-
-networks:
-  prod-postgres:
+  ongyeol-pgdata:
+    name: server_ongyeol-pgdata
     external: true
-    name: prod-postgres_default

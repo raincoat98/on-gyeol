@@ -44,31 +44,26 @@ npm run dev               # http://localhost:3000
 
 ## 3. 프로덕션 배포 (Docker)
 
-`nginx`(유일한 공개 진입점), `web`(Next.js standalone), `api`(NestJS) 세 컨테이너로 실행한다.
-`api` 는 같은 머신의 `prod-postgres` 컨테이너(`~/dev/postgres/prod`)와 `prod-postgres_default`
-네트워크를 공유해 `db:5432` 로 접속하고, 공개는 Cloudflare Tunnel(`~/dev/cloudflared`)이 담당한다.
-
-초기 1회 전용 DB 를 만든다(`app_rw` 소유, 기존 `app` DB 의 `app_probe` 와 충돌 방지):
-
-```bash
-docker exec prod-postgres psql -U postgres \
-  -c "CREATE DATABASE ongyeol OWNER app_rw ENCODING 'UTF8'"
-```
+`nginx`(유일한 공개 진입점), `web`(Next.js standalone), `api`(NestJS), `db`(PostgreSQL `ongyeol-postgres`)
+네 컨테이너가 같은 Docker Compose 네트워크(`default`)에서 실행된다.
+공개는 Cloudflare Tunnel(`~/dev/cloudflared`)이 담당한다.
 
 ```bash
 cp .env.production.example .env.production   # DATABASE_URL, JWT_SECRET 등 채우기
 docker compose --env-file .env.production up -d --build
 ```
 
-| 서비스 | 공개 포트 | 설명 |
+| 서비스 | 포트 | 설명 |
 | --- | --- | --- |
-| `nginx` | `4500` → :80 | 단일 오리진. `/api/*` → `api`(접두사 제거), 그 외 → `web` |
+| `nginx` | `4500` → :80 (호스트 공개) | 단일 오리진. `/api/*` → `api`(접두사 제거), 그 외 → `web` |
 | `web` | 내부 :3000 | Next.js standalone |
 | `api` | 내부 :4000 | NestJS. 기동 시 `prisma migrate deploy` 자동 실행 |
-| `api` 볼륨 | – | `uploads` (업로드 이미지 영구 저장) |
+| `db` | `5433` → :5432 (호스트 유지) | PostgreSQL 16 (`ongyeol-postgres`). 기존 볼륨 `server_ongyeol-pgdata` 공유 |
+| 볼륨 | – | `uploads` (업로드 이미지), `server_ongyeol-pgdata` (DB 데이터) |
 
 - Tunnel Public Hostname **하나만** 추가한다:
   `on-gyeol.cloudrainit.com` → `http://host.docker.internal:4500`.
+- 모든 컨테이너가 같은 네트워크에 있어 `api` 는 내부 호스트명 `db:5432` 로 DB 에 직접 접속한다.
 - 브라우저는 공개 주소 `NEXT_PUBLIC_API_URL=https://on-gyeol.cloudrainit.com/api`,
   서버 컴포넌트(SSR)는 내부 주소 `API_URL=http://api:4000` 로 호출한다.
 - 단일 오리진이므로 인증 쿠키(`SameSite=Lax` + `secure`)와 CORS 제약이 없다.
@@ -80,8 +75,8 @@ docker compose --env-file .env.production up -d --build
 
 ```bash
 docker build --target build -t ongyeol-api:build ./server
-docker run --rm --network prod-postgres_default \
-  -e DATABASE_URL="$DATABASE_URL" \
+docker run --rm --network on-gyeol_default \
+  -e DATABASE_URL="postgresql://ongyeol:ongyeol@db:5432/ongyeol?schema=public" \
   -e SEED_ADMIN_EMAIL=... -e SEED_ADMIN_PASSWORD=... \
   ongyeol-api:build npm run seed
 ```
